@@ -1,0 +1,104 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Roku Thumbnails</title>
+</head>
+<body>
+    <div data-role="page" class="page type-interior pluginConfigurationPage rokuConfigurationPage" data-require="emby-button,emby-select,emby-checkbox">
+
+        <div data-role="content">
+            <div class="content-primary">
+
+                <form class="rokuConfigurationForm">
+
+                    <div>
+                        <h3 class="checkBoxListLabel">Create thumbnails in:</h3>
+                        <div class="checkboxList paperList checkboxList-paperList">
+                            <label>
+                                <input is="emby-checkbox" type="checkbox" id="chkEnableHD" />
+                                <span>HD</span>
+                            </label>
+                            <label>
+                                <input is="emby-checkbox" type="checkbox" id="chkEnableSD" />
+                                <span>SD</span>
+                            </label>
+                        </div>
+                        <div class="fieldDescription">Configure this based on the TV screens your Roku devices are connected to, not based on your content. If you do not own any SDTV's, leaving it unchecked will reduce the amount of time required to create thumbnails.</div>
+                    </div>
+                    <br />
+                    <br />
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label>
+                            <input is="emby-checkbox" type="checkbox" id="chkSaveBifLocal" />
+                            <span>Save thumbnail files within media folders</span>
+                        </label>
+                        <div class="fieldDescription checkboxFieldDescription">This will enable easier storage management of the thumbnail files. Thumbnail files will be saved with a .bif extension.</div>
+                    </div>
+
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label>
+                            <input is="emby-checkbox" type="checkbox" id="chkEnableDuringScan" />
+                            <span>Create thumbnails when videos are discovered</span>
+                        </label>
+                        <div class="fieldDescription checkboxFieldDescription">This will make thumbnails available sooner but will result in longer library scans. Thumbnails are also created during a scheduled task.</div>
+                        <div class="fieldDescription checkboxFieldDescription">To configure the scheduled task, see <a href="scheduledtasks.html">scheduled tasks</a>.</div>
+                    </div>
+
+                    <br />
+                    <div>
+                        <button is="emby-button" type="submit" class="raised button-submit block"><span>Save</span></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            (function () {
+
+                var pluginId = "0417264b-5a93-4ad0-a1f0-b87569b7cf80";
+
+                $('.rokuConfigurationPage').on('pageshow', function (event) {
+
+                    var page = this;
+
+                    Dashboard.showLoadingMsg();
+
+                    ApiClient.getPluginConfiguration(pluginId).then(function (config) {
+
+                        $('#chkEnableHD', page).checked(config.EnableHdThumbnails).checkboxradio('refresh');
+                        $('#chkEnableSD', page).checked(config.EnableSdThumbnails).checkboxradio('refresh');
+                        $('#chkEnableDuringScan', page).checked(config.EnableExtractionDuringLibraryScan).checkboxradio('refresh');
+
+                        $('#chkSaveBifLocal', page).checked(config.EnableLocalMediaFolderSaving).checkboxradio('refresh');
+
+                        Dashboard.hideLoadingMsg();
+                    });
+                });
+
+                $('.rokuConfigurationForm').off('submit.plugin').on('submit.plugin', function (e) {
+
+                    Dashboard.showLoadingMsg();
+
+                    var form = this;
+
+                    ApiClient.getPluginConfiguration(pluginId).then(function (config) {
+
+                        config.EnableHdThumbnails = $('#chkEnableHD', form).checked();
+                        config.EnableSdThumbnails = $('#chkEnableSD', form).checked();
+                        config.EnableExtractionDuringLibraryScan = $('#chkEnableDuringScan', form).checked();
+
+                        config.EnableLocalMediaFolderSaving = $('#chkSaveBifLocal', form).checked();
+
+                        ApiClient.updatePluginConfiguration(pluginId, config).then(Dashboard.processPluginConfigurationUpdateResult);
+                    });
+
+                    return false;
+                });
+
+            })();
+
+        </script>
+    </div>
+</body>
+</html>
