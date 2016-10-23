@@ -1,6 +1,5 @@
 ﻿using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.IO;
-using MediaBrowser.Common.ScheduledTasks;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.MediaEncoding;
@@ -12,6 +11,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CommonIO;
+using MediaBrowser.Model.Tasks;
 
 namespace RokuMetadata.ScheduledTasks
 {
@@ -37,6 +37,11 @@ namespace RokuMetadata.ScheduledTasks
         public string Category
         {
             get { return "Roku"; }
+        }
+
+        public string Key
+        {
+            get { return "RokuBif"; }
         }
 
         public string Description
@@ -80,17 +85,15 @@ namespace RokuMetadata.ScheduledTasks
             }
         }
 
-        public IEnumerable<ITaskTrigger> GetDefaultTriggers()
+        public IEnumerable<TaskTriggerInfo> GetDefaultTriggers()
         {
-            return new ITaskTrigger[]
+            return new[]
                 {
-                    new DailyTrigger
+                    new TaskTriggerInfo
                     {
-                        TimeOfDay = TimeSpan.FromHours(5),
-                        TaskOptions = new TaskExecutionOptions
-                        {
-                            MaxRuntimeMs = Convert.ToInt32(TimeSpan.FromHours(3).TotalMilliseconds)
-                        }
+                        Type = TaskTriggerInfo.TriggerDaily,
+                        TimeOfDayTicks = TimeSpan.FromHours(5).Ticks,
+                        MaxRuntimeMs = Convert.ToInt32(TimeSpan.FromHours(3).TotalMilliseconds)
                     }
                 };
         }
