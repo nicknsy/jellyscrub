@@ -15,7 +15,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using CommonIO;
+using MediaBrowser.Model.IO;
 
 namespace RokuMetadata.Drawing
 {
@@ -168,7 +168,7 @@ namespace RokuMetadata.Drawing
 
                 var bifTempPath = Path.Combine(tempDirectory, Guid.NewGuid().ToString("N"));
 
-                using (var fs = _fileSystem.GetFileStream(bifTempPath, FileMode.Create, FileAccess.Write, FileShare.Read, true))
+                using (var fs = _fileSystem.GetFileStream(bifTempPath, FileOpenMode.Create, FileAccessMode.Write, FileShareMode.Read, true))
                 {
                     await CreateBif(fs, images).ConfigureAwait(false);
                 }
@@ -204,7 +204,7 @@ namespace RokuMetadata.Drawing
                 {
                     if (!File.Exists(path))
                     {
-                        using (var fs = _fileSystem.GetFileStream(path, FileMode.Create, FileAccess.Write, FileShare.Read, true))
+                        using (var fs = _fileSystem.GetFileStream(path, FileOpenMode.Create, FileAccessMode.Write, FileShareMode.Read, true))
                         {
                             await CreateBif(fs, new List<FileInfo>()).ConfigureAwait(false);
                         }
@@ -269,7 +269,7 @@ namespace RokuMetadata.Drawing
             // write the images
             foreach (var img in images)
             {
-                using (var imgStream = _fileSystem.GetFileStream(img.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, true))
+                using (var imgStream = _fileSystem.GetFileStream(img.FullName, FileOpenMode.Open, FileAccessMode.Read, FileShareMode.ReadWrite, true))
                 {
                     await imgStream.CopyToAsync(stream).ConfigureAwait(false);
                 }

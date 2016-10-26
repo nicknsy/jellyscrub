@@ -33,27 +33,17 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CommonIO, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CommonIO.1.0.0.9\lib\net45\CommonIO.dll</HintPath>
+    <Reference Include="MediaBrowser.Common, Version=3.1.6143.3133, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MediaBrowser.Common.3.0.680\lib\net45\MediaBrowser.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="MediaBrowser.Common, Version=3.1.6140.29430, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MediaBrowser.Common.3.0.667\lib\net45\MediaBrowser.Common.dll</HintPath>
+    <Reference Include="MediaBrowser.Controller, Version=3.1.6143.3132, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MediaBrowser.Server.Core.3.0.680\lib\net45\MediaBrowser.Controller.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="MediaBrowser.Controller, Version=3.1.6140.29428, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MediaBrowser.Server.Core.3.0.667\lib\net45\MediaBrowser.Controller.dll</HintPath>
+    <Reference Include="MediaBrowser.Model, Version=3.1.6143.3133, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MediaBrowser.Common.3.0.680\lib\net45\MediaBrowser.Model.dll</HintPath>
       <Private>True</Private>
-    </Reference>
-    <Reference Include="MediaBrowser.Model, Version=3.1.6140.29430, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MediaBrowser.Common.3.0.667\lib\net45\MediaBrowser.Model.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Patterns.Logging">
-      <HintPath>..\packages\Patterns.Logging.1.0.0.2\lib\portable-net45+sl4+wp71+win8+wpa81\Patterns.Logging.dll</HintPath>
-    </Reference>
-    <Reference Include="ServiceStack.Interfaces">
-      <HintPath>..\packages\ServiceStack.Interfaces.4.0.35\lib\portable-wp80+sl5+net40+win8+monotouch+monoandroid\ServiceStack.Interfaces.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -68,7 +58,6 @@
       <Link>Properties\SharedVersion.cs</Link>
     </Compile>
     <Compile Include="Api\BifService.cs" />
-    <Compile Include="Configuration\ConfigurationPage.cs" />
     <Compile Include="Configuration\PluginConfiguration.cs" />
     <Compile Include="Drawing\VideoProcessor.cs" />
     <Compile Include="Plugin.cs" />

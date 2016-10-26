@@ -6,11 +6,11 @@ using MediaBrowser.Controller.MediaEncoding;
 using MediaBrowser.Controller.Net;
 using MediaBrowser.Model.Logging;
 using RokuMetadata.Drawing;
-using ServiceStack;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using CommonIO;
+using MediaBrowser.Model.IO;
+using MediaBrowser.Model.Services;
 
 namespace RokuMetadata.Api
 {
@@ -27,7 +27,7 @@ namespace RokuMetadata.Api
         public string Id { get; set; }
     }
 
-    public class BifService : IRestfulService, IHasResultFactory
+    public class BifService : IService, IHasResultFactory
     {
         private readonly ILibraryManager _libraryManager;
         private readonly IMediaEncoder _mediaEncoder;
@@ -38,7 +38,7 @@ namespace RokuMetadata.Api
 
         public IHttpResultFactory ResultFactory { get; set; }
 
-        public ServiceStack.Web.IRequest Request { get; set; }
+        public IRequest Request { get; set; }
 
         public BifService(ILibraryManager libraryManager, IMediaEncoder mediaEncoder, IFileSystem fileSystem, ILogger logger, IApplicationPaths appPaths, ILibraryMonitor libraryMonitor)
         {
