@@ -27,7 +27,7 @@ namespace RokuMetadata.Api
         public string Id { get; set; }
     }
 
-    public class BifService : IService, IHasResultFactory
+    public class BifService : IService, IRequiresRequest
     {
         private readonly ILibraryManager _libraryManager;
         private readonly IMediaEncoder _mediaEncoder;
@@ -36,11 +36,11 @@ namespace RokuMetadata.Api
         private readonly IApplicationPaths _appPaths;
         private readonly ILibraryMonitor _libraryMonitor;
 
-        public IHttpResultFactory ResultFactory { get; set; }
+        public IHttpResultFactory ResultFactory { get; private set; }
 
         public IRequest Request { get; set; }
 
-        public BifService(ILibraryManager libraryManager, IMediaEncoder mediaEncoder, IFileSystem fileSystem, ILogger logger, IApplicationPaths appPaths, ILibraryMonitor libraryMonitor)
+        public BifService(ILibraryManager libraryManager, IMediaEncoder mediaEncoder, IFileSystem fileSystem, ILogger logger, IApplicationPaths appPaths, ILibraryMonitor libraryMonitor, IHttpResultFactory resultFactory)
         {
             _libraryManager = libraryManager;
             _mediaEncoder = mediaEncoder;
@@ -48,6 +48,7 @@ namespace RokuMetadata.Api
             _logger = logger;
             _appPaths = appPaths;
             _libraryMonitor = libraryMonitor;
+            ResultFactory = resultFactory;
         }
 
         public async Task<object> Get(GetBifFile request)
