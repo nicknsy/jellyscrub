@@ -6,7 +6,6 @@ using MediaBrowser.Controller.MediaEncoding;
 using MediaBrowser.Controller.Net;
 using MediaBrowser.Model.Logging;
 using RokuMetadata.Drawing;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using MediaBrowser.Model.IO;
@@ -58,7 +57,7 @@ namespace RokuMetadata.Api
                 ((IHasMediaSources)item).GetMediaSources(false)
                     .FirstOrDefault(i => string.Equals(i.Id, request.MediaSourceId));
 
-            var path = VideoProcessor.GetExistingBifPath(item, mediaSource.Id, request.Width);
+            var path = VideoProcessor.GetExistingBifPath(item, _fileSystem, mediaSource.Id, request.Width);
 
             if (path == null)
             {

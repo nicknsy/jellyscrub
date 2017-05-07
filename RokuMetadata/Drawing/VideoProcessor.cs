@@ -60,13 +60,13 @@ namespace RokuMetadata.Drawing
 
         private async Task Run(Video item, string itemModifier, MediaSourceInfo mediaSource, int width, CancellationToken cancellationToken)
         {
-            if (!HasBif(item, itemModifier, width, mediaSource))
+            if (!HasBif(item, _fileSystem, itemModifier, width, mediaSource))
             {
                 await BifWriterSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
 
                 try
                 {
-                    if (!HasBif(item, itemModifier, width, mediaSource))
+                    if (!HasBif(item, _fileSystem, itemModifier, width, mediaSource))
                     {
                         await CreateBif(item, itemModifier, width, mediaSource, cancellationToken).ConfigureAwait(false);
                     }
@@ -78,9 +78,9 @@ namespace RokuMetadata.Drawing
             }
         }
 
-        private bool HasBif(Video item, string itemModifier, int width, MediaSourceInfo mediaSource)
+        private bool HasBif(Video item, IFileSystem fileSystem, string itemModifier, int width, MediaSourceInfo mediaSource)
         {
-            return !string.IsNullOrWhiteSpace(GetExistingBifPath(item, itemModifier, mediaSource.Id, width));
+            return !string.IsNullOrWhiteSpace(GetExistingBifPath(item, fileSystem, itemModifier, mediaSource.Id, width));
         }
 
         public static string GetItemModifier(BaseItem item)
@@ -88,23 +88,23 @@ namespace RokuMetadata.Drawing
             return item.DateModified.Ticks.ToString(CultureInfo.InvariantCulture);
         }
 
-        public static string GetExistingBifPath(BaseItem item, string mediaSourceId, int width)
+        public static string GetExistingBifPath(BaseItem item, IFileSystem fileSystem, string mediaSourceId, int width)
         {
-            return GetExistingBifPath(item, GetItemModifier(item), mediaSourceId, width);
+            return GetExistingBifPath(item, fileSystem, GetItemModifier(item), mediaSourceId, width);
         }
 
-        private static string GetExistingBifPath(BaseItem item, string itemModifier, string mediaSourceId, int width)
+        private static string GetExistingBifPath(BaseItem item, IFileSystem fileSystem, string itemModifier, string mediaSourceId, int width)
         {
             var path = GetLocalBifPath(item, width);
 
-            if (File.Exists(path))
+            if (fileSystem.FileExists(path))
             {
                 return path;
             }
 
             path = GetInternalBifPath(item, itemModifier, mediaSourceId, width);
 
-            if (File.Exists(path))
+            if (fileSystem.FileExists(path))
             {
                 return path;
             }
@@ -152,7 +152,7 @@ namespace RokuMetadata.Drawing
             var inputPath = MediaEncoderHelpers.GetInputArgument(_fileSystem, mediaSource.Path, protocol, null, mediaSource.PlayableStreamFileNames);
 
             var tempDirectory = Path.Combine(_appPaths.TempDirectory, Guid.NewGuid().ToString("N"));
-            Directory.CreateDirectory(tempDirectory);
+            _fileSystem.CreateDirectory(tempDirectory);
 
             try
             {
@@ -160,8 +160,7 @@ namespace RokuMetadata.Drawing
                         TimeSpan.FromSeconds(10), tempDirectory, "img_", width, cancellationToken)
                         .ConfigureAwait(false);
 
-                var images = new DirectoryInfo(tempDirectory)
-                    .EnumerateFiles()
+                var images = _fileSystem.GetFiles(tempDirectory, new string[] { ".jpg" }, false, false)
                     .Where(img => string.Equals(img.Extension, ".jpg", StringComparison.Ordinal))
                     .OrderBy(i => i.FullName)
                     .ToList();
@@ -177,8 +176,8 @@ namespace RokuMetadata.Drawing
 
                 try
                 {
-                    Directory.CreateDirectory(Path.GetDirectoryName(path));
-                    File.Copy(bifTempPath, path, true);
+                    _fileSystem.CreateDirectory(_fileSystem.GetDirectoryName(path));
+                    _fileSystem.CopyFile(bifTempPath, path, true);
                 }
                 finally
                 {
@@ -196,17 +195,17 @@ namespace RokuMetadata.Drawing
         {
             var path = Path.Combine(_appPaths.CachePath, "roku-thumbs", "empty.bif");
 
-            if (!File.Exists(path))
+            if (!_fileSystem.FileExists(path))
             {
                 await BifWriterSemaphore.WaitAsync().ConfigureAwait(false);
 
                 try
                 {
-                    if (!File.Exists(path))
+                    if (!_fileSystem.FileExists(path))
                     {
                         using (var fs = _fileSystem.GetFileStream(path, FileOpenMode.Create, FileAccessMode.Write, FileShareMode.Read, true))
                         {
-                            await CreateBif(fs, new List<FileInfo>()).ConfigureAwait(false);
+                            await CreateBif(fs, new List<FileSystemMetadata>()).ConfigureAwait(false);
                         }
                     }
                 }
@@ -219,7 +218,7 @@ namespace RokuMetadata.Drawing
             return path;
         }
 
-        public async Task CreateBif(Stream stream, List<FileInfo> images)
+        public async Task CreateBif(Stream stream, List<FileSystemMetadata> images)
         {
             var magicNumber = new byte[] { 0x89, 0x42, 0x49, 0x46, 0x0d, 0x0a, 0x1a, 0x0a };
             await stream.WriteAsync(magicNumber, 0, magicNumber.Length);
