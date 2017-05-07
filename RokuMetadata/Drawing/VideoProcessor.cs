@@ -203,6 +203,8 @@ namespace RokuMetadata.Drawing
                 {
                     if (!_fileSystem.FileExists(path))
                     {
+                        _fileSystem.CreateDirectory(_fileSystem.GetDirectoryName(path));
+
                         using (var fs = _fileSystem.GetFileStream(path, FileOpenMode.Create, FileAccessMode.Write, FileShareMode.Read, true))
                         {
                             await CreateBif(fs, new List<FileSystemMetadata>()).ConfigureAwait(false);
