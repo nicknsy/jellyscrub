@@ -10,8 +10,8 @@
     <RootNamespace>RokuMetadata</RootNamespace>
     <AssemblyName>RokuMetadata</AssemblyName>
     <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-	<TargetFrameworkProfile>Profile7</TargetFrameworkProfile>
-	<TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Profile7</TargetFrameworkProfile>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
@@ -34,20 +34,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MediaBrowser.Common, Version=3.2.14.2, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MediaBrowser.Common.3.0.700\lib\portable-net45+win8+wpa81\MediaBrowser.Common.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="MediaBrowser.Controller, Version=3.2.14.2, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MediaBrowser.Server.Core.3.0.700\lib\net45\MediaBrowser.Controller.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="MediaBrowser.Model, Version=3.2.14.2, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MediaBrowser.Common.3.0.700\lib\portable-net45+win8+wpa81\MediaBrowser.Model.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="..\SharedVersion.cs">
       <Link>Properties\SharedVersion.cs</Link>
     </Compile>
@@ -63,6 +49,20 @@
     <Content Include="Images\bif.jpg" />
     <EmbeddedResource Include="Configuration\configPage.html" />
     <Content Include="Images\plugin.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="MediaBrowser.Common, Version=3.2.26.11, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MediaBrowser.Common.3.0.710\lib\portable-net45+win8+wpa81\MediaBrowser.Common.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MediaBrowser.Controller, Version=3.2.26.11, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MediaBrowser.Server.Core.3.0.710\lib\portable-net45+win8+wpa81\MediaBrowser.Controller.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MediaBrowser.Model, Version=3.2.26.11, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MediaBrowser.Common.3.0.710\lib\portable-net45+win8+wpa81\MediaBrowser.Model.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

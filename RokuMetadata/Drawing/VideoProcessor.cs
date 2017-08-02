@@ -1,5 +1,4 @@
 ﻿using MediaBrowser.Common.Configuration;
-using MediaBrowser.Common.IO;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.MediaEncoding;
@@ -47,14 +46,7 @@ namespace RokuMetadata.Drawing
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                if (Plugin.Instance.Configuration.EnableHdThumbnails)
-                {
-                    await Run(item, modifier, mediaSource, 320, cancellationToken).ConfigureAwait(false);
-                }
-                if (Plugin.Instance.Configuration.EnableSdThumbnails)
-                {
-                    await Run(item, modifier, mediaSource, 240, cancellationToken).ConfigureAwait(false);
-                }
+                await Run(item, modifier, mediaSource, 320, cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -156,7 +148,9 @@ namespace RokuMetadata.Drawing
 
             try
             {
-                await _mediaEncoder.ExtractVideoImagesOnInterval(inputPath, protocol, mediaSource.Video3DFormat,
+                var videoStream = mediaSource.VideoStream;
+
+                await _mediaEncoder.ExtractVideoImagesOnInterval(inputPath, mediaSource.Container, videoStream, protocol, mediaSource.Video3DFormat,
                         TimeSpan.FromSeconds(10), tempDirectory, "img_", width, cancellationToken)
                         .ConfigureAwait(false);
 
