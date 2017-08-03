@@ -4,7 +4,7 @@
     <title>Roku Thumbnails</title>
 </head>
 <body>
-    <div data-role="page" class="page type-interior pluginConfigurationPage rokuConfigurationPage" data-require="emby-button,emby-select,emby-checkbox">
+    <div data-role="page" class="page type-interior pluginConfigurationPage rokuConfigurationPage" data-require="emby-button,emby-select,emby-checkbox,emby-linkbutton">
 
         <div data-role="content">
             <div class="content-primary">
@@ -25,7 +25,7 @@
                             <span>Create thumbnails when videos are discovered</span>
                         </label>
                         <div class="fieldDescription checkboxFieldDescription">This will make thumbnails available sooner but will result in longer library scans. Thumbnails are also created during a scheduled task.</div>
-                        <div class="fieldDescription checkboxFieldDescription">To configure the scheduled task, see <a href="scheduledtasks.html">scheduled tasks</a>.</div>
+                        <div class="fieldDescription checkboxFieldDescription">To configure the scheduled task, see <a is="emby-linkbutton" class="button-link" href="scheduledtasks.html">scheduled tasks</a>.</div>
                     </div>
 
                     <br />
@@ -50,11 +50,8 @@
 
                     ApiClient.getPluginConfiguration(pluginId).then(function (config) {
 
-                        $('#chkEnableHD', page).checked(config.EnableHdThumbnails).checkboxradio('refresh');
-                        $('#chkEnableSD', page).checked(config.EnableSdThumbnails).checkboxradio('refresh');
-                        $('#chkEnableDuringScan', page).checked(config.EnableExtractionDuringLibraryScan).checkboxradio('refresh');
-
-                        $('#chkSaveBifLocal', page).checked(config.EnableLocalMediaFolderSaving).checkboxradio('refresh');
+                        page.querySelector('#chkEnableDuringScan').checked = config.EnableExtractionDuringLibraryScan;
+                        page.querySelector('#chkSaveBifLocal').checked = config.EnableLocalMediaFolderSaving;
 
                         Dashboard.hideLoadingMsg();
                     });
@@ -68,11 +65,9 @@
 
                     ApiClient.getPluginConfiguration(pluginId).then(function (config) {
 
-                        config.EnableHdThumbnails = $('#chkEnableHD', form).checked();
-                        config.EnableSdThumbnails = $('#chkEnableSD', form).checked();
-                        config.EnableExtractionDuringLibraryScan = $('#chkEnableDuringScan', form).checked();
+                        config.EnableExtractionDuringLibraryScan = form.querySelector('#chkEnableDuringScan').checked;
 
-                        config.EnableLocalMediaFolderSaving = $('#chkSaveBifLocal', form).checked();
+                        config.EnableLocalMediaFolderSaving = form.querySelector('#chkSaveBifLocal').checked;
 
                         ApiClient.updatePluginConfiguration(pluginId, config).then(Dashboard.processPluginConfigurationUpdateResult);
                     });
