@@ -132,16 +132,16 @@ namespace RokuMetadata.Drawing
         {
             var path = GetNewBifPath(item, itemModifier, mediaSource.Id, width);
 
-            return CreateBif(path, width, mediaSource, cancellationToken);
+            return CreateBif(path, width, item, mediaSource, cancellationToken);
         }
 
-        private async Task CreateBif(string path, int width, MediaSourceInfo mediaSource, CancellationToken cancellationToken)
+        private async Task CreateBif(string path, int width, Video item, MediaSourceInfo mediaSource, CancellationToken cancellationToken)
         {
             _logger.Info("Creating roku thumbnails at {0} width, for {1}", width, mediaSource.Path);
 
             var protocol = mediaSource.Protocol;
 
-            var inputPath = MediaEncoderHelpers.GetInputArgument(_fileSystem, mediaSource.Path, protocol, null, mediaSource.PlayableStreamFileNames);
+            var inputPath = MediaEncoderHelpers.GetInputArgument(_fileSystem, mediaSource.Path, protocol, null, item.GetPlayableStreamFileNames());
 
             var tempDirectory = Path.Combine(_appPaths.TempDirectory, Guid.NewGuid().ToString("N"));
             _fileSystem.CreateDirectory(tempDirectory);
