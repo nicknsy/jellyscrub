@@ -51,17 +51,14 @@
     <Content Include="Images\plugin.png" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="MediaBrowser.Common, Version=3.2.27.3, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MediaBrowser.Common.3.0.735\lib\portable-net45+win8+wpa81\MediaBrowser.Common.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="MediaBrowser.Common, Version=3.2.28.7, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MediaBrowser.Common.3.0.747\lib\portable-net45+win8+wpa81\MediaBrowser.Common.dll</HintPath>
     </Reference>
-    <Reference Include="MediaBrowser.Controller, Version=3.2.27.3, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MediaBrowser.Server.Core.3.0.735\lib\portable-net45+win8+wpa81\MediaBrowser.Controller.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="MediaBrowser.Controller, Version=3.2.28.7, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MediaBrowser.Server.Core.3.0.747\lib\portable-net45+win8+wpa81\MediaBrowser.Controller.dll</HintPath>
     </Reference>
-    <Reference Include="MediaBrowser.Model, Version=3.2.27.3, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MediaBrowser.Common.3.0.735\lib\portable-net45+win8+wpa81\MediaBrowser.Model.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="MediaBrowser.Model, Version=3.2.28.7, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MediaBrowser.Common.3.0.747\lib\portable-net45+win8+wpa81\MediaBrowser.Model.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
