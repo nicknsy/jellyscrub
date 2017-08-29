@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
 using MediaBrowser.Model.Plugins;
@@ -30,6 +31,12 @@ namespace RokuMetadata
                     EmbeddedResourcePath = GetType().Namespace + ".Configuration.configPage.html"
                 }
             };
+        }
+
+        private Guid _id = new Guid("0417264b-5a93-4ad0-a1f0-b87569b7cf80");
+        public override Guid Id
+        {
+            get { return _id; }
         }
 
         /// <summary>
