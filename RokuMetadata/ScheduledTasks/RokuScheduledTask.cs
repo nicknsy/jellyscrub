@@ -92,7 +92,7 @@ namespace RokuMetadata.ScheduledTasks
                     {
                         Type = TaskTriggerInfo.TriggerDaily,
                         TimeOfDayTicks = TimeSpan.FromHours(5).Ticks,
-                        MaxRuntimeMs = Convert.ToInt32(TimeSpan.FromHours(3).TotalMilliseconds)
+                        MaxRuntimeTicks = TimeSpan.FromHours(3).Ticks
                     }
                 };
         }
