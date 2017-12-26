@@ -51,7 +51,7 @@ namespace RokuMetadata.Providers
             }
         }
 
-        public bool HasChanged(IHasMetadata item, IDirectoryService directoryService)
+        public bool HasChanged(BaseItem item, IDirectoryService directoryService)
         {
             if (item.EnableRefreshOnDateModifiedChange && !string.IsNullOrWhiteSpace(item.Path))
             {
