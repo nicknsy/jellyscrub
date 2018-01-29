@@ -53,7 +53,7 @@ namespace RokuMetadata.Providers
 
         public bool HasChanged(BaseItem item, IDirectoryService directoryService)
         {
-            if (item.EnableRefreshOnDateModifiedChange && !string.IsNullOrWhiteSpace(item.Path))
+            if (item.LocationType == MediaBrowser.Model.Entities.LocationType.FileSystem && !string.IsNullOrEmpty(item.Path))
             {
                 var file = directoryService.GetFile(item.Path);
                 if (file != null && file.LastWriteTimeUtc != item.DateModified)
