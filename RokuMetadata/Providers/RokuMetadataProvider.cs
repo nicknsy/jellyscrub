@@ -80,11 +80,6 @@ namespace RokuMetadata.Providers
             return FetchInternal(item, options, cancellationToken);
         }
 
-        public Task<ItemUpdateType> FetchAsync(LiveTvVideoRecording item, MetadataRefreshOptions options, CancellationToken cancellationToken)
-        {
-            return FetchInternal(item, options, cancellationToken);
-        }
-
         public Task<ItemUpdateType> FetchAsync(Video item, MetadataRefreshOptions options, CancellationToken cancellationToken)
         {
             return FetchInternal(item, options, cancellationToken);
