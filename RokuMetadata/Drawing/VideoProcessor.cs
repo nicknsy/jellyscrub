@@ -141,7 +141,7 @@ namespace RokuMetadata.Drawing
 
             var protocol = mediaSource.Protocol;
 
-            var inputPath = MediaEncoderHelpers.GetInputArgument(_fileSystem, mediaSource.Path, protocol, null, item.GetPlayableStreamFileNames());
+            var inputPath = MediaEncoderHelpers.GetInputArgument(_fileSystem, mediaSource.Path, protocol, null, new string[] { });
 
             var tempDirectory = Path.Combine(_appPaths.TempDirectory, Guid.NewGuid().ToString("N"));
             _fileSystem.CreateDirectory(tempDirectory);

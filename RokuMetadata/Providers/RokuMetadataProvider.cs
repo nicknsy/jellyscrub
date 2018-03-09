@@ -11,6 +11,7 @@ using RokuMetadata.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
 using MediaBrowser.Model.IO;
+using MediaBrowser.Model.Entities;
 
 namespace RokuMetadata.Providers
 {
@@ -53,7 +54,7 @@ namespace RokuMetadata.Providers
 
         public bool HasChanged(BaseItem item, IDirectoryService directoryService)
         {
-            if (item.LocationType == MediaBrowser.Model.Entities.LocationType.FileSystem && !string.IsNullOrEmpty(item.Path))
+            if (item.IsFileProtocol)
             {
                 var file = directoryService.GetFile(item.Path);
                 if (file != null && file.LastWriteTimeUtc != item.DateModified)
@@ -87,6 +88,16 @@ namespace RokuMetadata.Providers
 
         private async Task<ItemUpdateType> FetchInternal(Video item, MetadataRefreshOptions options, CancellationToken cancellationToken)
         {
+            if (!item.IsFileProtocol)
+            {
+                return ItemUpdateType.None;
+            }
+
+            if (item.VideoType != VideoType.VideoFile)
+            {
+                return ItemUpdateType.None;
+            }
+
             if (Plugin.Instance.Configuration.EnableExtractionDuringLibraryScan)
             {
                 await new VideoProcessor(_logger, _mediaEncoder, _fileSystem, _appPaths, _libraryMonitor)
