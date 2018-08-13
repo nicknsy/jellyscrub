@@ -35,7 +35,7 @@ namespace RokuMetadata.Drawing
             _libraryMonitor = libraryMonitor;
         }
 
-        public async Task Run(Video item, CancellationToken cancellationToken)
+        public async Task Run(BaseItem item, CancellationToken cancellationToken)
         {
             var mediaSources = ((IHasMediaSources)item).GetMediaSources(false)
                 .ToList();
@@ -50,7 +50,7 @@ namespace RokuMetadata.Drawing
             }
         }
 
-        private async Task Run(Video item, string itemModifier, MediaSourceInfo mediaSource, int width, CancellationToken cancellationToken)
+        private async Task Run(BaseItem item, string itemModifier, MediaSourceInfo mediaSource, int width, CancellationToken cancellationToken)
         {
             if (!HasBif(item, _fileSystem, itemModifier, width, mediaSource))
             {
@@ -70,7 +70,7 @@ namespace RokuMetadata.Drawing
             }
         }
 
-        private bool HasBif(Video item, IFileSystem fileSystem, string itemModifier, int width, MediaSourceInfo mediaSource)
+        private bool HasBif(BaseItem item, IFileSystem fileSystem, string itemModifier, int width, MediaSourceInfo mediaSource)
         {
             return !string.IsNullOrWhiteSpace(GetExistingBifPath(item, fileSystem, itemModifier, mediaSource.Id, width));
         }
@@ -128,20 +128,20 @@ namespace RokuMetadata.Drawing
             return Path.Combine(item.GetInternalMetadataPath(), "bif", modifier, mediaSourceId, width.ToString(CultureInfo.InvariantCulture), "index.bif");
         }
 
-        private Task CreateBif(Video item, string itemModifier, int width, MediaSourceInfo mediaSource, CancellationToken cancellationToken)
+        private Task CreateBif(BaseItem item, string itemModifier, int width, MediaSourceInfo mediaSource, CancellationToken cancellationToken)
         {
             var path = GetNewBifPath(item, itemModifier, mediaSource.Id, width);
 
             return CreateBif(path, width, item, mediaSource, cancellationToken);
         }
 
-        private async Task CreateBif(string path, int width, Video item, MediaSourceInfo mediaSource, CancellationToken cancellationToken)
+        private async Task CreateBif(string path, int width, BaseItem item, MediaSourceInfo mediaSource, CancellationToken cancellationToken)
         {
             _logger.Info("Creating roku thumbnails at {0} width, for {1}", width, mediaSource.Path);
 
             var protocol = mediaSource.Protocol;
 
-            var inputPath = MediaEncoderHelpers.GetInputArgument(_fileSystem, mediaSource.Path, protocol, null, new string[] { });
+            var inputPathInfo = MediaEncoderHelpers.GetInputArgument(_fileSystem, mediaSource.Path, protocol, null, new string[] { });
 
             var tempDirectory = Path.Combine(_appPaths.TempDirectory, Guid.NewGuid().ToString("N"));
             _fileSystem.CreateDirectory(tempDirectory);
@@ -149,6 +149,9 @@ namespace RokuMetadata.Drawing
             try
             {
                 var videoStream = mediaSource.VideoStream;
+
+                var inputPath = inputPathInfo.Item1;
+                protocol = inputPathInfo.Item2;
 
                 await _mediaEncoder.ExtractVideoImagesOnInterval(inputPath, mediaSource.Container, videoStream, protocol, mediaSource.Video3DFormat,
                         TimeSpan.FromSeconds(10), tempDirectory, "img_", width, cancellationToken)

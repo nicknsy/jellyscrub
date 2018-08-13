@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediaBrowser.Model.IO;
 using MediaBrowser.Model.Tasks;
+using MediaBrowser.Model.Entities;
 
 namespace RokuMetadata.ScheduledTasks
 {
@@ -50,10 +51,11 @@ namespace RokuMetadata.ScheduledTasks
 
         public async Task Execute(CancellationToken cancellationToken, IProgress<double> progress)
         {
-            var items = _libraryManager.RootFolder
-                .RecursiveChildren
-                .OfType<Video>()
-                .ToList();
+            var items = _libraryManager.GetItemList(new InternalItemsQuery
+            {
+                MediaTypes = new[] { MediaType.Video },
+                IsVirtualItem = false
+            });
 
             var numComplete = 0;
 
