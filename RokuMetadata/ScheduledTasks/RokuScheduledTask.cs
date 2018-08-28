@@ -55,12 +55,18 @@ namespace RokuMetadata.ScheduledTasks
             {
                 MediaTypes = new[] { MediaType.Video },
                 IsVirtualItem = false
-            });
+
+            }).OfType<Video>().ToList();
 
             var numComplete = 0;
 
             foreach (var item in items)
             {
+                if (!Providers.RokuMetadataProvider.EnableForItem(item))
+                {
+                    continue;
+                }
+
                 try
                 {
                     cancellationToken.ThrowIfCancellationRequested();

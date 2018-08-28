@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediaBrowser.Model.IO;
 using MediaBrowser.Model.Entities;
+using System;
 
 namespace RokuMetadata.Providers
 {
@@ -57,7 +58,7 @@ namespace RokuMetadata.Providers
             if (item.IsFileProtocol)
             {
                 var file = directoryService.GetFile(item.Path);
-                if (file != null && file.LastWriteTimeUtc != item.DateModified)
+                if (file != null && item.HasDateModifiedChanged(file.LastWriteTimeUtc))
                 {
                     return true;
                 }
@@ -86,14 +87,49 @@ namespace RokuMetadata.Providers
             return FetchInternal(item, options, cancellationToken);
         }
 
-        private async Task<ItemUpdateType> FetchInternal(Video item, MetadataRefreshOptions options, CancellationToken cancellationToken)
+        public static bool EnableForItem(Video item)
         {
-            if (!item.IsFileProtocol)
+            var container = item.Container;
+
+            if (string.Equals(container, MediaContainer.Iso, StringComparison.OrdinalIgnoreCase))
             {
-                return ItemUpdateType.None;
+                return false;
             }
 
-            if (item.VideoType != VideoType.VideoFile)
+            if (string.Equals(container, MediaContainer.Bluray, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+            if (string.Equals(container, MediaContainer.Dvd, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            if (string.Equals(container, MediaContainer.BlurayIso, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+            if (string.Equals(container, MediaContainer.DvdIso, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            if (item.IsShortcut)
+            {
+                return false;
+            }
+
+            if (!item.IsCompleteMedia)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private async Task<ItemUpdateType> FetchInternal(Video item, MetadataRefreshOptions options, CancellationToken cancellationToken)
+        {
+            if (!EnableForItem(item))
             {
                 return ItemUpdateType.None;
             }
