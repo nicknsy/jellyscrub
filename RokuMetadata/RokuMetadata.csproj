@@ -2,20 +2,22 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;</TargetFrameworks>
-    <AssemblyVersion>3.1.8.0</AssemblyVersion>
-    <FileVersion>3.1.8.0</FileVersion>
+    <AssemblyVersion>3.1.9.0</AssemblyVersion>
+    <FileVersion>3.1.9.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Configuration\configPage.html" />
+    <None Remove="Images\plugin.png" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Configuration\configPage.html" />
+    <EmbeddedResource Include="Images\plugin.png" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="mediabrowser.server.core" Version="3.6.0.26-beta" />
+    <PackageReference Include="mediabrowser.server.core" Version="3.6.0.36-beta" />
   </ItemGroup>
 
 </Project>

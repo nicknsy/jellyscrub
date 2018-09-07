@@ -5,6 +5,8 @@ using MediaBrowser.Common.Plugins;
 using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Serialization;
 using RokuMetadata.Configuration;
+using System.IO;
+using MediaBrowser.Model.Drawing;
 
 namespace RokuMetadata
 {
@@ -57,6 +59,20 @@ namespace RokuMetadata
             get
             {
                 return "Creates Thumbnails for seeking with Roku.";
+            }
+        }
+
+        public Stream GetThumbImage()
+        {
+            var type = GetType();
+            return type.Assembly.GetManifestResourceStream(type.Namespace + ".Images.plugin.png");
+        }
+
+        public ImageFormat ThumbImageFormat
+        {
+            get
+            {
+                return ImageFormat.Png;
             }
         }
 
