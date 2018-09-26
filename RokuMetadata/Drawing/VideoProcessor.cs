@@ -141,8 +141,6 @@ namespace RokuMetadata.Drawing
 
             var protocol = mediaSource.Protocol;
 
-            var inputPathInfo = MediaEncoderHelpers.GetInputArgument(_fileSystem, mediaSource.Path, protocol, null, new string[] { });
-
             var tempDirectory = Path.Combine(_appPaths.TempDirectory, Guid.NewGuid().ToString("N"));
             _fileSystem.CreateDirectory(tempDirectory);
 
@@ -150,8 +148,7 @@ namespace RokuMetadata.Drawing
             {
                 var videoStream = mediaSource.VideoStream;
 
-                var inputPath = inputPathInfo.Item1;
-                protocol = inputPathInfo.Item2;
+                var inputPath = mediaSource.Path;
 
                 await _mediaEncoder.ExtractVideoImagesOnInterval(inputPath, mediaSource.Container, videoStream, protocol, mediaSource.Video3DFormat,
                         TimeSpan.FromSeconds(10), tempDirectory, "img_", width, cancellationToken)
