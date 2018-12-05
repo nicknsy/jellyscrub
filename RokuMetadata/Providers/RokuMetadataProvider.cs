@@ -87,7 +87,7 @@ namespace RokuMetadata.Providers
             return FetchInternal(item, options, cancellationToken);
         }
 
-        public static bool EnableForItem(Video item)
+        public static bool EnableForItem(Video item, IFileSystem fileSystem)
         {
             var container = item.Container;
 
@@ -124,12 +124,17 @@ namespace RokuMetadata.Providers
                 return false;
             }
 
+            if (item.IsFileProtocol && !fileSystem.FileExists(item.Path))
+            {
+                return false;
+            }
+
             return true;
         }
 
         private async Task<ItemUpdateType> FetchInternal(Video item, MetadataRefreshOptions options, CancellationToken cancellationToken)
         {
-            if (!EnableForItem(item))
+            if (!EnableForItem(item, _fileSystem))
             {
                 return ItemUpdateType.None;
             }

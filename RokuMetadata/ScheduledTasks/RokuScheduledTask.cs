@@ -62,7 +62,7 @@ namespace RokuMetadata.ScheduledTasks
 
             foreach (var item in items)
             {
-                if (!Providers.RokuMetadataProvider.EnableForItem(item))
+                if (!Providers.RokuMetadataProvider.EnableForItem(item, _fileSystem))
                 {
                     continue;
                 }
