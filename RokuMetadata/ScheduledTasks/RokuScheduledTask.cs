@@ -54,7 +54,8 @@ namespace RokuMetadata.ScheduledTasks
             var items = _libraryManager.GetItemList(new InternalItemsQuery
             {
                 MediaTypes = new[] { MediaType.Video },
-                IsVirtualItem = false
+                IsVirtualItem = false,
+                MinRunTimeTicks = TimeSpan.FromSeconds(30).Ticks
 
             }).OfType<Video>().ToList();
 
