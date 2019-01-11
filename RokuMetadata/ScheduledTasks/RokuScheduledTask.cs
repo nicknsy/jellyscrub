@@ -55,7 +55,7 @@ namespace RokuMetadata.ScheduledTasks
             {
                 MediaTypes = new[] { MediaType.Video },
                 IsVirtualItem = false,
-                MinRunTimeTicks = TimeSpan.FromSeconds(30).Ticks
+                MinRunTimeTicks = Providers.RokuMetadataProvider.MinRunTimeTicks
 
             }).OfType<Video>().ToList();
 

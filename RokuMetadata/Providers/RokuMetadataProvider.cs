@@ -87,6 +87,8 @@ namespace RokuMetadata.Providers
             return FetchInternal(item, options, cancellationToken);
         }
 
+        public static long MinRunTimeTicks = TimeSpan.FromSeconds(30).Ticks;
+
         public static bool EnableForItem(Video item, IFileSystem fileSystem)
         {
             var container = item.Container;
@@ -125,6 +127,11 @@ namespace RokuMetadata.Providers
             }
 
             if (item.IsFileProtocol && !fileSystem.FileExists(item.Path))
+            {
+                return false;
+            }
+
+            if (!item.RunTimeTicks.HasValue || item.RunTimeTicks.Value < MinRunTimeTicks)
             {
                 return false;
             }
