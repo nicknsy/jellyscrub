@@ -126,12 +126,19 @@ namespace RokuMetadata.Providers
                 return false;
             }
 
-            if (item.IsFileProtocol && !fileSystem.FileExists(item.Path))
+            if (!item.RunTimeTicks.HasValue || item.RunTimeTicks.Value < MinRunTimeTicks)
             {
                 return false;
             }
 
-            if (!item.RunTimeTicks.HasValue || item.RunTimeTicks.Value < MinRunTimeTicks)
+            if (item.IsFileProtocol)
+            {
+                if (!fileSystem.FileExists(item.Path))
+                {
+                    return false;
+                }
+            }
+            else
             {
                 return false;
             }
