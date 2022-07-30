@@ -5,7 +5,6 @@ using MediaBrowser.Model.IO;
 using MediaBrowser.Model.Tasks;
 using MediaBrowser.Model.Entities;
 using Microsoft.Extensions.Logging;
-using MediaBrowser.Controller.Configuration;
 using Nick.Plugin.Jellyscrub.Drawing;
 using MediaBrowser.Model.Globalization;
 
@@ -22,7 +21,6 @@ public class BIFGenerationTask : IScheduledTask
     private readonly IFileSystem _fileSystem;
     private readonly IApplicationPaths _appPaths;
     private readonly ILibraryMonitor _libraryMonitor;
-    private readonly IServerConfigurationManager _configurationManager;
     private readonly ILocalizationManager _localization;
 
     public BIFGenerationTask(
@@ -32,7 +30,6 @@ public class BIFGenerationTask : IScheduledTask
         IFileSystem fileSystem,
         IApplicationPaths appPaths,
         ILibraryMonitor libraryMonitor,
-        IServerConfigurationManager configurationManager,
         ILocalizationManager localization)
     {
         _libraryManager = libraryManager;
@@ -41,7 +38,6 @@ public class BIFGenerationTask : IScheduledTask
         _fileSystem = fileSystem;
         _appPaths = appPaths;
         _libraryMonitor = libraryMonitor;
-        _configurationManager = configurationManager;
         _localization = localization;
     }
 
@@ -95,7 +91,7 @@ public class BIFGenerationTask : IScheduledTask
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                await new VideoProcessor(_loggerFactory.CreateLogger<VideoProcessor>(), _fileSystem, _appPaths, _libraryMonitor, _loggerFactory, _configurationManager)
+                await new VideoProcessor(_loggerFactory.CreateLogger<VideoProcessor>(), _fileSystem, _appPaths, _libraryMonitor)
                     .Run(item, cancellationToken).ConfigureAwait(false);
             }
             catch (OperationCanceledException)

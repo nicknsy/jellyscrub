@@ -22,9 +22,7 @@ public class VideoProcessor
         ILogger<VideoProcessor> logger,
         IFileSystem fileSystem,
         IApplicationPaths appPaths,
-        ILibraryMonitor libraryMonitor,
-        ILoggerFactory loggerFactory,
-        IServerConfigurationManager configurationManager)
+        ILibraryMonitor libraryMonitor)
     {
         _logger = logger;
         _fileSystem = fileSystem;
@@ -33,34 +31,35 @@ public class VideoProcessor
         _config = JellyscrubPlugin.Instance!.Configuration;
     }
 
+    /*
+     * Entry point to tell VideoProcessor to generate BIF from item
+     */
     public async Task Run(BaseItem item, CancellationToken cancellationToken)
     {
         var mediaSources = ((IHasMediaSources)item).GetMediaSources(false)
             .ToList();
-
-        var modifier = GetItemModifier(item);
 
         foreach (var mediaSource in mediaSources)
         {
             foreach (var width in _config.WidthResolutions)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                await Run(item, modifier, mediaSource, width, _config.Interval, cancellationToken).ConfigureAwait(false);
+                await Run(item, mediaSource, width, _config.Interval, cancellationToken).ConfigureAwait(false);
             }
         }
     }
 
-    private async Task Run(BaseItem item, string itemModifier, MediaSourceInfo mediaSource, int width, int interval, CancellationToken cancellationToken)
+    private async Task Run(BaseItem item, MediaSourceInfo mediaSource, int width, int interval, CancellationToken cancellationToken)
     {
-        if (!HasBif(item, _fileSystem, itemModifier, width, mediaSource))
+        if (!HasBif(item, _fileSystem, width))
         {
             await BifWriterSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
 
             try
             {
-                if (!HasBif(item, _fileSystem, itemModifier, width, mediaSource))
+                if (!HasBif(item, _fileSystem, width))
                 {
-                    await CreateBif(item, itemModifier, width, interval, mediaSource, cancellationToken).ConfigureAwait(false);
+                    await CreateBif(item, width, interval, mediaSource, cancellationToken).ConfigureAwait(false);
                 }
             }
             finally
@@ -70,22 +69,15 @@ public class VideoProcessor
         }
     }
 
-    private bool HasBif(BaseItem item, IFileSystem fileSystem, string itemModifier, int width, MediaSourceInfo mediaSource)
+    /*
+     * Methods for getting storage paths of BIFs
+     */
+    private bool HasBif(BaseItem item, IFileSystem fileSystem, int width)
     {
-        return !string.IsNullOrWhiteSpace(GetExistingBifPath(item, fileSystem, itemModifier, mediaSource.Id, width));
+        return !string.IsNullOrWhiteSpace(GetExistingBifPath(item, fileSystem, width));
     }
 
-    public static string GetItemModifier(BaseItem item)
-    {
-        return item.DateModified.Ticks.ToString(CultureInfo.InvariantCulture);
-    }
-
-    public static string? GetExistingBifPath(BaseItem item, IFileSystem fileSystem, string mediaSourceId, int width)
-    {
-        return GetExistingBifPath(item, fileSystem, GetItemModifier(item), mediaSourceId, width);
-    }
-
-    private static string? GetExistingBifPath(BaseItem item, IFileSystem fileSystem, string itemModifier, string mediaSourceId, int width)
+    private static string? GetExistingBifPath(BaseItem item, IFileSystem fileSystem, int width)
     {
         var path = GetLocalBifPath(item, width);
 
@@ -94,7 +86,7 @@ public class VideoProcessor
             return path;
         }
 
-        path = GetInternalBifPath(item, itemModifier, mediaSourceId, width);
+        path = GetInternalBifPath(item, width);
 
         if (fileSystem.FileExists(path))
         {
@@ -104,14 +96,14 @@ public class VideoProcessor
         return null;
     }
 
-    private static string GetNewBifPath(BaseItem item, string itemModifier, string mediaSourceId, int width)
+    private static string GetNewBifPath(BaseItem item, int width)
     {
         if (JellyscrubPlugin.Instance!.Configuration.LocalMediaFolderSaving)
         {
             return GetLocalBifPath(item, width);
         }
 
-        return GetInternalBifPath(item, itemModifier, mediaSourceId, width);
+        return GetInternalBifPath(item, width);
     }
 
     private static string GetLocalBifPath(BaseItem item, int width)
@@ -123,14 +115,19 @@ public class VideoProcessor
         return Path.Combine(folder, filename);
     }
 
-    private static string GetInternalBifPath(BaseItem item, string modifier, string mediaSourceId, int width)
+    private static string GetInternalBifPath(BaseItem item, int width)
     {
-        return Path.Combine(item.GetInternalMetadataPath(), "bif", modifier, mediaSourceId, width.ToString(CultureInfo.InvariantCulture), "index.bif");
+        return Path.Combine(item.GetInternalMetadataPath(), "trickplay", width.ToString(CultureInfo.InvariantCulture) + ".bif");
     }
 
-    private Task CreateBif(BaseItem item, string itemModifier, int width, int interval, MediaSourceInfo mediaSource, CancellationToken cancellationToken)
+    /*
+     * Bif Creation
+     */
+    private static readonly SemaphoreSlim BifWriterSemaphore = new SemaphoreSlim(1, 1);
+
+    private Task CreateBif(BaseItem item, int width, int interval, MediaSourceInfo mediaSource, CancellationToken cancellationToken)
     {
-        var path = GetNewBifPath(item, itemModifier, mediaSource.Id, width);
+        var path = GetNewBifPath(item, width);
 
         return CreateBif(path, width, interval, item, mediaSource, cancellationToken);
     }
@@ -184,61 +181,31 @@ public class VideoProcessor
         }
     }
 
-    private static readonly SemaphoreSlim BifWriterSemaphore = new SemaphoreSlim(1, 1);
-    public async Task<string> GetEmptyBif()
-    {
-        var path = Path.Combine(_appPaths.CachePath, "trickplay", "empty.bif");
-
-        if (!_fileSystem.FileExists(path))
-        {
-            await BifWriterSemaphore.WaitAsync().ConfigureAwait(false);
-
-            try
-            {
-                if (!_fileSystem.FileExists(path))
-                {
-                    Directory.CreateDirectory(Directory.GetParent(path).FullName);
-
-                    using (var fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.Read))
-                    {
-                        await CreateBif(fs, new List<FileSystemMetadata>(), 10000).ConfigureAwait(false);
-                    }
-                }
-            }
-            finally
-            {
-                BifWriterSemaphore.Release();
-            }
-        }
-
-        return path;
-    }
-
     public async Task CreateBif(Stream stream, List<FileSystemMetadata> images, int interval)
     {
         var magicNumber = new byte[] { 0x89, 0x42, 0x49, 0x46, 0x0d, 0x0a, 0x1a, 0x0a };
         await stream.WriteAsync(magicNumber, 0, magicNumber.Length);
 
-        // version
+        // Version
         var bytes = GetBytes(0);
         await stream.WriteAsync(bytes, 0, bytes.Length);
 
-        // image count
+        // Image count
         bytes = GetBytes(images.Count);
         await stream.WriteAsync(bytes, 0, bytes.Length);
 
-        // interval in ms
+        // Interval in ms
         bytes = GetBytes(interval);
         await stream.WriteAsync(bytes, 0, bytes.Length);
 
-        // reserved
+        // Reserved
         for (var i = 20; i <= 63; i++)
         {
             bytes = new byte[] { 0x00 };
             await stream.WriteAsync(bytes, 0, bytes.Length);
         }
 
-        // write the bif index
+        // Write the bif index
         var index = 0;
         long imageOffset = 64 + (8 * images.Count) + 8;
 
@@ -261,10 +228,9 @@ public class VideoProcessor
         bytes = GetBytes(imageOffset);
         await stream.WriteAsync(bytes, 0, bytes.Length);
 
-        // write the images
+        // Write the images
         foreach (var img in images)
         {
-            // var imgStream = _fileSystem.GetFileStream(img.FullName, FileOpenMode.Open, FileAccessMode.Read, FileShareMode.ReadWrite, true)
             using (var imgStream = new FileStream(img.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
                 await imgStream.CopyToAsync(stream).ConfigureAwait(false);
@@ -272,6 +238,9 @@ public class VideoProcessor
         }
     }
 
+    /*
+     * Utility Methods
+     */
     private void DeleteDirectory(string directory)
     {
         try
@@ -296,10 +265,5 @@ public class VideoProcessor
     {
         var intVal = Convert.ToInt32(value);
         return GetBytes(intVal);
-
-        //byte[] bytes = BitConverter.GetBytes(value);
-        //if (BitConverter.IsLittleEndian)
-        //    Array.Reverse(bytes);
-        //return bytes;
     }
 }

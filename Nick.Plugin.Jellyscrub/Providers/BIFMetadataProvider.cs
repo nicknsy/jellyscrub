@@ -7,7 +7,6 @@ using MediaBrowser.Controller.Providers;
 using MediaBrowser.Model.IO;
 using MediaBrowser.Model.Entities;
 using Microsoft.Extensions.Logging;
-using MediaBrowser.Controller.Configuration;
 using Nick.Plugin.Jellyscrub.Drawing;
 
 namespace Nick.Plugin.Jellyscrub.Providers;
@@ -29,22 +28,19 @@ public class BIFMetadataProvider : ICustomMetadataProvider<Episode>,
     private readonly IFileSystem _fileSystem;
     private readonly IApplicationPaths _appPaths;
     private readonly ILibraryMonitor _libraryMonitor;
-    private readonly IServerConfigurationManager _configurationManager;
 
     public BIFMetadataProvider(
         ILogger<BIFMetadataProvider> logger,
         ILoggerFactory loggerFactory,
         IFileSystem fileSystem,
         IApplicationPaths appPaths,
-        ILibraryMonitor libraryMonitor,
-        IServerConfigurationManager configurationManager)
+        ILibraryMonitor libraryMonitor)
     {
         _logger = logger;
         _loggerFactory = loggerFactory;
         _fileSystem = fileSystem;
         _appPaths = appPaths;
         _libraryMonitor = libraryMonitor;
-        _configurationManager = configurationManager;
     }
 
     /// <inheritdoc />
@@ -149,7 +145,7 @@ public class BIFMetadataProvider : ICustomMetadataProvider<Episode>,
 
         if (JellyscrubPlugin.Instance!.Configuration.ExtractionDuringLibraryScan)
         {
-            await new VideoProcessor(_loggerFactory.CreateLogger<VideoProcessor>(), _fileSystem, _appPaths, _libraryMonitor, _loggerFactory, _configurationManager)
+            await new VideoProcessor(_loggerFactory.CreateLogger<VideoProcessor>(), _fileSystem, _appPaths, _libraryMonitor)
                 .Run(item, cancellationToken).ConfigureAwait(false);
         }
 
