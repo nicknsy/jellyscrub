@@ -21,9 +21,9 @@ public class OldMediaEncoder
     private readonly IMediaEncoder _mediaEncoder;
     private readonly IFileSystem _fileSystem;
 
-    private readonly SemaphoreSlim _thumbnailResourcePool = new SemaphoreSlim(2, 2);
-    private readonly object _runningProcessesLock = new object();
-    private readonly List<ProcessWrapper> _runningProcesses = new List<ProcessWrapper>();
+    private readonly SemaphoreSlim _thumbnailResourcePool = new(2, 2);
+    private readonly object _runningProcessesLock = new();
+    private readonly List<ProcessWrapper> _runningProcesses = new();
 
     private string _ffmpegPath;
     private int _threads;

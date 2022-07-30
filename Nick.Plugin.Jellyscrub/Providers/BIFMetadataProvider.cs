@@ -3,7 +3,6 @@ using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.Movies;
 using MediaBrowser.Controller.Entities.TV;
 using MediaBrowser.Controller.Library;
-using MediaBrowser.Controller.MediaEncoding;
 using MediaBrowser.Controller.Providers;
 using MediaBrowser.Model.IO;
 using MediaBrowser.Model.Entities;
@@ -27,17 +26,21 @@ public class BIFMetadataProvider : ICustomMetadataProvider<Episode>,
 {
     private readonly ILogger<BIFMetadataProvider> _logger;
     private readonly ILoggerFactory _loggerFactory;
-    private readonly IMediaEncoder _mediaEncoder;
     private readonly IFileSystem _fileSystem;
     private readonly IApplicationPaths _appPaths;
     private readonly ILibraryMonitor _libraryMonitor;
     private readonly IServerConfigurationManager _configurationManager;
 
-    public BIFMetadataProvider(ILogger<BIFMetadataProvider> logger, ILoggerFactory loggerFactory, IMediaEncoder mediaEncoder, IFileSystem fileSystem, IApplicationPaths appPaths, ILibraryMonitor libraryMonitor, IServerConfigurationManager configurationManager)
+    public BIFMetadataProvider(
+        ILogger<BIFMetadataProvider> logger,
+        ILoggerFactory loggerFactory,
+        IFileSystem fileSystem,
+        IApplicationPaths appPaths,
+        ILibraryMonitor libraryMonitor,
+        IServerConfigurationManager configurationManager)
     {
         _logger = logger;
         _loggerFactory = loggerFactory;
-        _mediaEncoder = mediaEncoder;
         _fileSystem = fileSystem;
         _appPaths = appPaths;
         _libraryMonitor = libraryMonitor;

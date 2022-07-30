@@ -20,7 +20,6 @@ public class BIFGenerationTask : IScheduledTask
     private readonly ILogger<BIFGenerationTask> _logger;
     private readonly ILoggerFactory _loggerFactory;
     private readonly ILibraryManager _libraryManager;
-    private readonly IMediaEncoder _mediaEncoder;
     private readonly IFileSystem _fileSystem;
     private readonly IApplicationPaths _appPaths;
     private readonly ILibraryMonitor _libraryMonitor;
@@ -31,7 +30,6 @@ public class BIFGenerationTask : IScheduledTask
         ILibraryManager libraryManager,
         ILogger<BIFGenerationTask> logger,
         ILoggerFactory loggerFactory,
-        IMediaEncoder mediaEncoder,
         IFileSystem fileSystem,
         IApplicationPaths appPaths,
         ILibraryMonitor libraryMonitor,
@@ -41,7 +39,6 @@ public class BIFGenerationTask : IScheduledTask
         _libraryManager = libraryManager;
         _logger = logger;
         _loggerFactory = loggerFactory;
-        _mediaEncoder = mediaEncoder;
         _fileSystem = fileSystem;
         _appPaths = appPaths;
         _libraryMonitor = libraryMonitor;

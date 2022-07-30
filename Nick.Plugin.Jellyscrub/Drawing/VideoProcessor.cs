@@ -145,11 +145,6 @@ public class VideoProcessor
 
             var inputPath = mediaSource.Path;
 
-            /*
-            await _mediaEncoder.ExtractVideoImagesOnInterval(inputPath, mediaSource.Container, videoStream, protocol, mediaSource.Video3DFormat,
-                    TimeSpan.FromSeconds(10), tempDirectory, "img_", width, cancellationToken)
-                    .ConfigureAwait(false);
-            */
             await JellyscrubPlugin.Instance!.OldMediaEncoder!.ExtractVideoImagesOnInterval(inputPath, mediaSource.Container, videoStream, mediaSource, mediaSource.Video3DFormat,
                     TimeSpan.FromSeconds(10), tempDirectory, "img_", width, cancellationToken)
                     .ConfigureAwait(false);
