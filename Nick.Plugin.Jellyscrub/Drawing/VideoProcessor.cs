@@ -175,7 +175,7 @@ public class VideoProcessor
         }
         finally
         {
-            //DeleteDirectory(tempDirectory);
+            DeleteDirectory(tempDirectory);
         }
     }
 
