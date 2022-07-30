@@ -101,7 +101,7 @@ public class VideoProcessor
 
     private static string GetNewBifPath(BaseItem item, string itemModifier, string mediaSourceId, int width)
     {
-        if (Plugin.Instance!.Configuration.EnableLocalMediaFolderSaving)
+        if (JellyscrubPlugin.Instance!.Configuration.EnableLocalMediaFolderSaving)
         {
             return GetLocalBifPath(item, width);
         }
@@ -150,7 +150,7 @@ public class VideoProcessor
                     TimeSpan.FromSeconds(10), tempDirectory, "img_", width, cancellationToken)
                     .ConfigureAwait(false);
             */
-            await Plugin.Instance!.OldMediaEncoder!.ExtractVideoImagesOnInterval(inputPath, mediaSource.Container, videoStream, mediaSource, mediaSource.Video3DFormat,
+            await JellyscrubPlugin.Instance!.OldMediaEncoder!.ExtractVideoImagesOnInterval(inputPath, mediaSource.Container, videoStream, mediaSource, mediaSource.Video3DFormat,
                     TimeSpan.FromSeconds(10), tempDirectory, "img_", width, cancellationToken)
                     .ConfigureAwait(false);
 

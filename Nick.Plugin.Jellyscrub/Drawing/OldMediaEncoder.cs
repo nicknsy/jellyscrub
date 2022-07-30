@@ -12,6 +12,9 @@ using MediaBrowser.Model.IO;
 
 namespace Nick.Plugin.Jellyscrub.Drawing;
 
+/// <summary>
+/// Re-implementation of removed MediaEncoder methods.
+/// </summary>
 public class OldMediaEncoder
 {
     private readonly ILogger _logger;
