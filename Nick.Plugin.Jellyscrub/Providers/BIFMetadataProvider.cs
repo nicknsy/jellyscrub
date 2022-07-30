@@ -147,7 +147,7 @@ public class BIFMetadataProvider : ICustomMetadataProvider<Episode>,
             return ItemUpdateType.None;
         }
 
-        if (JellyscrubPlugin.Instance!.Configuration.EnableExtractionDuringLibraryScan)
+        if (JellyscrubPlugin.Instance!.Configuration.ExtractionDuringLibraryScan)
         {
             await new VideoProcessor(_loggerFactory.CreateLogger<VideoProcessor>(), _fileSystem, _appPaths, _libraryMonitor, _loggerFactory, _configurationManager)
                 .Run(item, cancellationToken).ConfigureAwait(false);

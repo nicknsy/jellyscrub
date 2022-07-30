@@ -1,48 +1,93 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-    <title>Roku Thumbnails</title>
+    <title>Jellyscrub</title>
 </head>
 <body>
-    <div data-role="page" class="page type-interior pluginConfigurationPage rokuConfigurationPage" data-require="emby-button,emby-select,emby-checkbox,emby-linkbutton">
+    <div data-role="page" class="page type-interior pluginConfigurationPage jellyscrubConfigurationPage" data-require="emby-button,emby-select,emby-checkbox,emby-linkbutton">
 
         <div data-role="content">
             <div class="content-primary">
 
-                <form class="rokuConfigurationForm">
+                <form class="jellyscrubConfigurationForm">
+                    <br />
+
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label>
+                            <input is="emby-checkbox" type="checkbox" id="chkOnDemand" />
+                            <span>Generate trickplay files on demand when a client requests one</span>
+                        </label>
+                    </div>
 
                     <div class="checkboxContainer checkboxContainer-withDescription">
                         <label>
                             <input is="emby-checkbox" type="checkbox" id="chkSaveBifLocal" />
-                            <span>Save thumbnail files within media folders</span>
+                            <span>Save trickplay files within media folders</span>
                         </label>
-                        <div class="fieldDescription checkboxFieldDescription">This will enable easier storage management of the thumbnail files. Thumbnail files will be saved with a .bif extension.</div>
+                        <div class="fieldDescription checkboxFieldDescription">This will enable easier storage management of the trickplay files. Trickplay files will be saved with a .bif extension.</div>
                     </div>
 
                     <div class="checkboxContainer checkboxContainer-withDescription">
                         <label>
                             <input is="emby-checkbox" type="checkbox" id="chkEnableDuringScan" />
-                            <span>Create thumbnails when videos are discovered</span>
+                            <span>Create trickplays when videos are discovered</span>
                         </label>
-                        <div class="fieldDescription checkboxFieldDescription">This will make thumbnails available sooner but will result in longer library scans. Thumbnails are also created during a scheduled task.</div>
+                        <div class="fieldDescription checkboxFieldDescription">This will make trickplay files available sooner but will result in longer library scans. Trickplay files are also created during a scheduled task.</div>
                         <div class="fieldDescription checkboxFieldDescription">To configure the scheduled task, see <a is="emby-linkbutton" class="button-link" href="scheduledtasks.html">scheduled tasks</a>.</div>
+                    </div>
+
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="intervalInput">Image Interval</label>
+                        <input is="emby-input" type="number" id="intervalInput" pattern="[0-9]*" required="" min="0" label="Image Interval" class="emby-input">
+                        <div class="fieldDescription">Interval of time between each new trickplay image. A shorter interval and more images will take up more space.</div>
+                        <div class="fieldDescription"><strong>Note:</strong> This value cannot be below 0. A value of 0 defaults to a 1000ms interval.</div>
+                    </div>
+
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="resolutionInput">Width Resolutions</label>
+                        <input is="emby-input" id="resolutionInput" pattern="[0-9,]*" required="" label="Width Resolutions" class="emby-input">
+                        <div class="fieldDescription">Comma separated list of the width (px) that trickplay images will be generated at.</div>
+                        <div class="fieldDescription">All images are generated as 16:9, so a width of 320 would end up as 320x180.</div>
+                        <div class="fieldDescription"><strong>Note:</strong> Do not include spaces after commas.</div>
                     </div>
 
                     <br />
                     <div>
-                        <button is="emby-button" type="submit" class="raised button-submit block"><span>Save</span></button>
+                        <button is="emby-button" type="submit" class="raised button-submit block emby-button"><span>Save</span></button>
                     </div>
                 </form>
             </div>
         </div>
 
         <script type="text/javascript">
+            function fromIntArray(intArray) {
+                let text = '';
+
+                for (let i = 0; i < intArray.length; i++) {
+                    text += intArray[i];
+                    if (i != intArray.length - 1) text += ',';
+                }
+
+                return text;
+            }
+
+            function toIntArray(csv) {
+                let intArray = [];
+                let strArray = csv.split(',');
+
+                for (let i = 0; i < strArray.length; i++) {
+                    intArray.push(parseInt(strArray[i].trim()));
+                }
+
+                return intArray;
+            }
+
 
             (function () {
 
                 var pluginId = "a84a949d-4b73-4099-aacb-8341b4da17ba";
 
-                $('.rokuConfigurationPage').on('pageshow', function (event) {
+                $('.jellyscrubConfigurationPage').on('pageshow', function (event) {
 
                     var page = this;
 
@@ -50,14 +95,17 @@
 
                     ApiClient.getPluginConfiguration(pluginId).then(function (config) {
 
-                        page.querySelector('#chkEnableDuringScan').checked = config.EnableExtractionDuringLibraryScan;
-                        page.querySelector('#chkSaveBifLocal').checked = config.EnableLocalMediaFolderSaving;
+                        page.querySelector('#chkOnDemand').checked = config.OnDemandGeneration;
+                        page.querySelector('#chkEnableDuringScan').checked = config.ExtractionDuringLibraryScan;
+                        page.querySelector('#chkSaveBifLocal').checked = config.LocalMediaFolderSaving;
+                        page.querySelector('#intervalInput').value = config.Interval;
+                        page.querySelector('#resolutionInput').value = fromIntArray(config.WidthResolutions);
 
                         Dashboard.hideLoadingMsg();
                     });
                 });
 
-                $('.rokuConfigurationForm').off('submit.plugin').on('submit.plugin', function (e) {
+                $('.jellyscrubConfigurationForm').off('submit.plugin').on('submit.plugin', function (e) {
 
                     Dashboard.showLoadingMsg();
 
@@ -65,9 +113,11 @@
 
                     ApiClient.getPluginConfiguration(pluginId).then(function (config) {
 
-                        config.EnableExtractionDuringLibraryScan = form.querySelector('#chkEnableDuringScan').checked;
-
-                        config.EnableLocalMediaFolderSaving = form.querySelector('#chkSaveBifLocal').checked;
+                        config.OnDemandGeneration = form.querySelector('#chkOnDemand').checked;
+                        config.ExtractionDuringLibraryScan = form.querySelector('#chkEnableDuringScan').checked;
+                        config.LocalMediaFolderSaving = form.querySelector('#chkSaveBifLocal').checked;
+                        config.Interval = Math.max(0, form.querySelector('#intervalInput').value);
+                        config.WidthResolutions = toIntArray(form.querySelector('#resolutionInput').value);
 
                         ApiClient.updatePluginConfiguration(pluginId, config).then(Dashboard.processPluginConfigurationUpdateResult);
                     });

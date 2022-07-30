@@ -6,6 +6,7 @@ using System.Globalization;
 using MediaBrowser.Model.IO;
 using Microsoft.Extensions.Logging;
 using MediaBrowser.Controller.Configuration;
+using Nick.Plugin.Jellyscrub.Configuration;
 
 namespace Nick.Plugin.Jellyscrub.Drawing;
 
@@ -15,6 +16,7 @@ public class VideoProcessor
     private readonly IFileSystem _fileSystem;
     private readonly IApplicationPaths _appPaths;
     private readonly ILibraryMonitor _libraryMonitor;
+    private readonly PluginConfiguration _config;
 
     public VideoProcessor(
         ILogger<VideoProcessor> logger,
@@ -28,6 +30,7 @@ public class VideoProcessor
         _fileSystem = fileSystem;
         _appPaths = appPaths;
         _libraryMonitor = libraryMonitor;
+        _config = JellyscrubPlugin.Instance!.Configuration;
     }
 
     public async Task Run(BaseItem item, CancellationToken cancellationToken)
@@ -39,13 +42,15 @@ public class VideoProcessor
 
         foreach (var mediaSource in mediaSources)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            await Run(item, modifier, mediaSource, 320, cancellationToken).ConfigureAwait(false);
+            foreach (var width in _config.WidthResolutions)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                await Run(item, modifier, mediaSource, width, _config.Interval, cancellationToken).ConfigureAwait(false);
+            }
         }
     }
 
-    private async Task Run(BaseItem item, string itemModifier, MediaSourceInfo mediaSource, int width, CancellationToken cancellationToken)
+    private async Task Run(BaseItem item, string itemModifier, MediaSourceInfo mediaSource, int width, int interval, CancellationToken cancellationToken)
     {
         if (!HasBif(item, _fileSystem, itemModifier, width, mediaSource))
         {
@@ -55,7 +60,7 @@ public class VideoProcessor
             {
                 if (!HasBif(item, _fileSystem, itemModifier, width, mediaSource))
                 {
-                    await CreateBif(item, itemModifier, width, mediaSource, cancellationToken).ConfigureAwait(false);
+                    await CreateBif(item, itemModifier, width, interval, mediaSource, cancellationToken).ConfigureAwait(false);
                 }
             }
             finally
@@ -101,7 +106,7 @@ public class VideoProcessor
 
     private static string GetNewBifPath(BaseItem item, string itemModifier, string mediaSourceId, int width)
     {
-        if (JellyscrubPlugin.Instance!.Configuration.EnableLocalMediaFolderSaving)
+        if (JellyscrubPlugin.Instance!.Configuration.LocalMediaFolderSaving)
         {
             return GetLocalBifPath(item, width);
         }
@@ -123,16 +128,16 @@ public class VideoProcessor
         return Path.Combine(item.GetInternalMetadataPath(), "bif", modifier, mediaSourceId, width.ToString(CultureInfo.InvariantCulture), "index.bif");
     }
 
-    private Task CreateBif(BaseItem item, string itemModifier, int width, MediaSourceInfo mediaSource, CancellationToken cancellationToken)
+    private Task CreateBif(BaseItem item, string itemModifier, int width, int interval, MediaSourceInfo mediaSource, CancellationToken cancellationToken)
     {
         var path = GetNewBifPath(item, itemModifier, mediaSource.Id, width);
 
-        return CreateBif(path, width, item, mediaSource, cancellationToken);
+        return CreateBif(path, width, interval, item, mediaSource, cancellationToken);
     }
 
-    private async Task CreateBif(string path, int width, BaseItem item, MediaSourceInfo mediaSource, CancellationToken cancellationToken)
+    private async Task CreateBif(string path, int width, int interval, BaseItem item, MediaSourceInfo mediaSource, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Creating roku thumbnails at {0} width, for {1}", width, mediaSource.Path);
+        _logger.LogInformation("Creating trickplay files at {0} width, for {1}", width, mediaSource.Path);
 
         var protocol = mediaSource.Protocol;
 
@@ -158,7 +163,7 @@ public class VideoProcessor
 
             using (var fs = new FileStream(bifTempPath, FileMode.Create, FileAccess.Write, FileShare.Read))
             {
-                await CreateBif(fs, images).ConfigureAwait(false);
+                await CreateBif(fs, images, interval).ConfigureAwait(false);
             }
 
             _libraryMonitor.ReportFileSystemChangeBeginning(path);
@@ -182,7 +187,7 @@ public class VideoProcessor
     private static readonly SemaphoreSlim BifWriterSemaphore = new SemaphoreSlim(1, 1);
     public async Task<string> GetEmptyBif()
     {
-        var path = Path.Combine(_appPaths.CachePath, "roku-thumbs", "empty.bif");
+        var path = Path.Combine(_appPaths.CachePath, "trickplay", "empty.bif");
 
         if (!_fileSystem.FileExists(path))
         {
@@ -196,7 +201,7 @@ public class VideoProcessor
 
                     using (var fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.Read))
                     {
-                        await CreateBif(fs, new List<FileSystemMetadata>()).ConfigureAwait(false);
+                        await CreateBif(fs, new List<FileSystemMetadata>(), 10000).ConfigureAwait(false);
                     }
                 }
             }
@@ -209,7 +214,7 @@ public class VideoProcessor
         return path;
     }
 
-    public async Task CreateBif(Stream stream, List<FileSystemMetadata> images)
+    public async Task CreateBif(Stream stream, List<FileSystemMetadata> images, int interval)
     {
         var magicNumber = new byte[] { 0x89, 0x42, 0x49, 0x46, 0x0d, 0x0a, 0x1a, 0x0a };
         await stream.WriteAsync(magicNumber, 0, magicNumber.Length);
@@ -223,7 +228,7 @@ public class VideoProcessor
         await stream.WriteAsync(bytes, 0, bytes.Length);
 
         // interval in ms
-        bytes = GetBytes(10000);
+        bytes = GetBytes(interval);
         await stream.WriteAsync(bytes, 0, bytes.Length);
 
         // reserved

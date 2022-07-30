@@ -1,7 +1,6 @@
 ﻿using MediaBrowser.Common.Configuration;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
-using MediaBrowser.Controller.MediaEncoding;
 using MediaBrowser.Model.IO;
 using MediaBrowser.Model.Tasks;
 using MediaBrowser.Model.Entities;
@@ -105,7 +104,7 @@ public class BIFGenerationTask : IScheduledTask
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error creating roku thumbnails for {0}: {1}", item.Name, ex);
+                _logger.LogError("Error creating trickplay files for {0}: {1}", item.Name, ex);
             }
 
             numComplete++;
