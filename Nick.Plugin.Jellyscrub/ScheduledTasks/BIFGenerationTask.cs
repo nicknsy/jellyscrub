@@ -61,7 +61,7 @@ public class BIFGenerationTask : IScheduledTask
                 new TaskTriggerInfo
                 {
                     Type = TaskTriggerInfo.TriggerDaily,
-                    TimeOfDayTicks = TimeSpan.FromHours(4).Ticks,
+                    TimeOfDayTicks = TimeSpan.FromHours(3).Ticks,
                     MaxRuntimeTicks = TimeSpan.FromHours(5).Ticks
                 }
             };
@@ -73,8 +73,7 @@ public class BIFGenerationTask : IScheduledTask
         var items = _libraryManager.GetItemList(new InternalItemsQuery
         {
             MediaTypes = new[] { MediaType.Video },
-            IsVirtualItem = false//,
-            //MinRunTimeTicks = Providers.RokuMetadataProvider.MinRunTimeTicks
+            IsVirtualItem = false
 
         }).OfType<Video>().ToList();
 

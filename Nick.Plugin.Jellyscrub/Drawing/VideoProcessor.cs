@@ -5,8 +5,8 @@ using MediaBrowser.Model.Dto;
 using System.Globalization;
 using MediaBrowser.Model.IO;
 using Microsoft.Extensions.Logging;
-using MediaBrowser.Controller.Configuration;
 using Nick.Plugin.Jellyscrub.Configuration;
+using System.Text.Json;
 
 namespace Nick.Plugin.Jellyscrub.Drawing;
 
@@ -16,7 +16,7 @@ public class VideoProcessor
     private readonly IFileSystem _fileSystem;
     private readonly IApplicationPaths _appPaths;
     private readonly ILibraryMonitor _libraryMonitor;
-    private readonly PluginConfiguration _config;
+    private static readonly PluginConfiguration _config = JellyscrubPlugin.Instance!.Configuration;
 
     public VideoProcessor(
         ILogger<VideoProcessor> logger,
@@ -28,7 +28,6 @@ public class VideoProcessor
         _fileSystem = fileSystem;
         _appPaths = appPaths;
         _libraryMonitor = libraryMonitor;
-        _config = JellyscrubPlugin.Instance!.Configuration;
     }
 
     /*
@@ -60,6 +59,7 @@ public class VideoProcessor
                 if (!HasBif(item, _fileSystem, width))
                 {
                     await CreateBif(item, width, interval, mediaSource, cancellationToken).ConfigureAwait(false);
+                    await CreateManifest(item, width).ConfigureAwait(false);
                 }
             }
             finally
@@ -70,6 +70,72 @@ public class VideoProcessor
     }
 
     /*
+     * Methods for getting storage paths of Manifest files
+     */
+    private bool HasManifest(BaseItem item, IFileSystem fileSystem)
+    {
+        return !string.IsNullOrWhiteSpace(GetExistingManifestPath(item, fileSystem));
+    }
+
+    private static string GetNewManifestPath(BaseItem item)
+    {
+        return _config.LocalMediaFolderSaving ? GetLocalManifestPath(item) : GetInternalManifestPath(item);
+    }
+
+    public static string? GetExistingManifestPath(BaseItem item, IFileSystem fileSystem)
+    {
+        var path = _config.LocalMediaFolderSaving ? GetLocalManifestPath(item) : GetInternalManifestPath(item);
+
+        return fileSystem.FileExists(path) ? path : null;
+    }
+
+    private static string GetLocalManifestPath(BaseItem item)
+    {
+        var folder = Path.Combine(item.ContainingFolderPath, "trickplay");
+        var filename = Path.GetFileNameWithoutExtension(item.Path);
+        filename += "-" + "manifest.json";
+
+        return Path.Combine(folder, filename);
+    }
+
+    private static string GetInternalManifestPath(BaseItem item)
+    {
+        return Path.Combine(item.GetInternalMetadataPath(), "trickplay", "manifest.json");
+    }
+
+    /*
+     * Manifest Creation
+     */
+    private async Task CreateManifest(BaseItem item, int width)
+    {
+        // Create Manifest object with new resolution
+        Manifest newManifest = new Manifest() {
+            Version = JellyscrubPlugin.Instance!.Version.ToString(),
+            WidthResolutions = new List<int> { width }
+        };
+
+        // If a Manifest object already exists, combine resolutions
+        var path = GetNewManifestPath(item);
+        if (HasManifest(item, _fileSystem))
+        {
+            using FileStream openStream = File.OpenRead(path);
+            Manifest? oldManifest = await JsonSerializer.DeserializeAsync<Manifest>(openStream);
+
+            if (oldManifest != null && oldManifest.WidthResolutions != null)
+            {
+                newManifest.WidthResolutions = newManifest.WidthResolutions.Union(oldManifest.WidthResolutions).ToList();
+            }
+        }
+
+        // Serialize and write to manifest file
+        newManifest.WidthResolutions.Sort();
+
+        using FileStream createStream = File.Create(path);
+        await JsonSerializer.SerializeAsync(createStream, newManifest);
+        await createStream.DisposeAsync();
+    }
+
+    /*
      * Methods for getting storage paths of BIFs
      */
     private bool HasBif(BaseItem item, IFileSystem fileSystem, int width)
@@ -77,38 +143,21 @@ public class VideoProcessor
         return !string.IsNullOrWhiteSpace(GetExistingBifPath(item, fileSystem, width));
     }
 
-    private static string? GetExistingBifPath(BaseItem item, IFileSystem fileSystem, int width)
+    public static string? GetExistingBifPath(BaseItem item, IFileSystem fileSystem, int width)
     {
-        var path = GetLocalBifPath(item, width);
+        var path = _config.LocalMediaFolderSaving ? GetLocalBifPath(item, width) : GetInternalBifPath(item, width);
 
-        if (fileSystem.FileExists(path))
-        {
-            return path;
-        }
-
-        path = GetInternalBifPath(item, width);
-
-        if (fileSystem.FileExists(path))
-        {
-            return path;
-        }
-
-        return null;
+        return fileSystem.FileExists(path) ? path : null;
     }
 
     private static string GetNewBifPath(BaseItem item, int width)
     {
-        if (JellyscrubPlugin.Instance!.Configuration.LocalMediaFolderSaving)
-        {
-            return GetLocalBifPath(item, width);
-        }
-
-        return GetInternalBifPath(item, width);
+        return _config.LocalMediaFolderSaving ? GetLocalBifPath(item, width) : GetInternalBifPath(item, width);
     }
 
     private static string GetLocalBifPath(BaseItem item, int width)
     {
-        var folder = item.ContainingFolderPath;
+        var folder = Path.Combine(item.ContainingFolderPath, "trickplay");
         var filename = Path.GetFileNameWithoutExtension(item.Path);
         filename += "-" + width.ToString(CultureInfo.InvariantCulture) + ".bif";
 
