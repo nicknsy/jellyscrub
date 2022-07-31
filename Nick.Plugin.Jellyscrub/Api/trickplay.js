@@ -13,6 +13,11 @@ let trickplayManifest = null;
 let trickplayData = null;
 let currentTrickplayFrame = null;
 
+let hiddenSliderBubble = null;
+let customSliderBubble = null;
+let customThumbImg = null;
+let customChapterText = null;
+
 let osdPositionSlider = null;
 let osdGetBubbleHtml = null;
 let osdGetBubbleHtmlLock = false;
@@ -36,30 +41,16 @@ function info(msg) {
 }
 
 /*
- * Code for updating and locking mediaSourceId and getBubbleHtml 
+ * Inject style to be used for slider bubble popup
  */
 
-// On page change these variables must manually be set back to null as new pages are simply pushState's and
-// wont reload the script.
-/* Actually this gets run after everything else so it breaks everything -- moving to the fetch
-addEventListener('popstate', (event) => {
-    clearTimeout(mainScriptExecution);
+let jellyscrubStyle = document.createElement('style');
+jellyscrubStyle.textContent = '.jellyscrubThumbText {margin: 0;}';
+document.body.insertBefore(jellyscrubStyle, document.body.firstChild);
 
-    mediaSourceId = null;
-    mediaRuntimeTicks = null;
-
-    embyAuthValue = '';
-
-    hasFailed = false;
-    trickplayManifest = null;
-    trickplayData = null;
-    currentTrickplayFrame = null;
-
-    osdPositionSlider = null;
-    osdGetBubbleHtml = null;
-    osdGetBubbleHtmlLock = false;
-});
-*/
+/*
+ * Code for updating and locking mediaSourceId and getBubbleHtml 
+ */
 
 // Grab MediaSourceId from jellyfin-web internal API calls
 const { fetch: originalFetch } = window;
@@ -83,6 +74,11 @@ window.fetch = async (...args) => {
         trickplayManifest = null;
         trickplayData = null;
         currentTrickplayFrame = null;
+
+        hiddenSliderBubble = null;
+        customSliderBubble = null;
+        customThumbImg = null;
+        customChapterText = null;
     
         osdPositionSlider = null;
         osdGetBubbleHtml = null;
@@ -111,23 +107,16 @@ window.fetch = async (...args) => {
         });
     }
 
-    // Don't know if this will be triggered by the fetch intercept first or the observer
-    // Don't run main script if there is already trickplay data
-    // I'm using window.setTimeout because I don't want to block the response return but I have no idea if thats how it works
-    if (!hasFailed && !trickplayData && mediaSourceId && mediaRuntimeTicks && embyAuthValue && osdPositionSlider) window.setTimeout(mainScriptExecution, 0);
-
     return response;
 };
 
 // Observe when video player slider is added to know when playback starts
 // and to set/lock getBubbleHtml function
-const targetNode = document.getElementsByClassName('mainAnimatedPages')[0];
-const config = { childList: true, subtree: true };
-
-const callback = function (mutationList, observer) {
+function containerCallback(mutationList, observer) {
     for (const mutation of mutationList) {
         if (mutation.target.classList.contains('mdl-slider-container')) {
             debug(`Found OSD container: ${mutation.target}`);
+
             let slider = mutation.target.getElementsByClassName('osdPositionSlider')[0];
             if (slider) {
                 osdPositionSlider = slider;
@@ -140,16 +129,69 @@ const callback = function (mutationList, observer) {
                     enumerable: true
                 });
 
+                let bubble = mutation.target.getElementsByClassName('sliderBubble')[0];
+                if (bubble) {
+                    hiddenSliderBubble = bubble;
+                    //hiddenSliderBubble.classList.add('jellyscrub-hide');
+    
+                    let customBubble = document.createElement('div');
+                    customBubble.classList.add('sliderBubble', 'jellyscrub-slider', 'hide');
+    
+                    let customThumbContainer = document.createElement('div');
+                    customThumbContainer.classList.add('chapterThumbContainer');
+    
+                    customThumbImg = document.createElement('img');
+                    customThumbImg.classList.add('chapterThumb');
+                    customThumbImg.src = 'data:,';
+                    customThumbContainer.appendChild(customThumbImg);
+
+                    let customChapterTextContainer = document.createElement('div');
+                    customChapterTextContainer.classList.add('chapterThumbTextContainer');
+
+                    customChapterText = document.createElement('h2');
+                    customChapterText.classList.add('jellyscrubThumbText');
+                    customChapterText.textContent = '--:--';
+                    customChapterTextContainer.appendChild(customChapterText);
+    
+                    customThumbContainer.appendChild(customChapterTextContainer);
+                    customBubble.appendChild(customThumbContainer);
+                    customSliderBubble = hiddenSliderBubble.parentElement.appendChild(customBubble);
+
+                    let sliderConfig = { attributeFilter: ['style', 'class'] };
+                    let sliderObserver = new MutationObserver(sliderCallback);
+                    sliderObserver.observe(hiddenSliderBubble, sliderConfig); 
+                }
+    
                 // Don't know if this will be triggered by the fetch intercept first or the observer
                 // Don't run main script if there is already trickplay data
-                if (!hasFailed && !trickplayData && mediaSourceId && mediaRuntimeTicks && embyAuthValue && osdPositionSlider) mainScriptExecution();
+                if (!hasFailed && !trickplayData && mediaSourceId && mediaRuntimeTicks && embyAuthValue
+                    && osdPositionSlider && hiddenSliderBubble && customSliderBubble) mainScriptExecution();
             }
         }
     }
 };
 
-const observer = new MutationObserver(callback);
-observer.observe(targetNode, config);
+function sliderCallback(mutationList, observer) {
+    for (const mutation of mutationList) {
+        switch(mutation.attributeName) {
+            case 'style':
+                customSliderBubble.setAttribute('style', mutation.target.getAttribute('style'));
+                break;
+            case 'class':
+                if (mutation.target.classList.contains('hide')) {
+                    customSliderBubble.classList.add('hide');
+                } else if (trickplayData) {
+                    customSliderBubble.classList.remove('hide');
+                }
+                break;
+        }
+    }
+}
+
+let targetObserveNode = document.getElementsByClassName('mainAnimatedPages')[0];
+let containerConfig = { childList: true, subtree: true };
+let containerObserver = new MutationObserver(containerCallback);
+containerObserver.observe(targetObserveNode, containerConfig);
 
 /*
  * Indexed UInt8Array
@@ -354,7 +396,7 @@ function mainScriptExecution() {
 }
 
 function getBubbleHtmlTrickplay(sliderValue) {
-    showOsd();
+    //showOsd();
 
     let currentTicks = mediaRuntimeTicks * (sliderValue / 100);
     let currentTimeMs = currentTicks / 10_000
@@ -364,29 +406,21 @@ function getBubbleHtmlTrickplay(sliderValue) {
         if (currentTrickplayFrame) URL.revokeObjectURL(currentTrickplayFrame);
         currentTrickplayFrame = imageSrc;
 
-        let html = '<div class="chapterThumbContainer">';
-        html += '<img class="chapterThumb" src="' + imageSrc + '" />';
-        html += '<div class="chapterThumbTextContainer">';
-        //html += '<div class="chapterThumbText chapterThumbText-dim">';
-        //html += escapeHtml(chapter.Name);
-        //html += '</div>';
-        html += '<h2 class="chapterThumbText">';
-        html += getDisplayRunningTime(currentTicks);
-        html += '</h2>';
-        html += '</div>';
-
-        return html + '</div>';
+        customThumbImg.src = imageSrc;
+        customChapterText.textContent = getDisplayRunningTime(currentTicks);
     }
 
-    return null;
+    return `<div style="min-width: ${customSliderBubble.offsetWidth}px; max-height: 0px"></div>`;
 }
 
 // Not the same, but should be functionally equaivalent to --
 // https://github.com/jellyfin/jellyfin-web/blob/8ff9d63e25b40575e02fe638491259c480c89ba5/src/controllers/playback/video/index.js#L237
+/*
 function showOsd() {
     //document.getElementsByClassName('skinHeader')[0]?.classList.remove('osdHeader-hidden');
     // todo: actually can't be bothered so I'll wait and see if it works without it or not
 }
+*/
 
 // Taken from https://github.com/jellyfin/jellyfin-web/blob/8ff9d63e25b40575e02fe638491259c480c89ba5/src/scripts/datetime.js#L76
 function getDisplayRunningTime(ticks) {
