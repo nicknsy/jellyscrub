@@ -8,6 +8,7 @@ let mediaRuntimeTicks = null;   // NOT ms -- Microsoft DateTime.Ticks. Must be d
 const EMBY_AUTH_HEADER = 'X-Emby-Authorization';
 let embyAuthValue = '';
 
+let hasFailed = false;
 let trickplayManifest = null;
 let trickplayData = null;
 let currentTrickplayFrame = null;
@@ -40,6 +41,7 @@ function info(msg) {
 
 // On page change these variables must manually be set back to null as new pages are simply pushState's and
 // wont reload the script.
+/* Actually this gets run after everything else so it breaks everything -- moving to the fetch
 addEventListener('popstate', (event) => {
     clearTimeout(mainScriptExecution);
 
@@ -48,6 +50,7 @@ addEventListener('popstate', (event) => {
 
     embyAuthValue = '';
 
+    hasFailed = false;
     trickplayManifest = null;
     trickplayData = null;
     currentTrickplayFrame = null;
@@ -55,7 +58,8 @@ addEventListener('popstate', (event) => {
     osdPositionSlider = null;
     osdGetBubbleHtml = null;
     osdGetBubbleHtmlLock = false;
-}); 
+});
+*/
 
 // Grab MediaSourceId from jellyfin-web internal API calls
 const { fetch: originalFetch } = window;
@@ -67,6 +71,24 @@ window.fetch = async (...args) => {
     let isPlaybackInfo = url.pathname.split('/').pop() == 'PlaybackInfo';
 
     if (isPlaybackInfo) {
+        // Clear old values
+        clearTimeout(mainScriptExecution);
+
+        mediaSourceId = null;
+        mediaRuntimeTicks = null;
+    
+        embyAuthValue = '';
+    
+        hasFailed = false;
+        trickplayManifest = null;
+        trickplayData = null;
+        currentTrickplayFrame = null;
+    
+        osdPositionSlider = null;
+        osdGetBubbleHtml = null;
+        osdGetBubbleHtmlLock = false;
+        // Clear old values
+
         mediaSourceId = new URLSearchParams(url.search).get('MediaSourceId');
         debug(`Found media source ID: ${mediaSourceId}`);
 
@@ -92,7 +114,7 @@ window.fetch = async (...args) => {
     // Don't know if this will be triggered by the fetch intercept first or the observer
     // Don't run main script if there is already trickplay data
     // I'm using window.setTimeout because I don't want to block the response return but I have no idea if thats how it works
-    if (!trickplayData && mediaSourceId && mediaRuntimeTicks && embyAuthValue && osdPositionSlider) window.setTimeout(mainScriptExecution, 0);
+    if (!hasFailed && !trickplayData && mediaSourceId && mediaRuntimeTicks && embyAuthValue && osdPositionSlider) window.setTimeout(mainScriptExecution, 0);
 
     return response;
 };
@@ -119,7 +141,7 @@ const callback = function (mutationList, observer) {
 
                 // Don't know if this will be triggered by the fetch intercept first or the observer
                 // Don't run main script if there is already trickplay data
-                if (!trickplayData && mediaSourceId && mediaRuntimeTicks && embyAuthValue && osdPositionSlider) mainScriptExecution();
+                if (!hasFailed && !trickplayData && mediaSourceId && mediaRuntimeTicks && embyAuthValue && osdPositionSlider) mainScriptExecution();
             }
         }
     }
@@ -246,6 +268,9 @@ function manifestLoad() {
     } else if (this.status == 503) {
         info(`Received 503 from server -- still generating manifest. Waiting ${RETRY_INTERVAL}ms then retrying...`);
         setTimeout(mainScriptExecution, RETRY_INTERVAL);
+    } else {
+        debug(`Failed to get manifest file: url ${this.responseURL}, error ${this.status}, ${this.responseText}`)
+        hasFailed = true;
     }
 }
 
@@ -255,20 +280,26 @@ function bifLoad() {
     } else if (this.status == 503) {
         info(`Received 503 from server -- still generating BIF. Waiting ${RETRY_INTERVAL}ms then retrying...`);
         setTimeout(mainScriptExecution, RETRY_INTERVAL);
-    } else if (this.status == 404) {
-        error('Requested BIF file listed in manifest but server returned 404 not found.');
+    } else {
+        if (this.status == 404) error('Requested BIF file listed in manifest but server returned 404 not found.');
+
+        debug(`Failed to get BIF file: url ${this.responseURL}, error ${this.status}, ${this.responseText}`)
+        hasFailed = true;
     }
 }
 
 function mainScriptExecution() {
     // Get trickplay manifest file
     if (!trickplayManifest) {
+        let manifestUrl = MANIFEST_ENDPOINT.replace('{itemId}', mediaSourceId);
         let manifestRequest = new XMLHttpRequest();
-        manifestRequest.setRequestHeader(EMBY_AUTH_HEADER, embyAuthValue);
         manifestRequest.responseType = 'json';
         manifestRequest.addEventListener('load', manifestLoad);
 
-        manifestRequest.open('GET', MANIFEST_ENDPOINT.replace('{itemId}', mediaSourceId));
+        manifestRequest.open('GET', manifestUrl);
+        manifestRequest.setRequestHeader(EMBY_AUTH_HEADER, embyAuthValue);
+
+        debug(`Requesting Manifest @ ${manifestUrl}`);
         manifestRequest.send();
     }
 
@@ -292,12 +323,15 @@ function mainScriptExecution() {
             }
             info(`Requesting BIF file with width ${width}`);
 
+            let bifUrl = BIF_ENDPOINT.replace('{itemId}', mediaSourceId).replace('{width}', width);
             let bifRequest = new XMLHttpRequest();
-            bifRequest.setRequestHeader(EMBY_AUTH_HEADER, embyAuthValue);
             bifRequest.responseType = 'arraybuffer';
             bifRequest.addEventListener('load', bifLoad);
 
-            bifRequest.open('GET', BIF_ENDPOINT.replace('{itemId}', mediaSourceId).replace('{width}', width));
+            bifRequest.open('GET', bifUrl);
+            bifRequest.setRequestHeader(EMBY_AUTH_HEADER, embyAuthValue);
+
+            debug(`Requesting BIF @ ${bifUrl}`);
             bifRequest.send();
         } else {
             error(`Have manifest file with no listed resolutions: ${trickplayManifest}`);
