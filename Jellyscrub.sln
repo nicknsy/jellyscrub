@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32630.192
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nick.Plugin.Jellyscrub", "Nick.Plugin.Jellyscrub.csproj", "{DF526B2C-5F30-40A0-ACDA-17D8933962B1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nick.Plugin.Jellyscrub", "Nick.Plugin.Jellyscrub\Nick.Plugin.Jellyscrub.csproj", "{DF526B2C-5F30-40A0-ACDA-17D8933962B1}"
 EndProject
-Project("{911E67C6-3D85-4FCE-B560-20A9C3E3FF48}") = "jellyfin", "..\..\..\..\Desktop\jellyfin_10.8.1\jellyfin_10.8.1\jellyfin.exe", "{3C3B31F4-F1D8-4C10-A142-066D2033783E}"
+Project("{911E67C6-3D85-4FCE-B560-20A9C3E3FF48}") = "jellyfin", "..\..\..\Desktop\jellyfin_10.8.1\jellyfin_10.8.1\jellyfin.exe", "{3C3B31F4-F1D8-4C10-A142-066D2033783E}"
 	ProjectSection(DebuggerProjectSystem) = preProject
 		PortSupplier = 00000000-0000-0000-0000-000000000000
 		Executable = C:\Users\Nick\Desktop\jellyfin_10.8.1\jellyfin_10.8.1\jellyfin.exe
