@@ -3,7 +3,7 @@ const BIF_ENDPOINT = '/Trickplay/{itemId}/{width}/GetBIF';
 const RETRY_INTERVAL = 60_000;  // ms (1 minute)
 
 let mediaSourceId = null;
-let mediaRuntimeTicks = null;   // NOT ms. Must be divided by 10,000.
+let mediaRuntimeTicks = null;   // NOT ms -- Microsoft DateTime.Ticks. Must be divided by 10,000.
 
 const EMBY_AUTH_HEADER = 'X-Emby-Authorization';
 let embyAuthValue = '';
@@ -43,10 +43,10 @@ function info(msg) {
 addEventListener('popstate', (event) => {
     clearTimeout(mainScriptExecution);
 
-    embyAuthValue = '';
-
     mediaSourceId = null;
     mediaRuntimeTicks = null;
+
+    embyAuthValue = '';
 
     trickplayManifest = null;
     trickplayData = null;
@@ -89,6 +89,11 @@ window.fetch = async (...args) => {
         });
     }
 
+    // Don't know if this will be triggered by the fetch intercept first or the observer
+    // Don't run main script if there is already trickplay data
+    // I'm using window.setTimeout because I don't want to block the response return but I have no idea if thats how it works
+    if (!trickplayData && mediaSourceId && mediaRuntimeTicks && embyAuthValue && osdPositionSlider) window.setTimeout(mainScriptExecution, 0);
+
     return response;
 };
 
@@ -111,6 +116,10 @@ const callback = function (mutationList, observer) {
                     configurable: true,
                     enumerable: true
                 });
+
+                // Don't know if this will be triggered by the fetch intercept first or the observer
+                // Don't run main script if there is already trickplay data
+                if (!trickplayData && mediaSourceId && mediaRuntimeTicks && embyAuthValue && osdPositionSlider) mainScriptExecution();
             }
         }
     }
@@ -267,11 +276,20 @@ function mainScriptExecution() {
     if (!trickplayData && trickplayManifest) {
         // Determine which width to use
         // Prefer highest resolution @ less than 20% of total screen resolution width
-        let width = null;
-        ///
+        let resolutions = trickplayManifest.WidthResolutions;
 
-        if (width)
+        if (resolutions && resolutions.length > 0)
         {
+            resolutions.sort();
+            let screenWidth = window.screen.width * window.devicePixelRatio;
+            let width = resolutions[0];
+
+            // Prefer bigger trickplay images granted they are less than or equal to 20% of total screen width
+            for (let i = 1; i < resolutions.length; i++)
+            {
+                let biggerWidth = resolutions[i];
+                if (biggerWidth <= (screenWidth * .2)) width = biggerWidth;
+            }
             info(`Requesting BIF file with width ${width}`);
 
             let bifRequest = new XMLHttpRequest();
@@ -281,11 +299,13 @@ function mainScriptExecution() {
 
             bifRequest.open('GET', BIF_ENDPOINT.replace('{itemId}', mediaSourceId).replace('{width}', width));
             bifRequest.send();
+        } else {
+            error(`Have manifest file with no listed resolutions: ${trickplayManifest}`);
         }
     }
 
     // Set the bubble function to our custom trickplay one
-    if (trickplayData && osdPositionSlider) {
+    if (trickplayData) {
         osdPositionSlider.getBubbleHtml = getBubbleHtmlTrickplay;
         osdGetBubbleHtmlLock = true;
     }
@@ -294,8 +314,9 @@ function mainScriptExecution() {
 function getBubbleHtmlTrickplay(sliderValue) {
     showOsd();
 
-    let currentTicks = mediaRuntimeTicks * (sliderValue / 100) / 10_000;
-    let imageSrc = getTrickplayFrameUrl(currentTicks, trickplayData);
+    let currentTicks = mediaRuntimeTicks * (sliderValue / 100);
+    let currentTimeMs = currentTicks / 10_000
+    let imageSrc = getTrickplayFrameUrl(currentTimeMs, trickplayData);
 
     if (imageSrc) {
         if (currentTrickplayFrame) URL.revokeObjectURL(currentTrickplayFrame);
@@ -308,7 +329,7 @@ function getBubbleHtmlTrickplay(sliderValue) {
         //html += escapeHtml(chapter.Name);
         //html += '</div>';
         html += '<h2 class="chapterThumbText">';
-        html += datetime.getDisplayRunningTime(positionTicks);
+        html += getDisplayRunningTime(currentTicks);
         html += '</h2>';
         html += '</div>';
 
@@ -316,4 +337,49 @@ function getBubbleHtmlTrickplay(sliderValue) {
     }
 
     return null;
+}
+
+// Not the same, but should be functionally equaivalent to --
+// https://github.com/jellyfin/jellyfin-web/blob/8ff9d63e25b40575e02fe638491259c480c89ba5/src/controllers/playback/video/index.js#L237
+function showOsd() {
+    document.getElementsByClassName('skinHeader')[0]?.classList.remove('osdHeader-hidden');
+    // todo: actually can't be bothered so I'll wait and see if it works without it or not
+}
+
+// Taken from https://github.com/jellyfin/jellyfin-web/blob/8ff9d63e25b40575e02fe638491259c480c89ba5/src/scripts/datetime.js#L76
+function getDisplayRunningTime(ticks) {
+    const ticksPerHour = 36000000000;
+    const ticksPerMinute = 600000000;
+    const ticksPerSecond = 10000000;
+
+    const parts = [];
+
+    let hours = ticks / ticksPerHour;
+    hours = Math.floor(hours);
+
+    if (hours) {
+        parts.push(hours);
+    }
+
+    ticks -= (hours * ticksPerHour);
+
+    let minutes = ticks / ticksPerMinute;
+    minutes = Math.floor(minutes);
+
+    ticks -= (minutes * ticksPerMinute);
+
+    if (minutes < 10 && hours) {
+        minutes = '0' + minutes;
+    }
+    parts.push(minutes);
+
+    let seconds = ticks / ticksPerSecond;
+    seconds = Math.floor(seconds);
+
+    if (seconds < 10) {
+        seconds = '0' + seconds;
+    }
+    parts.push(seconds);
+
+    return parts.join(':');
 }
