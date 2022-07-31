@@ -16,7 +16,7 @@ public class VideoProcessor
     private readonly IFileSystem _fileSystem;
     private readonly IApplicationPaths _appPaths;
     private readonly ILibraryMonitor _libraryMonitor;
-    private static readonly PluginConfiguration _config = JellyscrubPlugin.Instance!.Configuration;
+    private readonly PluginConfiguration _config;
 
     public VideoProcessor(
         ILogger<VideoProcessor> logger,
@@ -28,6 +28,7 @@ public class VideoProcessor
         _fileSystem = fileSystem;
         _appPaths = appPaths;
         _libraryMonitor = libraryMonitor;
+        _config = JellyscrubPlugin.Instance!.Configuration;
     }
 
     /*
@@ -42,6 +43,13 @@ public class VideoProcessor
         {
             foreach (var width in _config.WidthResolutions)
             {
+                /*
+                 * It seems that in Jellyfin multiple files in the same folder exist both as separate items
+                 * and as sub-media sources under a single head item. Because of this, it is worth a simple check
+                 * to make sure we are not writing a "sub-items" trickplay data to the metadata folder of the "main" item.
+                 */
+                if (!item.Id.Equals(Guid.Parse(mediaSource.Id))) continue;
+
                 cancellationToken.ThrowIfCancellationRequested();
                 await Run(item, mediaSource, width, _config.Interval, cancellationToken).ConfigureAwait(false);
             }
@@ -79,12 +87,12 @@ public class VideoProcessor
 
     private static string GetNewManifestPath(BaseItem item)
     {
-        return _config.LocalMediaFolderSaving ? GetLocalManifestPath(item) : GetInternalManifestPath(item);
+        return JellyscrubPlugin.Instance!.Configuration.LocalMediaFolderSaving ? GetLocalManifestPath(item) : GetInternalManifestPath(item);
     }
 
     public static string? GetExistingManifestPath(BaseItem item, IFileSystem fileSystem)
     {
-        var path = _config.LocalMediaFolderSaving ? GetLocalManifestPath(item) : GetInternalManifestPath(item);
+        var path = JellyscrubPlugin.Instance!.Configuration.LocalMediaFolderSaving ? GetLocalManifestPath(item) : GetInternalManifestPath(item);
 
         return fileSystem.FileExists(path) ? path : null;
     }
@@ -145,14 +153,14 @@ public class VideoProcessor
 
     public static string? GetExistingBifPath(BaseItem item, IFileSystem fileSystem, int width)
     {
-        var path = _config.LocalMediaFolderSaving ? GetLocalBifPath(item, width) : GetInternalBifPath(item, width);
+        var path = JellyscrubPlugin.Instance!.Configuration.LocalMediaFolderSaving ? GetLocalBifPath(item, width) : GetInternalBifPath(item, width);
 
         return fileSystem.FileExists(path) ? path : null;
     }
 
     private static string GetNewBifPath(BaseItem item, int width)
     {
-        return _config.LocalMediaFolderSaving ? GetLocalBifPath(item, width) : GetInternalBifPath(item, width);
+        return JellyscrubPlugin.Instance!.Configuration.LocalMediaFolderSaving ? GetLocalBifPath(item, width) : GetInternalBifPath(item, width);
     }
 
     private static string GetLocalBifPath(BaseItem item, int width)
@@ -183,7 +191,8 @@ public class VideoProcessor
 
     private async Task CreateBif(string path, int width, int interval, BaseItem item, MediaSourceInfo mediaSource, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Creating trickplay files at {0} width, for {1}", width, mediaSource.Path);
+        _logger.LogInformation("Creating trickplay files at {0} width, for {1} [ID: {2}]", width, mediaSource.Path, item.Id);
+        _logger.LogInformation("Item ID: {0}    Media ID: {1}", item.Id, mediaSource.Id);
 
         var protocol = mediaSource.Protocol;
 

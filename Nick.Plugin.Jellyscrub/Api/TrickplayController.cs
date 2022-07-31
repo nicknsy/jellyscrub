@@ -87,8 +87,8 @@ public class TrickplayController : ControllerBase
             }
             else if (_config.OnDemandGeneration)
             {
-                await new VideoProcessor(_loggerFactory.CreateLogger<VideoProcessor>(), _fileSystem, _appPaths, _libraryMonitor)
-                    .Run(item, CancellationToken.None).ConfigureAwait(false);
+                new VideoProcessor(_loggerFactory.CreateLogger<VideoProcessor>(), _fileSystem, _appPaths, _libraryMonitor)
+                    .Run(item, CancellationToken.None);
                 return StatusCode(503);
             }
         }
@@ -121,10 +121,10 @@ public class TrickplayController : ControllerBase
             {
                 return PhysicalFile(path, MediaTypeNames.Application.Octet);
             }
-            else if (_config.OnDemandGeneration)
+            else if (_config.OnDemandGeneration && _config.WidthResolutions.Contains(width))
             {
-                await new VideoProcessor(_loggerFactory.CreateLogger<VideoProcessor>(), _fileSystem, _appPaths, _libraryMonitor)
-                    .Run(item, CancellationToken.None).ConfigureAwait(false);
+                new VideoProcessor(_loggerFactory.CreateLogger<VideoProcessor>(), _fileSystem, _appPaths, _libraryMonitor)
+                    .Run(item, CancellationToken.None);
                 return StatusCode(503);
             }
         }
