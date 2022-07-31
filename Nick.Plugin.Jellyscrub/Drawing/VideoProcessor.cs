@@ -119,7 +119,7 @@ public class VideoProcessor
         // Create Manifest object with new resolution
         Manifest newManifest = new Manifest() {
             Version = JellyscrubPlugin.Instance!.Version.ToString(),
-            WidthResolutions = new List<int> { width }
+            WidthResolutions = new HashSet<int> { width }
         };
 
         // If a Manifest object already exists, combine resolutions
@@ -131,13 +131,11 @@ public class VideoProcessor
 
             if (oldManifest != null && oldManifest.WidthResolutions != null)
             {
-                newManifest.WidthResolutions = newManifest.WidthResolutions.Union(oldManifest.WidthResolutions).ToList();
+                newManifest.WidthResolutions = newManifest.WidthResolutions.Union(oldManifest.WidthResolutions).ToHashSet();
             }
         }
 
         // Serialize and write to manifest file
-        newManifest.WidthResolutions.Sort();
-
         using FileStream createStream = File.Create(path);
         await JsonSerializer.SerializeAsync(createStream, newManifest);
         await createStream.DisposeAsync();
@@ -192,7 +190,6 @@ public class VideoProcessor
     private async Task CreateBif(string path, int width, int interval, BaseItem item, MediaSourceInfo mediaSource, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Creating trickplay files at {0} width, for {1} [ID: {2}]", width, mediaSource.Path, item.Id);
-        _logger.LogInformation("Item ID: {0}    Media ID: {1}", item.Id, mediaSource.Id);
 
         var protocol = mediaSource.Protocol;
 

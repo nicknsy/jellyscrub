@@ -41,5 +41,5 @@ public class PluginConfiguration : BasePluginConfiguration
     /// List of target width resolutions, in px, to generates BIFs for.
     /// default = { 320 }
     /// </summary>
-    public List<int> WidthResolutions { get; set; } = new List<int> { 320 };
+    public HashSet<int> WidthResolutions { get; set; } = new HashSet<int> { 320 };
 }
