@@ -31,7 +31,7 @@ Jellyscrub [<b>SSL, Cloudflare Proxy</b>] (Default 10s Interval, 320px width):
 ## Installation ##
 <b>NOTE: If the script is unable to inject due to a lack of permission, this is likely due to the docker container being run as a non-root user while being built as a root user, causing the web files to be owned by root. To solve this, you can remove any lines like `User: 1000:1000`, `GUID:`, `PID:`, etc. from the jellyfin docker compose file. Alternatively, the script can manually be added to the index as described below.</b>
 
-1. Add https://github.com/nicknsy/jellyscrub/blob/main/manifest.json as a Jellyfin plugin repository
+1. Add https://raw.githubusercontent.com/nicknsy/jellyscrub/main/manifest.json as a Jellyfin plugin repository
 2. Install Jellyscrub from the repository
 3. Restart the Jellyfin server
 4. If you Jellyfin's web path is set, the plugin should automatically inject the companion client script into the "index.html" file of the web server directory. Otherwise, the line `<script plugin="Jellyscrub" version="1.0.0.0" src="/Trickplay/ClientScript"></script>` will have to be added at the end of end body tag manually right before `</body>` manually.
