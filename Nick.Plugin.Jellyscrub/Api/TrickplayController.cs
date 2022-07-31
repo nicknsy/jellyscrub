@@ -8,6 +8,7 @@ using Nick.Plugin.Jellyscrub.Configuration;
 using Nick.Plugin.Jellyscrub.Drawing;
 using System.ComponentModel.DataAnnotations;
 using System.Net.Mime;
+using System.Reflection;
 
 namespace Nick.Plugin.Jellyscrub.Api;
 
@@ -34,6 +35,9 @@ namespace Nick.Plugin.Jellyscrub.Api;
 //
 public class TrickplayController : ControllerBase
 {
+    private readonly Assembly _assembly;
+    private readonly string _trickplayScriptPath;
+
     private readonly ILogger<TrickplayController> _logger;
     private readonly ILibraryManager _libraryManager;
     private readonly IFileSystem _fileSystem;
@@ -53,6 +57,9 @@ public class TrickplayController : ControllerBase
         IApplicationPaths appPaths,
         ILibraryMonitor libraryMonitor)
     {
+        _assembly = Assembly.GetExecutingAssembly();
+        _trickplayScriptPath = GetType().Namespace + ".trickplay.js";
+
         _libraryManager = libraryManager;
         _logger = logger;
         _fileSystem = fileSystem;
@@ -60,6 +67,28 @@ public class TrickplayController : ControllerBase
         _appPaths = appPaths;
         _libraryMonitor = libraryMonitor;
         _config = JellyscrubPlugin.Instance!.Configuration;
+    }
+
+    /// <summary>
+    /// Get embedded javascript file for client-run code.
+    /// </summary>
+    /// <response code="200">Javascript file successfully returned.</response>
+    /// <response code="404">File not found.</response>
+    /// <returns>The "trickplay.js" embedded file.</returns>
+    [HttpGet("ClientScript")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [Produces("application/javascript")]
+    public async Task<ActionResult> GetClientScript()
+    {
+        var scriptStream = _assembly.GetManifestResourceStream(_trickplayScriptPath);
+
+        if (scriptStream != null)
+        {
+            return File(scriptStream, "application/javascript");
+        }
+
+        return NotFound();
     }
 
     /// <summary>
