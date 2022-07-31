@@ -1,6 +1,7 @@
 ﻿using MediaBrowser.Common.Configuration;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.IO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -17,22 +18,6 @@ namespace Nick.Plugin.Jellyscrub.Api;
 /// </summary>
 [ApiController]
 [Route("Trickplay")]
-//!!
-//!!
-//!!
-//!!!!
-//!!
-//!!
-//!!
-// TODO !!! [Authorize(Policy = "DefaultAuthorization")] !!!
-//!!
-//!!
-//!!
-//!!
-//!!
-//!!
-//!!
-//
 public class TrickplayController : ControllerBase
 {
     private readonly Assembly _assembly;
@@ -70,7 +55,7 @@ public class TrickplayController : ControllerBase
     }
 
     /// <summary>
-    /// Get embedded javascript file for client-run code.
+    /// Get embedded javascript file for client-side code.
     /// </summary>
     /// <response code="200">Javascript file successfully returned.</response>
     /// <response code="404">File not found.</response>
@@ -100,6 +85,7 @@ public class TrickplayController : ControllerBase
     /// <response code="503">If on-demand generation is enabled, this indicates the server hasn't completed generation.</response>
     /// <returns>A JSON response as read from manfiest file, or a <see cref="NotFoundResult"/>.</returns>
     [HttpGet("{itemId}/GetManifest")]
+    [Authorize(Policy = "DefaultAuthorization")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [Produces(MediaTypeNames.Application.Json)]
@@ -135,6 +121,7 @@ public class TrickplayController : ControllerBase
     /// <response code="503">If on-demand generation is enabled, this indicates the server hasn't completed generation.</response>
     /// <returns>Associated BIF file, or a <see cref="NotFoundResult"/>.</returns>
     [HttpGet("{itemId}/{width}/GetBIF")]
+    [Authorize(Policy = "DefaultAuthorization")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
