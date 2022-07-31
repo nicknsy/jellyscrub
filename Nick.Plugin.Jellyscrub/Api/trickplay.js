@@ -128,8 +128,9 @@ const callback = function (mutationList, observer) {
     for (const mutation of mutationList) {
         if (mutation.target.classList.contains('mdl-slider-container')) {
             debug(`Found OSD container: ${mutation.target}`);
-            osdPositionSlider = mutation.target.getElementsByClassName('osdPositionSlider')[0];
-            if (osdPositionSlider) {
+            let slider = mutation.target.getElementsByClassName('osdPositionSlider')[0];
+            if (slider) {
+                osdPositionSlider = slider;
                 debug(`Found OSD slider: ${osdPositionSlider}`);
 
                 Object.defineProperty(osdPositionSlider, 'getBubbleHtml', {
@@ -188,6 +189,9 @@ Indexed8Array.prototype.readInt32 = function() {
 /*
  * Code for BIF/Trickplay frames
  */
+
+const BIF_MAGIC_NUMBERS = [0x89, 0x42, 0x49, 0x46, 0x0D, 0x0A, 0x1A, 0x0A];
+const SUPPORTED_BIF_VERSION = 0;
 
 function trickplayDecode(buffer) {
     info(`BIF file size: ${(buffer.byteLength / 1_048_576).toFixed(2)}MB`);
@@ -265,6 +269,7 @@ function getTrickplayFrameUrl(playerTimestamp, data) {
 function manifestLoad() {
     if (this.status == 200) {
         trickplayManifest = this.response;
+        setTimeout(mainScriptExecution, 0); // Hacky way of avoiding using fetch/await by returning then calling function again
     } else if (this.status == 503) {
         info(`Received 503 from server -- still generating manifest. Waiting ${RETRY_INTERVAL}ms then retrying...`);
         setTimeout(mainScriptExecution, RETRY_INTERVAL);
@@ -277,6 +282,7 @@ function manifestLoad() {
 function bifLoad() {
     if (this.status == 200) {
         trickplayData = trickplayDecode(this.response);
+        setTimeout(mainScriptExecution, 0); // Hacky way of avoiding using fetch/await by returning then calling function again
     } else if (this.status == 503) {
         info(`Received 503 from server -- still generating BIF. Waiting ${RETRY_INTERVAL}ms then retrying...`);
         setTimeout(mainScriptExecution, RETRY_INTERVAL);
@@ -301,6 +307,7 @@ function mainScriptExecution() {
 
         debug(`Requesting Manifest @ ${manifestUrl}`);
         manifestRequest.send();
+        return;
     }
 
     // Get trickplay BIF file
@@ -333,6 +340,7 @@ function mainScriptExecution() {
 
             debug(`Requesting BIF @ ${bifUrl}`);
             bifRequest.send();
+            return;
         } else {
             error(`Have manifest file with no listed resolutions: ${trickplayManifest}`);
         }
@@ -376,7 +384,7 @@ function getBubbleHtmlTrickplay(sliderValue) {
 // Not the same, but should be functionally equaivalent to --
 // https://github.com/jellyfin/jellyfin-web/blob/8ff9d63e25b40575e02fe638491259c480c89ba5/src/controllers/playback/video/index.js#L237
 function showOsd() {
-    document.getElementsByClassName('skinHeader')[0]?.classList.remove('osdHeader-hidden');
+    //document.getElementsByClassName('skinHeader')[0]?.classList.remove('osdHeader-hidden');
     // todo: actually can't be bothered so I'll wait and see if it works without it or not
 }
 
