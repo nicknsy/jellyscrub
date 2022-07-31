@@ -1,0 +1,21 @@
+[
+    {
+        "guid": "a84a949d-4b73-4099-aacb-8341b4da17ba",
+        "name": "Jellyscrub",
+        "overview": "Create BIF files for media to be used for trickplay scrubbing previews.",
+        "description": "Smooth mouse-over video scrubbing previews.",
+        "owner": "Nick",
+        "category": "General",
+        "imageUrl": "----------------------------------",
+        "versions": [
+            {
+                "version": "1.0.0.0",
+                "changelog": "Initial release",
+                "targetAbi": "10.8.1.0",
+                "sourceUrl": "",
+                "checksum": "",
+                "timestamp": ""
+            }
+        ]
+    }
+]
