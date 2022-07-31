@@ -32,6 +32,12 @@ public class PluginConfiguration : BasePluginConfiguration
     public bool LocalMediaFolderSaving { get; set; } = false;
 
     /// <summary>
+    /// Whether or not the plugin should inject the client-side script tag into jellyfin-web.
+    /// default = true
+    /// </summary>
+    public bool InjectClientScript { get; set; } = true;
+
+    /// <summary>
     /// Interval, in ms, between each new trickplay image.
     /// default = 10000
     /// </summary>

@@ -47,6 +47,35 @@ public class JellyscrubPlugin : BasePlugin<PluginConfiguration>, IHasWebPages
     {
         Instance = this;
         OldMediaEncoder = new OldMediaEncoder(loggerFactory.CreateLogger<OldMediaEncoder>(), mediaEncoder, configurationManager, fileSystem);
+
+        if (Configuration.InjectClientScript)
+        {
+            if (!string.IsNullOrWhiteSpace(applicationPaths.WebPath))
+            {
+                var indexFile = Path.Combine(applicationPaths.WebPath, "index.html");
+                if (File.Exists(indexFile))
+                {
+                    string indexContents = File.ReadAllText(indexFile);
+                    if (!indexContents.Contains("/Trickplay/ClientScript"))
+                    {
+                        logger.LogInformation("Attempting to inject trickplay script code in {0}", indexFile);
+
+                        int bodyClosing = indexContents.LastIndexOf("</body>");
+                        if (bodyClosing != -1)
+                        {
+                            indexContents = indexContents.Insert(bodyClosing, "<script plugin=\"Jellyscrub\" version=\"1.0.0.0\" src=\"/Trickplay/ClientScript\"></script>");
+                            File.WriteAllText(indexFile, indexContents);
+
+                            logger.LogInformation("Finished injecting trickplay script code in {0}", indexFile);
+                        }
+                        else
+                        {
+                            logger.LogInformation("Could not find closing body tag in {0}", indexFile);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /// <summary>

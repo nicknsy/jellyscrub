@@ -59,7 +59,8 @@ window.fetch = async (...args) => {
     let [resource, config] = args;
 
     let url = new URL(resource);
-    let isPlaybackInfo = url.pathname.split('/').pop() == 'PlaybackInfo';
+    let urlParts = url.pathname.split('/');
+    let isPlaybackInfo = urlParts.pop() == 'PlaybackInfo';
 
     if (isPlaybackInfo) {
         // Clear old values
@@ -86,6 +87,8 @@ window.fetch = async (...args) => {
         // Clear old values
 
         mediaSourceId = new URLSearchParams(url.search).get('MediaSourceId');
+        mediaSourceId = mediaSourceId ? mediaSourceId : urlParts.pop();
+
         debug(`Found media source ID: ${mediaSourceId}`);
 
         let auth = config.headers['X-Emby-Authorization'];
