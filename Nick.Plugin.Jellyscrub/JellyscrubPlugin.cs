@@ -64,9 +64,16 @@ public class JellyscrubPlugin : BasePlugin<PluginConfiguration>, IHasWebPages
                         if (bodyClosing != -1)
                         {
                             indexContents = indexContents.Insert(bodyClosing, "<script plugin=\"Jellyscrub\" version=\"1.0.0.0\" src=\"/Trickplay/ClientScript\"></script>");
-                            File.WriteAllText(indexFile, indexContents);
 
-                            logger.LogInformation("Finished injecting trickplay script code in {0}", indexFile);
+                            try
+                            {
+                                File.WriteAllText(indexFile, indexContents);
+                                logger.LogInformation("Finished injecting trickplay script code in {0}", indexFile);
+                            }
+                            catch (Exception e)
+                            {
+                                logger.LogError("Encountered exception while writing to {0}: {1}", indexFile, e);
+                            }
                         }
                         else
                         {
