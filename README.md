@@ -5,7 +5,7 @@ Jellyscrub
 ## About ##
 Jellyscrub is a plugin that generates "trickplay" (Roku .bif) files that are then interpreted by the client and used for bufferless scrubbing image previews.
 
-The trickplay data for a 1:30hr movie with 320x180 thumbnails only takes about 6MB of data when generating an image every 10 seconds. It also only takes a little over a minute to generate.
+The trickplay data for a 1:30hr movie with 320x180 thumbnails only takes about 6MB of data when generating an image every 10 seconds. Takes around one - four minutes to generate depending on computer hardware.
 
 <b>Abilities</b>
 * No buffering, even over proxies
@@ -20,9 +20,13 @@ The trickplay data for a 1:30hr movie with 320x180 thumbnails only takes about 6
 
 ## Comparison ##
 
-Jellyfin Default [<b>SSL, LOCAL</b>] (Minimum of 5m Interval):
+Jellyfin Default [<b>SSL, Cloudflare Proxy</b>] (Minimum of 5m Interval):
+<br/>
+<img src="https://github.com/nicknsy/jellyscrub/raw/main/logo/jellyfin-cloudflare.gif" width="500">
 
 Jellyscrub [<b>SSL, Cloudflare Proxy</b>] (Default 10s Interval, 320px width):
+<br/>
+<img src="https://github.com/nicknsy/jellyscrub/raw/main/logo/jellyscrub-cloudflare.gif" width="500">
 
 ## Installation ##
 1. Add https://github.com/nicknsy/jellyscrub/blob/main/manifest.json as a Jellyfin plugin repository
