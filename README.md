@@ -34,7 +34,7 @@ Jellyscrub [<b>SSL, Cloudflare Proxy</b>] (Default 10s Interval, 320px width):
 1. Add https://raw.githubusercontent.com/nicknsy/jellyscrub/main/manifest.json as a Jellyfin plugin repository
 2. Install Jellyscrub from the repository
 3. Restart the Jellyfin server
-4. If you Jellyfin's web path is set, the plugin should automatically inject the companion client script into the "index.html" file of the web server directory. Otherwise, the line `<script plugin="Jellyscrub" version="1.0.0.0" src="/Trickplay/ClientScript"></script>` will have to be added at the end of end body tag manually right before `</body>` manually.
+4. If you Jellyfin's web path is set, the plugin should automatically inject the companion client script into the "index.html" file of the web server directory. Otherwise, the line `<script plugin="Jellyscrub" version="1.0.0.0" src="/Trickplay/ClientScript"></script>` will have to be added at the end of the body tag manually right before `</body>`.
 5. Clear your site cookies / local storage to get rid of the cached index file and receive a new one from the server.
 6. Change any configuration options, like whether to save in media folders over internal metadata folders.
 7. Run a scan (could take much longer depending on library size) or start watching a movie and the scrubbing preview should update in a few minutes.
