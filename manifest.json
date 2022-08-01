@@ -11,7 +11,7 @@
             {
                 "version": "1.0.0.0",
                 "changelog": "Initial release",
-                "targetAbi": "10.8.1.0",
+                "targetAbi": "10.8.0.0",
                 "sourceUrl": "https://github.com/nicknsy/jellyscrub/releases/download/1.0.0.0/Jellyscrub-v1.0.0.0.zip",
                 "checksum": "72340430bdb7dab0a223d9d40c3c676f",
                 "timestamp": "2022-07-31T20:09:00Z"
