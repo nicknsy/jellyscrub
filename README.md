@@ -9,7 +9,7 @@ The trickplay data for a 1:30hr movie with 320x180 thumbnails only takes about 6
 
 <b>Abilities</b>
 * No buffering, even over proxies
-* <s>Customize interval between new images</s> Don't use this for now, will be fixed tomorrow with 1.0.1
+* Customize interval between new images
 * Generate trickplay files at multiple target resolutions
 * Generate on library scan, as a scheduled task, or whenever they are requested by the client
 * Option to save locally to media folder
