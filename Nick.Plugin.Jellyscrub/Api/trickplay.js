@@ -18,6 +18,8 @@ let customSliderBubble = null;
 let customThumbImg = null;
 let customChapterText = null;
 
+let sliderObserver = null;
+
 let osdPositionSlider = null;
 let osdGetBubbleHtml = null;
 let osdGetBubbleHtmlLock = false;
@@ -52,6 +54,14 @@ document.body.insertBefore(jellyscrubStyle, document.body.firstChild);
  * Code for updating and locking mediaSourceId and getBubbleHtml 
  */
 
+// Remove slider observer on page change
+addEventListener('popstate', (event) => {
+    if (sliderObserver) {
+        sliderObserver.disconnect();
+        sliderObserver = null;
+    }
+}); 
+
 // Grab MediaSourceId from jellyfin-web internal API calls
 const { fetch: originalFetch } = window;
 
@@ -80,6 +90,8 @@ window.fetch = async (...args) => {
         customSliderBubble = null;
         customThumbImg = null;
         customChapterText = null;
+
+        sliderObserver = null;
     
         osdPositionSlider = null;
         osdGetBubbleHtml = null;
@@ -161,7 +173,7 @@ function containerCallback(mutationList, observer) {
                     customSliderBubble = hiddenSliderBubble.parentElement.appendChild(customBubble);
 
                     let sliderConfig = { attributeFilter: ['style', 'class'] };
-                    let sliderObserver = new MutationObserver(sliderCallback);
+                    sliderObserver = new MutationObserver(sliderCallback);
                     sliderObserver.observe(hiddenSliderBubble, sliderConfig); 
                 }
     
@@ -175,6 +187,8 @@ function containerCallback(mutationList, observer) {
 };
 
 function sliderCallback(mutationList, observer) {
+    if (!trickplayData) return;
+
     for (const mutation of mutationList) {
         switch(mutation.attributeName) {
             case 'style':
@@ -183,7 +197,7 @@ function sliderCallback(mutationList, observer) {
             case 'class':
                 if (mutation.target.classList.contains('hide')) {
                     customSliderBubble.classList.add('hide');
-                } else if (trickplayData) {
+                } else {
                     customSliderBubble.classList.remove('hide');
                 }
                 break;

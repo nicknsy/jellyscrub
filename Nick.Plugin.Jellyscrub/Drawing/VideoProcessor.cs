@@ -203,7 +203,7 @@ public class VideoProcessor
             var inputPath = mediaSource.Path;
 
             await JellyscrubPlugin.Instance!.OldMediaEncoder!.ExtractVideoImagesOnInterval(inputPath, mediaSource.Container, videoStream, mediaSource, mediaSource.Video3DFormat,
-                    TimeSpan.FromSeconds(10), tempDirectory, "img_", width, cancellationToken)
+                    TimeSpan.FromMilliseconds(interval), tempDirectory, "img_", width, cancellationToken)
                     .ConfigureAwait(false);
 
             var images = _fileSystem.GetFiles(tempDirectory, new string[] { ".jpg" }, false, false)
@@ -224,6 +224,7 @@ public class VideoProcessor
             {
                 Directory.CreateDirectory(Directory.GetParent(path).FullName);
                 File.Copy(bifTempPath, path, true);
+                _logger.LogInformation("Finished creation of trickplay file {0}", path);
             }
             finally
             {
