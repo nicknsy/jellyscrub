@@ -121,6 +121,7 @@ public class TrickplayController : ControllerBase
     /// <response code="503">If on-demand generation is enabled, this indicates the server hasn't completed generation.</response>
     /// <returns>Associated BIF file, or a <see cref="NotFoundResult"/>.</returns>
     [HttpGet("{itemId}/{width}/GetBIF")]
+    [HttpGet("{itemId}/{width}/GetBIF.bif")]
     [Authorize(Policy = "DefaultAuthorization")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
