@@ -55,12 +55,14 @@ document.body.insertBefore(jellyscrubStyle, document.body.firstChild);
  */
 
 // Remove slider observer on page change
+/* Breaking preview on clicking subtitles, settings as it pushes ?dlg=dlgXXXXXXXXXXXXX
 addEventListener('popstate', (event) => {
     if (sliderObserver) {
         sliderObserver.disconnect();
         sliderObserver = null;
     }
-}); 
+});
+*/
 
 // Grab MediaSourceId from jellyfin-web internal API calls
 const { fetch: originalFetch } = window;
