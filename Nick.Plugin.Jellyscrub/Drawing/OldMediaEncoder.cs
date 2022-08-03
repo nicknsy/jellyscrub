@@ -1,4 +1,4 @@
-﻿using MediaBrowser.Common;
+using MediaBrowser.Common;
 using MediaBrowser.Common.Extensions;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Controller.MediaEncoding;
@@ -40,11 +40,13 @@ public class OldMediaEncoder
         _mediaEncoder = mediaEncoder;
         _fileSystem = fileSystem;
 
+        _config = JellyscrubPlugin.Instance!.Configuration;
+        var configThreads = _config.ProcessThreads;
+
         var encodingConfig = configurationManager.GetEncodingOptions();
         _mediaEncoder.SetFFmpegPath();
         _ffmpegPath = _mediaEncoder.EncoderPath;
-        _threads = EncodingHelper.GetNumberOfThreads(null, encodingConfig, null);
-        _config = JellyscrubPlugin.Instance!.Configuration;
+        _threads = configThreads == -1 ? EncodingHelper.GetNumberOfThreads(null, encodingConfig, null) : configThreads;
     }
 
     public async Task ExtractVideoImagesOnInterval(

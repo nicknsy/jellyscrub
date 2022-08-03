@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
     <title>Jellyscrub</title>
@@ -62,17 +62,25 @@
                     </div>
 
                     <div class="inputContainer">
-	                    <label class="inputLabel inputLabelUnfocused" for="processPriority">Process Priority</label>
-	                    <select is="emby-select" id="processPriority" name="Process Priority" class="emby-select-withcolor emby-select">
-		                    <option id="optPriorityRealtime" value="Realtime">Realtime</option>
-		                    <option id="optPriorityHigh" value="High">High</option>
-		                    <option id="optPriorityAboveNormal" value="AboveNormal">Above Normal</option>
-		                    <option id="optPriorityNormal" value="Normal">Normal</option>
-		                    <option id="optPriorityBelowNormal" value="BelowNormal">Below Normal</option>
-		                    <option id="optPriorityIdle" value="Idle">Idle</option>
-	                    </select>
-	                    <div class="fieldDescription">Process priority of the ffmpeg .bif extraction process</div>
-	                    <div class="fieldDescription"><strong>Note:</strong> Setting this to Realtime might freeze the PC during bif generation!</div>
+                        <label class="inputLabel inputLabelUnfocused" for="processPriority">Process Priority</label>
+                        <select is="emby-select" id="processPriority" name="Process Priority" class="emby-select-withcolor emby-select">
+                            <option id="optPriorityRealtime" value="Realtime">Realtime</option>
+                            <option id="optPriorityHigh" value="High">High</option>
+                            <option id="optPriorityAboveNormal" value="AboveNormal">Above Normal</option>
+                            <option id="optPriorityNormal" value="Normal">Normal</option>
+                            <option id="optPriorityBelowNormal" value="BelowNormal">Below Normal</option>
+                            <option id="optPriorityIdle" value="Idle">Idle</option>
+                        </select>
+                        <div class="fieldDescription">Process priority of the ffmpeg .bif extraction process</div>
+                        <div class="fieldDescription"><strong>Note:</strong> Setting this to Realtime might freeze the PC during bif generation!</div>
+                    </div>
+
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="processThreads">FFmpeg Threads</label>
+                        <input is="emby-input" type="number" id="processThreads" pattern="[0-9]*" required="" label="FFmpeg Threads" class="emby-input">
+                        <div class="fieldDescription">The number of threads to pass to the "-threads" argument of ffmpeg.</div>
+                        <div class="fieldDescription"><strong>-1:</strong> The option "-1" will use the same amount of threads as configured in Jellyfin, usually "0".</div>
+                        <div class="fieldDescription"><strong>0:</strong> The option "0" is the default for ffmpeg, utilizing as many threads/cores as possible.</div>
                     </div>
 
                     <br />
@@ -126,6 +134,7 @@
                         page.querySelector('#intervalInput').value = config.Interval;
                         page.querySelector('#resolutionInput').value = fromIntArray(config.WidthResolutions);
                         page.querySelector('#processPriority').value = config.ProcessPriority;
+                        page.querySelector('#processThreads').value = config.ProcessThreads;
 
                         Dashboard.hideLoadingMsg();
                     });
@@ -146,6 +155,7 @@
                         config.Interval = Math.max(0, form.querySelector('#intervalInput').value);
                         config.WidthResolutions = toIntArray(form.querySelector('#resolutionInput').value);
                         config.ProcessPriority = form.querySelector('#processPriority').value;
+                        config.ProcessThreads = form.querySelector('#processThreads').value;
 
                         ApiClient.updatePluginConfiguration(pluginId, config).then(Dashboard.processPluginConfigurationUpdateResult);
                     });

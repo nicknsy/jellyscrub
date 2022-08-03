@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using MediaBrowser.Model.Plugins;
 
 namespace Nick.Plugin.Jellyscrub.Configuration;
@@ -51,7 +51,14 @@ public class PluginConfiguration : BasePluginConfiguration
     public HashSet<int> WidthResolutions { get; set; } = new HashSet<int> { 320 };
 
     /// <summary>
-    /// The process priority of the ffmpeg .bif generation process
+    /// The process priority of the ffmpeg .bif generation process.
     /// </summary>
     public ProcessPriorityClass ProcessPriority { get; set; } = ProcessPriorityClass.Normal;
+
+    /// <summary>
+    /// Set the number of threads to be used by ffmpeg.
+    /// -1 = use default from jellyfin
+    /// 0 = default used by ffmpeg
+    /// </summary>
+    public int ProcessThreads { get; set; } = -1;
 }
