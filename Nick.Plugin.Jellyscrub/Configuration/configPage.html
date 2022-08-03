@@ -64,15 +64,16 @@
                     <div class="inputContainer">
                         <label class="inputLabel inputLabelUnfocused" for="processPriority">Process Priority</label>
                         <select is="emby-select" id="processPriority" name="Process Priority" class="emby-select-withcolor emby-select">
-                            <option id="optPriorityRealtime" value="Realtime">Realtime</option>
+                            <!--<option id="optPriorityRealtime" value="Realtime">Realtime</option>-->
                             <option id="optPriorityHigh" value="High">High</option>
                             <option id="optPriorityAboveNormal" value="AboveNormal">Above Normal</option>
                             <option id="optPriorityNormal" value="Normal">Normal</option>
                             <option id="optPriorityBelowNormal" value="BelowNormal">Below Normal</option>
                             <option id="optPriorityIdle" value="Idle">Idle</option>
                         </select>
-                        <div class="fieldDescription">Process priority of the ffmpeg .bif extraction process</div>
-                        <div class="fieldDescription"><strong>Note:</strong> Setting this to Realtime might freeze the PC during bif generation!</div>
+                        <div class="fieldDescription">Setting this lower or higher will determine how the CPU prioritizes the ffmpeg .bif process in relation to other processes.</div>
+                        <div class="fieldDescription">If you notice slowdown while generating bifs but don't want to fully stop their generation, try lowering this and the thread count.</div>
+                        <!--<div class="fieldDescription"><strong>Note:</strong> Setting this to Realtime might freeze the PC during bif generation!</div>-->
                     </div>
 
                     <div class="inputContainer">
