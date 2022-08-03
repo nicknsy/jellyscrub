@@ -46,6 +46,17 @@
                         <div class="fieldDescription checkboxFieldDescription"><strong>Especially ideal for Docker/combo installs. Recommended to be kept on.</strong></div>
                     </div>
 
+                    <!--
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label>
+                            <input is="emby-checkbox" type="checkbox" id="chkStyleTrickplayContainer" />
+                            <span>Style Trickplay Container</span>
+                        </label>
+                        <div class="fieldDescription checkboxFieldDescription">Injects a style element into the page that makes the trickplay preview look better.</div>
+                        <div class="fieldDescription"><strong>Note:</strong> This will not overwrite custom CSS as set in General settings.</div>
+                    </div>
+                    -->
+
                     <div class="inputContainer">
                         <input is="emby-input" type="number" id="intervalInput" pattern="[0-9]*" min="0" required label="Image Interval">
                         <div class="fieldDescription">Interval of time between each new trickplay image. A shorter interval and more images will take up more space.</div>
@@ -128,6 +139,7 @@
                         page.querySelector('#chkEnableDuringScan').checked = config.ExtractionDuringLibraryScan;
                         page.querySelector('#chkSaveBifLocal').checked = config.LocalMediaFolderSaving;
                         page.querySelector('#chkInjectScript').checked = config.InjectClientScript;
+                        // page.querySelector('#chkStyleTrickplayContainer').checked = config.StyleTrickplayContainer;
                         page.querySelector('#intervalInput').value = config.Interval;
                         page.querySelector('#resolutionInput').value = fromIntArray(config.WidthResolutions);
                         page.querySelector('#processPriority').value = config.ProcessPriority;
@@ -149,6 +161,7 @@
                         config.ExtractionDuringLibraryScan = form.querySelector('#chkEnableDuringScan').checked;
                         config.LocalMediaFolderSaving = form.querySelector('#chkSaveBifLocal').checked;
                         config.InjectClientScript = form.querySelector('#chkInjectScript').checked;
+                        // config.StyleTrickplayContainer = page.querySelector('#chkStyleTrickplayContainer').checked;
                         config.Interval = Math.max(0, form.querySelector('#intervalInput').value);
                         config.WidthResolutions = toIntArray(form.querySelector('#resolutionInput').value);
                         config.ProcessPriority = form.querySelector('#processPriority').value;

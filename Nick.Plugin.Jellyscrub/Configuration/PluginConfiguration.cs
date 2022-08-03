@@ -39,6 +39,12 @@ public class PluginConfiguration : BasePluginConfiguration
     public bool InjectClientScript { get; set; } = true;
 
     /// <summary>
+    /// Whether or not the plugin should style the sliderBubble elements.
+    /// default = true
+    /// </summary>
+    public bool StyleTrickplayContainer { get; set; } = true;
+
+    /// <summary>
     /// Interval, in ms, between each new trickplay image.
     /// default = 10000
     /// </summary>
