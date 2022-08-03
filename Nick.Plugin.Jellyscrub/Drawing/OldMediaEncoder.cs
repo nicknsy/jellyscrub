@@ -22,7 +22,7 @@ public class OldMediaEncoder
     private readonly IMediaEncoder _mediaEncoder;
     private readonly IFileSystem _fileSystem;
 
-    private readonly SemaphoreSlim _thumbnailResourcePool = new(2, 2);
+    private readonly SemaphoreSlim _thumbnailResourcePool = new(1, 1);
     private readonly object _runningProcessesLock = new();
     private readonly List<ProcessWrapper> _runningProcesses = new();
 
