@@ -4,7 +4,7 @@
     <title>Jellyscrub</title>
 </head>
 <body>
-    <div data-role="page" class="page type-interior pluginConfigurationPage jellyscrubConfigurationPage" data-require="emby-button,emby-select,emby-checkbox,emby-linkbutton">
+    <div data-role="page" class="page type-interior pluginConfigurationPage jellyscrubConfigurationPage" data-require="emby-input,emby-button,emby-select,emby-checkbox,emby-linkbutton">
 
         <div data-role="content">
             <div class="content-primary">
@@ -47,23 +47,20 @@
                     </div>
 
                     <div class="inputContainer">
-                        <label class="inputLabel inputLabelUnfocused" for="intervalInput">Image Interval</label>
-                        <input is="emby-input" type="number" id="intervalInput" pattern="[0-9]*" required="" min="0" label="Image Interval" class="emby-input">
+                        <input is="emby-input" type="number" id="intervalInput" pattern="[0-9]*" min="0" required label="Image Interval">
                         <div class="fieldDescription">Interval of time between each new trickplay image. A shorter interval and more images will take up more space.</div>
                         <div class="fieldDescription"><strong>Note:</strong> This value cannot be below 0. A value of 0 defaults to a 1000ms interval.</div>
                     </div>
 
                     <div class="inputContainer">
-                        <label class="inputLabel inputLabelUnfocused" for="resolutionInput">Width Resolutions</label>
-                        <input is="emby-input" id="resolutionInput" pattern="[0-9,]*" required="" label="Width Resolutions" class="emby-input">
+                        <input is="emby-input" id="resolutionInput" pattern="[0-9,]*" required label="Width Resolutions">
                         <div class="fieldDescription">Comma separated list of the width (px) that trickplay images will be generated at.</div>
                         <div class="fieldDescription">All images <strong>try</strong> to generate proportionally to the source, so a width of 320 on a 16:9 video ends up <strong>around</strong> 320x180.</div>
                         <div class="fieldDescription"><strong>Note:</strong> Do not include spaces after commas.</div>
                     </div>
 
                     <div class="inputContainer">
-                        <label class="inputLabel inputLabelUnfocused" for="processPriority">Process Priority</label>
-                        <select is="emby-select" id="processPriority" name="Process Priority" class="emby-select-withcolor emby-select">
+                        <select is="emby-select" id="processPriority" name="Process Priority" label="Process Priority">
                             <!--<option id="optPriorityRealtime" value="Realtime">Realtime</option>-->
                             <option id="optPriorityHigh" value="High">High</option>
                             <option id="optPriorityAboveNormal" value="AboveNormal">Above Normal</option>
@@ -77,8 +74,7 @@
                     </div>
 
                     <div class="inputContainer">
-                        <label class="inputLabel inputLabelUnfocused" for="processThreads">FFmpeg Threads</label>
-                        <input is="emby-input" type="number" id="processThreads" pattern="[0-9]*" required="" label="FFmpeg Threads" class="emby-input">
+                        <input is="emby-input" type="number" id="processThreads" pattern="[0-9]*" required="" label="FFmpeg Threads">
                         <div class="fieldDescription">The number of threads to pass to the "-threads" argument of ffmpeg.</div>
                         <div class="fieldDescription"><strong>-1:</strong> The option "-1" will use the same amount of threads as configured in Jellyfin, usually "0".</div>
                         <div class="fieldDescription"><strong>0:</strong> The option "0" is the default for ffmpeg, utilizing as many threads/cores as possible.</div>
