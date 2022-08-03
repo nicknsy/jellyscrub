@@ -21,6 +21,7 @@ public class OldMediaEncoder
     private readonly ILogger _logger;
     private readonly IMediaEncoder _mediaEncoder;
     private readonly IFileSystem _fileSystem;
+    private readonly IServerConfigurationManager _configurationManager;
 
     private readonly SemaphoreSlim _thumbnailResourcePool = new(1, 1);
     private readonly object _runningProcessesLock = new();
@@ -39,13 +40,20 @@ public class OldMediaEncoder
         _logger = logger;
         _mediaEncoder = mediaEncoder;
         _fileSystem = fileSystem;
+        _configurationManager = configurationManager;
 
         _config = JellyscrubPlugin.Instance!.Configuration;
         var configThreads = _config.ProcessThreads;
 
-        var encodingConfig = configurationManager.GetEncodingOptions();
-        _mediaEncoder.SetFFmpegPath();
+        var encodingConfig = _configurationManager.GetEncodingOptions();
         _ffmpegPath = _mediaEncoder.EncoderPath;
+
+        if (string.IsNullOrWhiteSpace(_ffmpegPath))
+        {
+            _mediaEncoder.SetFFmpegPath();
+            _ffmpegPath = _mediaEncoder.EncoderPath;
+        }
+
         _threads = configThreads == -1 ? EncodingHelper.GetNumberOfThreads(null, encodingConfig, null) : configThreads;
     }
 

@@ -1,4 +1,4 @@
-﻿using MediaBrowser.Common.Configuration;
+using MediaBrowser.Common.Configuration;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.Dto;
@@ -7,6 +7,8 @@ using MediaBrowser.Model.IO;
 using Microsoft.Extensions.Logging;
 using Nick.Plugin.Jellyscrub.Configuration;
 using System.Text.Json;
+using MediaBrowser.Controller.MediaEncoding;
+using MediaBrowser.Controller.Configuration;
 
 namespace Nick.Plugin.Jellyscrub.Drawing;
 
@@ -17,9 +19,13 @@ public class VideoProcessor
     private readonly IApplicationPaths _appPaths;
     private readonly ILibraryMonitor _libraryMonitor;
     private readonly PluginConfiguration _config;
+    private readonly OldMediaEncoder _oldEncoder;
 
     public VideoProcessor(
+        ILoggerFactory loggerFactory,
         ILogger<VideoProcessor> logger,
+        IMediaEncoder mediaEncoder,
+        IServerConfigurationManager configurationManager,
         IFileSystem fileSystem,
         IApplicationPaths appPaths,
         ILibraryMonitor libraryMonitor)
@@ -29,6 +35,7 @@ public class VideoProcessor
         _appPaths = appPaths;
         _libraryMonitor = libraryMonitor;
         _config = JellyscrubPlugin.Instance!.Configuration;
+        _oldEncoder = new OldMediaEncoder(loggerFactory.CreateLogger<OldMediaEncoder>(), mediaEncoder, configurationManager, fileSystem);
     }
 
     /*
@@ -202,7 +209,7 @@ public class VideoProcessor
 
             var inputPath = mediaSource.Path;
 
-            await JellyscrubPlugin.Instance!.OldMediaEncoder!.ExtractVideoImagesOnInterval(inputPath, mediaSource.Container, videoStream, mediaSource, mediaSource.Video3DFormat,
+            await _oldEncoder.ExtractVideoImagesOnInterval(inputPath, mediaSource.Container, videoStream, mediaSource, mediaSource.Video3DFormat,
                     TimeSpan.FromMilliseconds(interval), tempDirectory, "img_", width, cancellationToken)
                     .ConfigureAwait(false);
 

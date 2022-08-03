@@ -1,5 +1,7 @@
 ﻿using MediaBrowser.Common.Configuration;
+using MediaBrowser.Controller.Configuration;
 using MediaBrowser.Controller.Library;
+using MediaBrowser.Controller.MediaEncoding;
 using MediaBrowser.Model.IO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -29,6 +31,9 @@ public class TrickplayController : ControllerBase
     private readonly ILoggerFactory _loggerFactory;
     private readonly IApplicationPaths _appPaths;
     private readonly ILibraryMonitor _libraryMonitor;
+    private readonly IMediaEncoder _mediaEncoder;
+    private readonly IServerConfigurationManager _configurationManager;
+
     private readonly PluginConfiguration _config;
 
     /// <summary>
@@ -40,7 +45,9 @@ public class TrickplayController : ControllerBase
         ILogger<TrickplayController> logger,
         ILoggerFactory loggerFactory,
         IApplicationPaths appPaths,
-        ILibraryMonitor libraryMonitor)
+        ILibraryMonitor libraryMonitor,
+        IMediaEncoder mediaEncoder,
+        IServerConfigurationManager configurationManager)
     {
         _assembly = Assembly.GetExecutingAssembly();
         _trickplayScriptPath = GetType().Namespace + ".trickplay.js";
@@ -51,6 +58,9 @@ public class TrickplayController : ControllerBase
         _loggerFactory = loggerFactory;
         _appPaths = appPaths;
         _libraryMonitor = libraryMonitor;
+        _mediaEncoder = mediaEncoder;
+        _configurationManager = configurationManager;
+
         _config = JellyscrubPlugin.Instance!.Configuration;
     }
 
@@ -102,7 +112,7 @@ public class TrickplayController : ControllerBase
             }
             else if (_config.OnDemandGeneration)
             {
-                new VideoProcessor(_loggerFactory.CreateLogger<VideoProcessor>(), _fileSystem, _appPaths, _libraryMonitor)
+                new VideoProcessor(_loggerFactory, _loggerFactory.CreateLogger<VideoProcessor>(), _mediaEncoder, _configurationManager, _fileSystem, _appPaths, _libraryMonitor)
                     .Run(item, CancellationToken.None);
                 return StatusCode(503);
             }
@@ -140,7 +150,7 @@ public class TrickplayController : ControllerBase
             }
             else if (_config.OnDemandGeneration && _config.WidthResolutions.Contains(width))
             {
-                new VideoProcessor(_loggerFactory.CreateLogger<VideoProcessor>(), _fileSystem, _appPaths, _libraryMonitor)
+                new VideoProcessor(_loggerFactory, _loggerFactory.CreateLogger<VideoProcessor>(), _mediaEncoder, _configurationManager, _fileSystem, _appPaths, _libraryMonitor)
                     .Run(item, CancellationToken.None);
                 return StatusCode(503);
             }
