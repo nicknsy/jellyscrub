@@ -67,6 +67,10 @@ public class JellyscrubPlugin : BasePlugin<PluginConfiguration>, IHasWebPages
                             logger.LogInformation("Could not find closing body tag in {0}", indexFile);
                         }
                     }
+                    else
+                    {
+                        logger.LogInformation("Found client script injected in {0}", indexFile);
+                    }
                 }
             }
         }
