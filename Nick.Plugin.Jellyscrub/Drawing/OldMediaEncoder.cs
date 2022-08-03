@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Globalization;
 using MediaBrowser.Controller.Configuration;
 using MediaBrowser.Model.IO;
+using Nick.Plugin.Jellyscrub.Configuration;
 
 namespace Nick.Plugin.Jellyscrub.Drawing;
 
@@ -27,12 +28,13 @@ public class OldMediaEncoder
 
     private string _ffmpegPath;
     private int _threads;
+    private readonly PluginConfiguration _config;
 
     public OldMediaEncoder(
-        ILogger<OldMediaEncoder> logger,
-        IMediaEncoder mediaEncoder,
-        IServerConfigurationManager configurationManager,
-        IFileSystem fileSystem)
+	    ILogger<OldMediaEncoder> logger,
+	    IMediaEncoder mediaEncoder,
+	    IServerConfigurationManager configurationManager,
+	    IFileSystem fileSystem)
     {
         _logger = logger;
         _mediaEncoder = mediaEncoder;
@@ -42,6 +44,7 @@ public class OldMediaEncoder
         _mediaEncoder.SetFFmpegPath();
         _ffmpegPath = _mediaEncoder.EncoderPath;
         _threads = EncodingHelper.GetNumberOfThreads(null, encodingConfig, null);
+        _config = JellyscrubPlugin.Instance!.Configuration;
     }
 
     public async Task ExtractVideoImagesOnInterval(
@@ -158,6 +161,7 @@ public class OldMediaEncoder
     private void StartProcess(ProcessWrapper process)
     {
         process.Process.Start();
+        process.Process.PriorityClass = _config.ProcessPriority;
 
         lock (_runningProcessesLock)
         {
