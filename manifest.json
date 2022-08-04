@@ -9,6 +9,14 @@
         "imageUrl": "https://raw.githubusercontent.com/nicknsy/jellyscrub/main/logo/logo.png",
         "versions": [
             {
+                "version": "1.0.0.3",
+                "changelog": "- maybe fixed hdr tonemapping\n- style trickplay images to look better\n- added option to set threads\n- added option to set process priority\n- other bug fixes",
+                "targetAbi": "10.8.0.0",
+                "sourceUrl": "https://github.com/nicknsy/jellyscrub/releases/download/1.0.0.3/Jellyscrub-v1.0.0.3.zip",
+                "checksum": "a18c7dab567ac2919e65f98589991db7",
+                "timestamp": "2022-08-04T02:11:00Z"
+            },
+            {
                 "version": "1.0.0.2",
                 "changelog": "- fix issue causing previews to disappear after clicking certain playback controls",
                 "targetAbi": "10.8.0.0",
