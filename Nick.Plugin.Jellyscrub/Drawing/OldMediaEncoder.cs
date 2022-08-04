@@ -66,18 +66,22 @@ public class OldMediaEncoder
             TimeSpan interval,
             string targetDirectory,
             string filenamePrefix,
-            int? maxWidth,
+            int maxWidth,
             CancellationToken cancellationToken)
     {
         var inputArgument = _mediaEncoder.GetInputArgument(inputFile, mediaSource);
 
         var vf = "-filter:v fps=1/" + interval.TotalSeconds.ToString(CultureInfo.InvariantCulture);
+        var maxWidthParam = maxWidth.ToString(CultureInfo.InvariantCulture);
 
-        if (maxWidth.HasValue)
+        vf += string.Format(CultureInfo.InvariantCulture, ",scale=min(iw\\,{0}):trunc(ow/dar/2)*2", maxWidthParam);
+
+        // HDR Software Tonemapping
+        if ((string.Equals(videoStream?.ColorTransfer, "smpte2084", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(videoStream?.ColorTransfer, "arib-std-b67", StringComparison.OrdinalIgnoreCase))
+            && _mediaEncoder.SupportsFilter("zscale"))
         {
-            var maxWidthParam = maxWidth.Value.ToString(CultureInfo.InvariantCulture);
-
-            vf += string.Format(CultureInfo.InvariantCulture, ",scale=min(iw\\,{0}):trunc(ow/dar/2)*2", maxWidthParam);
+            vf += ",zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0:peak=100,zscale=t=bt709:m=bt709,format=yuv420p";
         }
 
         Directory.CreateDirectory(targetDirectory);
