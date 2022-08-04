@@ -175,7 +175,14 @@ public class OldMediaEncoder
     private void StartProcess(ProcessWrapper process)
     {
         process.Process.Start();
-        process.Process.PriorityClass = _config.ProcessPriority;
+        try
+        {
+            process.Process.PriorityClass = _config.ProcessPriority;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("Unable to set process priority: {0}", e.Message);
+        }
 
         lock (_runningProcessesLock)
         {
