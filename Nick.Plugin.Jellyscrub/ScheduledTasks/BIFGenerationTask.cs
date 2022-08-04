@@ -1,4 +1,4 @@
-﻿using MediaBrowser.Common.Configuration;
+using MediaBrowser.Common.Configuration;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.IO;
@@ -7,6 +7,8 @@ using MediaBrowser.Model.Entities;
 using Microsoft.Extensions.Logging;
 using Nick.Plugin.Jellyscrub.Drawing;
 using MediaBrowser.Model.Globalization;
+using MediaBrowser.Controller.MediaEncoding;
+using MediaBrowser.Controller.Configuration;
 
 namespace Nick.Plugin.Jellyscrub.ScheduledTasks;
 
@@ -22,6 +24,8 @@ public class BIFGenerationTask : IScheduledTask
     private readonly IApplicationPaths _appPaths;
     private readonly ILibraryMonitor _libraryMonitor;
     private readonly ILocalizationManager _localization;
+    private readonly IMediaEncoder _mediaEncoder;
+    private readonly IServerConfigurationManager _configurationManager;
 
     public BIFGenerationTask(
         ILibraryManager libraryManager,
@@ -30,7 +34,9 @@ public class BIFGenerationTask : IScheduledTask
         IFileSystem fileSystem,
         IApplicationPaths appPaths,
         ILibraryMonitor libraryMonitor,
-        ILocalizationManager localization)
+        ILocalizationManager localization,
+        IMediaEncoder mediaEncoder,
+        IServerConfigurationManager configurationManager)
     {
         _libraryManager = libraryManager;
         _logger = logger;
@@ -39,6 +45,8 @@ public class BIFGenerationTask : IScheduledTask
         _appPaths = appPaths;
         _libraryMonitor = libraryMonitor;
         _localization = localization;
+        _mediaEncoder = mediaEncoder;
+        _configurationManager = configurationManager;
     }
 
     /// <inheritdoc />
@@ -90,7 +98,7 @@ public class BIFGenerationTask : IScheduledTask
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                await new VideoProcessor(_loggerFactory.CreateLogger<VideoProcessor>(), _fileSystem, _appPaths, _libraryMonitor)
+                await new VideoProcessor(_loggerFactory, _loggerFactory.CreateLogger<VideoProcessor>(), _mediaEncoder, _configurationManager, _fileSystem, _appPaths, _libraryMonitor)
                     .Run(item, cancellationToken).ConfigureAwait(false);
             }
             catch (OperationCanceledException)

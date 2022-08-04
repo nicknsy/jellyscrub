@@ -1,4 +1,4 @@
-﻿using MediaBrowser.Common.Configuration;
+using MediaBrowser.Common.Configuration;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.Movies;
 using MediaBrowser.Controller.Entities.TV;
@@ -8,6 +8,8 @@ using MediaBrowser.Model.IO;
 using MediaBrowser.Model.Entities;
 using Microsoft.Extensions.Logging;
 using Nick.Plugin.Jellyscrub.Drawing;
+using MediaBrowser.Controller.MediaEncoding;
+using MediaBrowser.Controller.Configuration;
 
 namespace Nick.Plugin.Jellyscrub.Providers;
 
@@ -28,19 +30,25 @@ public class BIFMetadataProvider : ICustomMetadataProvider<Episode>,
     private readonly IFileSystem _fileSystem;
     private readonly IApplicationPaths _appPaths;
     private readonly ILibraryMonitor _libraryMonitor;
+    private readonly IMediaEncoder _mediaEncoder;
+    private readonly IServerConfigurationManager _configurationManager;
 
     public BIFMetadataProvider(
         ILogger<BIFMetadataProvider> logger,
         ILoggerFactory loggerFactory,
         IFileSystem fileSystem,
         IApplicationPaths appPaths,
-        ILibraryMonitor libraryMonitor)
+        ILibraryMonitor libraryMonitor,
+        IMediaEncoder mediaEncoder,
+        IServerConfigurationManager configurationManager)
     {
         _logger = logger;
         _loggerFactory = loggerFactory;
         _fileSystem = fileSystem;
         _appPaths = appPaths;
         _libraryMonitor = libraryMonitor;
+        _mediaEncoder = mediaEncoder;
+        _configurationManager = configurationManager;
     }
 
     /// <inheritdoc />
@@ -145,7 +153,7 @@ public class BIFMetadataProvider : ICustomMetadataProvider<Episode>,
 
         if (JellyscrubPlugin.Instance!.Configuration.ExtractionDuringLibraryScan)
         {
-            await new VideoProcessor(_loggerFactory.CreateLogger<VideoProcessor>(), _fileSystem, _appPaths, _libraryMonitor)
+            await new VideoProcessor(_loggerFactory, _loggerFactory.CreateLogger<VideoProcessor>(), _mediaEncoder, _configurationManager, _fileSystem, _appPaths, _libraryMonitor)
                 .Run(item, cancellationToken).ConfigureAwait(false);
         }
 

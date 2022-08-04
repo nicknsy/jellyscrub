@@ -1,4 +1,5 @@
-﻿using MediaBrowser.Model.Plugins;
+using System.Diagnostics;
+using MediaBrowser.Model.Plugins;
 
 namespace Nick.Plugin.Jellyscrub.Configuration;
 
@@ -38,6 +39,12 @@ public class PluginConfiguration : BasePluginConfiguration
     public bool InjectClientScript { get; set; } = true;
 
     /// <summary>
+    /// Whether or not the plugin should style the sliderBubble elements.
+    /// default = true
+    /// </summary>
+    public bool StyleTrickplayContainer { get; set; } = true;
+
+    /// <summary>
     /// Interval, in ms, between each new trickplay image.
     /// default = 10000
     /// </summary>
@@ -48,4 +55,16 @@ public class PluginConfiguration : BasePluginConfiguration
     /// default = { 320 }
     /// </summary>
     public HashSet<int> WidthResolutions { get; set; } = new HashSet<int> { 320 };
+
+    /// <summary>
+    /// The process priority of the ffmpeg .bif generation process.
+    /// </summary>
+    public ProcessPriorityClass ProcessPriority { get; set; } = ProcessPriorityClass.Normal;
+
+    /// <summary>
+    /// Set the number of threads to be used by ffmpeg.
+    /// -1 = use default from jellyfin
+    /// 0 = default used by ffmpeg
+    /// </summary>
+    public int ProcessThreads { get; set; } = -1;
 }

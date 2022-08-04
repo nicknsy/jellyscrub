@@ -1,4 +1,5 @@
-﻿const MANIFEST_ENDPOINT = '/Trickplay/{itemId}/GetManifest';
+const JELLYSCRUB_GUID = 'a84a949d-4b73-4099-aacb-8341b4da17ba';
+const MANIFEST_ENDPOINT = '/Trickplay/{itemId}/GetManifest';
 const BIF_ENDPOINT = '/Trickplay/{itemId}/{width}/GetBIF';
 const RETRY_INTERVAL = 60_000;  // ms (1 minute)
 
@@ -43,26 +44,32 @@ function info(msg) {
 }
 
 /*
+ * Get config values
+ */
+
+// -- ApiClient hasn't loaded by this point... :(
+// -- Also needs to go in async function
+//const jellyscrubConfig = await ApiClient.getPluginConfiguration(JELLYSCRUB_GUID);
+//let STYLE_TRICKPLAY_CONTAINER = jellyscrubConfig.StyleTrickplayContainer ?? true;
+let STYLE_TRICKPLAY_CONTAINER = true;
+
+/*
  * Inject style to be used for slider bubble popup
  */
 
-let jellyscrubStyle = document.createElement('style');
-jellyscrubStyle.textContent = '.jellyscrubThumbText {margin: 0;}';
-document.body.insertBefore(jellyscrubStyle, document.body.firstChild);
+if (STYLE_TRICKPLAY_CONTAINER) {
+    let jellyscrubStyle = document.createElement('style');
+    jellyscrubStyle.id = 'jellscrubStyle';
+    jellyscrubStyle.textContent += '.chapterThumbContainer {width: 15vw; overflow: hidden;}';
+    jellyscrubStyle.textContent += '.chapterThumb {width: 100%; display: block; height: unset; min-height: unset; min-width: unset;}';
+    jellyscrubStyle.textContent += '.chapterThumbTextContainer {position: relative; background: rgb(38, 38, 38);}';
+    jellyscrubStyle.textContent += '.chapterThumbText {margin: 0; opacity: unset; padding: unset;}';
+    document.body.appendChild(jellyscrubStyle);
+}
 
 /*
  * Code for updating and locking mediaSourceId and getBubbleHtml 
  */
-
-// Remove slider observer on page change
-/* Breaking preview on clicking subtitles, settings as it pushes ?dlg=dlgXXXXXXXXXXXXX
-addEventListener('popstate', (event) => {
-    if (sliderObserver) {
-        sliderObserver.disconnect();
-        sliderObserver = null;
-    }
-});
-*/
 
 // Grab MediaSourceId from jellyfin-web internal API calls
 const { fetch: originalFetch } = window;
@@ -152,7 +159,7 @@ function containerCallback(mutationList, observer) {
                     //hiddenSliderBubble.classList.add('jellyscrub-hide');
     
                     let customBubble = document.createElement('div');
-                    customBubble.classList.add('sliderBubble', 'jellyscrub-slider', 'hide');
+                    customBubble.classList.add('sliderBubble', 'hide');
     
                     let customThumbContainer = document.createElement('div');
                     customThumbContainer.classList.add('chapterThumbContainer');
@@ -160,13 +167,17 @@ function containerCallback(mutationList, observer) {
                     customThumbImg = document.createElement('img');
                     customThumbImg.classList.add('chapterThumb');
                     customThumbImg.src = 'data:,';
+                    // Fix for custom styles that set radius on EVERYTHING causing weird holes when both img and text container are rounded
+                    if (STYLE_TRICKPLAY_CONTAINER) customThumbImg.setAttribute('style', 'border-radius: unset !important;')
                     customThumbContainer.appendChild(customThumbImg);
 
                     let customChapterTextContainer = document.createElement('div');
                     customChapterTextContainer.classList.add('chapterThumbTextContainer');
+                    // Fix for custom styles that set radius on EVERYTHING causing weird holes when both img and text container are rounded
+                    if (STYLE_TRICKPLAY_CONTAINER) customChapterTextContainer.setAttribute('style', 'border-radius: unset !important;')
 
                     customChapterText = document.createElement('h2');
-                    customChapterText.classList.add('jellyscrubThumbText');
+                    customChapterText.classList.add('chapterThumbText');
                     customChapterText.textContent = '--:--';
                     customChapterTextContainer.appendChild(customChapterText);
     
@@ -189,7 +200,7 @@ function containerCallback(mutationList, observer) {
 };
 
 function sliderCallback(mutationList, observer) {
-    if (!trickplayData) return;
+    if (!customSliderBubble || !trickplayData) return;
 
     for (const mutation of mutationList) {
         switch(mutation.attributeName) {

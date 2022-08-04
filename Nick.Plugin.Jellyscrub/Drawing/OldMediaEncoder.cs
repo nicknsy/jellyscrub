@@ -1,4 +1,4 @@
-﻿using MediaBrowser.Common;
+using MediaBrowser.Common;
 using MediaBrowser.Common.Extensions;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Controller.MediaEncoding;
@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Globalization;
 using MediaBrowser.Controller.Configuration;
 using MediaBrowser.Model.IO;
+using Nick.Plugin.Jellyscrub.Configuration;
 
 namespace Nick.Plugin.Jellyscrub.Drawing;
 
@@ -20,28 +21,40 @@ public class OldMediaEncoder
     private readonly ILogger _logger;
     private readonly IMediaEncoder _mediaEncoder;
     private readonly IFileSystem _fileSystem;
+    private readonly IServerConfigurationManager _configurationManager;
 
-    private readonly SemaphoreSlim _thumbnailResourcePool = new(2, 2);
+    private readonly SemaphoreSlim _thumbnailResourcePool = new(1, 1);
     private readonly object _runningProcessesLock = new();
     private readonly List<ProcessWrapper> _runningProcesses = new();
 
     private string _ffmpegPath;
     private int _threads;
+    private readonly PluginConfiguration _config;
 
     public OldMediaEncoder(
-        ILogger<OldMediaEncoder> logger,
-        IMediaEncoder mediaEncoder,
-        IServerConfigurationManager configurationManager,
-        IFileSystem fileSystem)
+	    ILogger<OldMediaEncoder> logger,
+	    IMediaEncoder mediaEncoder,
+	    IServerConfigurationManager configurationManager,
+	    IFileSystem fileSystem)
     {
         _logger = logger;
         _mediaEncoder = mediaEncoder;
         _fileSystem = fileSystem;
+        _configurationManager = configurationManager;
 
-        var encodingConfig = configurationManager.GetEncodingOptions();
-        _mediaEncoder.SetFFmpegPath();
+        _config = JellyscrubPlugin.Instance!.Configuration;
+        var configThreads = _config.ProcessThreads;
+
+        var encodingConfig = _configurationManager.GetEncodingOptions();
         _ffmpegPath = _mediaEncoder.EncoderPath;
-        _threads = EncodingHelper.GetNumberOfThreads(null, encodingConfig, null);
+
+        if (string.IsNullOrWhiteSpace(_ffmpegPath))
+        {
+            _mediaEncoder.SetFFmpegPath();
+            _ffmpegPath = _mediaEncoder.EncoderPath;
+        }
+
+        _threads = configThreads == -1 ? EncodingHelper.GetNumberOfThreads(null, encodingConfig, null) : configThreads;
     }
 
     public async Task ExtractVideoImagesOnInterval(
@@ -53,18 +66,22 @@ public class OldMediaEncoder
             TimeSpan interval,
             string targetDirectory,
             string filenamePrefix,
-            int? maxWidth,
+            int maxWidth,
             CancellationToken cancellationToken)
     {
         var inputArgument = _mediaEncoder.GetInputArgument(inputFile, mediaSource);
 
         var vf = "-filter:v fps=1/" + interval.TotalSeconds.ToString(CultureInfo.InvariantCulture);
+        var maxWidthParam = maxWidth.ToString(CultureInfo.InvariantCulture);
 
-        if (maxWidth.HasValue)
+        vf += string.Format(CultureInfo.InvariantCulture, ",scale=min(iw\\,{0}):trunc(ow/dar/2)*2", maxWidthParam);
+
+        // HDR Software Tonemapping
+        if ((string.Equals(videoStream?.ColorTransfer, "smpte2084", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(videoStream?.ColorTransfer, "arib-std-b67", StringComparison.OrdinalIgnoreCase))
+            && _mediaEncoder.SupportsFilter("zscale"))
         {
-            var maxWidthParam = maxWidth.Value.ToString(CultureInfo.InvariantCulture);
-
-            vf += string.Format(CultureInfo.InvariantCulture, ",scale=min(iw\\,{0}):trunc(ow/dar/2)*2", maxWidthParam);
+            vf += ",zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0:peak=100,zscale=t=bt709:m=bt709,format=yuv420p";
         }
 
         Directory.CreateDirectory(targetDirectory);
@@ -158,6 +175,7 @@ public class OldMediaEncoder
     private void StartProcess(ProcessWrapper process)
     {
         process.Process.Start();
+        process.Process.PriorityClass = _config.ProcessPriority;
 
         lock (_runningProcessesLock)
         {
