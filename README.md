@@ -9,13 +9,14 @@ The trickplay data for a 1:30hr movie with 320x180 thumbnails only takes about 6
 
 <b>Abilities</b>
 * No buffering, even over proxies
+* <a href="https://github.com/nicknsy/jellyscrub/issues/22#issuecomment-1206847719">Works with desktop client manually</a>
 * Customize interval between new images
 * Generate trickplay files at multiple target resolutions
 * Generate on library scan, as a scheduled task, or whenever they are requested by the client
 * Option to save locally to media folder
 
 <b>Limitations</b>
-* Only works with web version of Jellyfin
+* Only works with web version of Jellyfin (see above for desktop support)
 * No options to limit libraries/media that have trickplay files generated
 
 ## Comparison ##
@@ -43,3 +44,4 @@ Jellyscrub [<b>SSL, Cloudflare Proxy</b>] (Default 10s Interval, 320px width):
 5. Clear your site cookies / local storage to get rid of the cached index file and receive a new one from the server.
 6. Change any configuration options, like whether to save in media folders over internal metadata folders.
 7. Run a scan (could take much longer depending on library size) or start watching a movie and the scrubbing preview should update in a few minutes.
+8. OPTIONAL: <a href="https://github.com/nicknsy/jellyscrub/issues/22#issuecomment-1206847719">See how to get it working on desktop client.</a>
