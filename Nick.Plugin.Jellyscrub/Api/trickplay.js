@@ -20,6 +20,7 @@ let customThumbImg = null;
 let customChapterText = null;
 
 let osdPositionSlider = null;
+let osdOriginalBubbleHtml = null;
 let osdGetBubbleHtml = null;
 let osdGetBubbleHtmlLock = false;
 
@@ -114,6 +115,8 @@ function loadVideoView() {
         osdPositionSlider = slider;
         debug(`Found OSD slider: ${osdPositionSlider}`);
 
+        osdOriginalBubbleHtml = osdPositionSlider.getBubbleHtml;
+
         Object.defineProperty(osdPositionSlider, 'getBubbleHtml', {
             get() { return osdGetBubbleHtml },
             set(value) { if (!osdGetBubbleHtmlLock) osdGetBubbleHtml = value; },
@@ -184,6 +187,7 @@ function unloadVideoView() {
     customChapterText = null;
 
     osdPositionSlider = null;
+    osdOriginalBubbleHtml = null;
     osdGetBubbleHtml = null;
     osdGetBubbleHtmlLock = false;
     // Clear old values
@@ -203,6 +207,8 @@ window.fetch = async (...args) => {
     let urlParts = url.pathname.split('/');
     let isPlaybackInfo = urlParts.pop() == 'PlaybackInfo';
 
+    const response = await originalFetch(resource, config);
+
     if (isPlaybackInfo) {
         mediaSourceId = new URLSearchParams(url.search).get('MediaSourceId');
         mediaSourceId = mediaSourceId ?? urlParts.pop();
@@ -212,16 +218,16 @@ window.fetch = async (...args) => {
         let auth = config.headers['X-Emby-Authorization'];
         embyAuthValue = auth ?? '';
         debug(`Using Emby auth value: ${embyAuthValue}`);
-    }
 
-    const response = await originalFetch(resource, config);
-
-    if (isPlaybackInfo) {
         response.clone().json().then((data) => {
             for (const source of data.MediaSources) {
                 if (source.Id == mediaSourceId) {
                     mediaRuntimeTicks = source.RunTimeTicks;
                     debug(`Found media runtime of ${mediaRuntimeTicks} ticks`);
+
+                    debug(`Attempting to change trickplay data to source ${mediaSourceId}`);
+                    changeCurrentMedia();
+
                     break;
                 } else {
                     debug(`Runtime -- found media source ID ${source.Id} but main source is ${mediaSourceId}`);
@@ -232,6 +238,23 @@ window.fetch = async (...args) => {
 
     return response;
 };
+
+function changeCurrentMedia() {
+    // Reset trickplay-related variables
+    hasFailed = false;
+    trickplayManifest = null;
+    trickplayData = null;
+    currentTrickplayFrame = null;
+
+    // Set bubble html back to default
+    if (osdOriginalBubbleHtml) osdGetBubbleHtml = osdOriginalBubbleHtml;
+    osdGetBubbleHtmlLock = false;
+
+    // Main execution will first by triggered by the load video view method, but later (e.g. in the case of TV series)
+    // will be triggered by the playback request interception
+    if (!hasFailed && !trickplayData && mediaSourceId && mediaRuntimeTicks && embyAuthValue
+        && osdPositionSlider && hiddenSliderBubble && customSliderBubble) mainScriptExecution();
+}
 
 /*
  * Indexed UInt8Array
