@@ -1,6 +1,8 @@
+let basePath = document.currentScript?.getAttribute('src')?.replace('Trickplay/ClientScript', '') ?? '/';
+
 const JELLYSCRUB_GUID = 'a84a949d-4b73-4099-aacb-8341b4da17ba';
-const MANIFEST_ENDPOINT = '/Trickplay/{itemId}/GetManifest';
-const BIF_ENDPOINT = '/Trickplay/{itemId}/{width}/GetBIF';
+const MANIFEST_ENDPOINT = basePath + 'Trickplay/{itemId}/GetManifest';
+const BIF_ENDPOINT = basePath + 'Trickplay/{itemId}/{width}/GetBIF';
 const RETRY_INTERVAL = 60_000;  // ms (1 minute)
 
 let mediaSourceId = null;
@@ -19,9 +21,8 @@ let customSliderBubble = null;
 let customThumbImg = null;
 let customChapterText = null;
 
-let sliderObserver = null;
-
 let osdPositionSlider = null;
+let osdOriginalBubbleHtml = null;
 let osdGetBubbleHtml = null;
 let osdGetBubbleHtmlLock = false;
 
@@ -68,142 +69,32 @@ if (STYLE_TRICKPLAY_CONTAINER) {
 }
 
 /*
- * Code for updating and locking mediaSourceId and getBubbleHtml 
+ * Monitor current page to be used for trickplay load/unload
  */
 
-// Grab MediaSourceId from jellyfin-web internal API calls
-const { fetch: originalFetch } = window;
+let videoPath = 'playback/video/index.html';
+let previousRoutePath = null;
 
-window.fetch = async (...args) => {
-    let [resource, config] = args;
+document.addEventListener('viewshow', function () {
+    let currentRoutePath = Emby.Page.currentRouteInfo.route.path;
 
-    let url = new URL(resource);
-    let urlParts = url.pathname.split('/');
-    let isPlaybackInfo = urlParts.pop() == 'PlaybackInfo';
-
-    if (isPlaybackInfo) {
-        // Clear old values
-        clearTimeout(mainScriptExecution);
-
-        mediaSourceId = null;
-        mediaRuntimeTicks = null;
-    
-        embyAuthValue = '';
-    
-        hasFailed = false;
-        trickplayManifest = null;
-        trickplayData = null;
-        currentTrickplayFrame = null;
-
-        hiddenSliderBubble = null;
-        customSliderBubble = null;
-        customThumbImg = null;
-        customChapterText = null;
-
-        sliderObserver = null;
-    
-        osdPositionSlider = null;
-        osdGetBubbleHtml = null;
-        osdGetBubbleHtmlLock = false;
-        // Clear old values
-
-        mediaSourceId = new URLSearchParams(url.search).get('MediaSourceId');
-        mediaSourceId = mediaSourceId ? mediaSourceId : urlParts.pop();
-
-        debug(`Found media source ID: ${mediaSourceId}`);
-
-        let auth = config.headers['X-Emby-Authorization'];
-        embyAuthValue = auth ? auth : '';
-        debug(`Using Emby auth value: ${embyAuthValue}`);
+    if (currentRoutePath == videoPath) {
+        loadVideoView();
+    } else if (previousRoutePath == videoPath) {
+        unloadVideoView();
     }
 
-    const response = await originalFetch(resource, config);
+    previousRoutePath = currentRoutePath;
+});
 
-    if (isPlaybackInfo) {
-        response.clone().json().then((data) => {
-            for (const source of data.MediaSources) {
-                if (source.Id == mediaSourceId) {
-                    mediaRuntimeTicks = source.RunTimeTicks;
-                    debug(`Found media runtime of ${mediaRuntimeTicks} ticks`);
-                    break;
-                }
-            }
-        });
-    }
-
-    return response;
-};
-
-// Observe when video player slider is added to know when playback starts
-// and to set/lock getBubbleHtml function
-function containerCallback(mutationList, observer) {
-    for (const mutation of mutationList) {
-        if (mutation.target.classList.contains('mdl-slider-container')) {
-            debug(`Found OSD container: ${mutation.target}`);
-
-            let slider = mutation.target.getElementsByClassName('osdPositionSlider')[0];
-            if (slider) {
-                osdPositionSlider = slider;
-                debug(`Found OSD slider: ${osdPositionSlider}`);
-
-                Object.defineProperty(osdPositionSlider, 'getBubbleHtml', {
-                    get() { return osdGetBubbleHtml },
-                    set(value) { if (!osdGetBubbleHtmlLock) osdGetBubbleHtml = value; },
-                    configurable: true,
-                    enumerable: true
-                });
-
-                let bubble = mutation.target.getElementsByClassName('sliderBubble')[0];
-                if (bubble) {
-                    hiddenSliderBubble = bubble;
-                    //hiddenSliderBubble.classList.add('jellyscrub-hide');
-    
-                    let customBubble = document.createElement('div');
-                    customBubble.classList.add('sliderBubble', 'hide');
-    
-                    let customThumbContainer = document.createElement('div');
-                    customThumbContainer.classList.add('chapterThumbContainer');
-    
-                    customThumbImg = document.createElement('img');
-                    customThumbImg.classList.add('chapterThumb');
-                    customThumbImg.src = 'data:,';
-                    // Fix for custom styles that set radius on EVERYTHING causing weird holes when both img and text container are rounded
-                    if (STYLE_TRICKPLAY_CONTAINER) customThumbImg.setAttribute('style', 'border-radius: unset !important;')
-                    customThumbContainer.appendChild(customThumbImg);
-
-                    let customChapterTextContainer = document.createElement('div');
-                    customChapterTextContainer.classList.add('chapterThumbTextContainer');
-                    // Fix for custom styles that set radius on EVERYTHING causing weird holes when both img and text container are rounded
-                    if (STYLE_TRICKPLAY_CONTAINER) customChapterTextContainer.setAttribute('style', 'border-radius: unset !important;')
-
-                    customChapterText = document.createElement('h2');
-                    customChapterText.classList.add('chapterThumbText');
-                    customChapterText.textContent = '--:--';
-                    customChapterTextContainer.appendChild(customChapterText);
-    
-                    customThumbContainer.appendChild(customChapterTextContainer);
-                    customBubble.appendChild(customThumbContainer);
-                    customSliderBubble = hiddenSliderBubble.parentElement.appendChild(customBubble);
-
-                    let sliderConfig = { attributeFilter: ['style', 'class'] };
-                    sliderObserver = new MutationObserver(sliderCallback);
-                    sliderObserver.observe(hiddenSliderBubble, sliderConfig); 
-                }
-    
-                // Don't know if this will be triggered by the fetch intercept first or the observer
-                // Don't run main script if there is already trickplay data
-                if (!hasFailed && !trickplayData && mediaSourceId && mediaRuntimeTicks && embyAuthValue
-                    && osdPositionSlider && hiddenSliderBubble && customSliderBubble) mainScriptExecution();
-            }
-        }
-    }
-};
+let sliderConfig = { attributeFilter: ['style', 'class'] };
+let sliderObserver = new MutationObserver(sliderCallback);
 
 function sliderCallback(mutationList, observer) {
     if (!customSliderBubble || !trickplayData) return;
 
     for (const mutation of mutationList) {
-        switch(mutation.attributeName) {
+        switch (mutation.attributeName) {
             case 'style':
                 customSliderBubble.setAttribute('style', mutation.target.getAttribute('style'));
                 break;
@@ -218,10 +109,154 @@ function sliderCallback(mutationList, observer) {
     }
 }
 
-let targetObserveNode = document.getElementsByClassName('mainAnimatedPages')[0];
-let containerConfig = { childList: true, subtree: true };
-let containerObserver = new MutationObserver(containerCallback);
-containerObserver.observe(targetObserveNode, containerConfig);
+function loadVideoView() {
+    debug('!!!!!!! Loading video view !!!!!!!');
+
+    let slider = document.getElementsByClassName('osdPositionSlider')[0];
+    if (slider) {
+        osdPositionSlider = slider;
+        debug(`Found OSD slider: ${osdPositionSlider}`);
+
+        osdOriginalBubbleHtml = osdPositionSlider.getBubbleHtml;
+
+        Object.defineProperty(osdPositionSlider, 'getBubbleHtml', {
+            get() { return osdGetBubbleHtml },
+            set(value) { if (!osdGetBubbleHtmlLock) osdGetBubbleHtml = value; },
+            configurable: true,
+            enumerable: true
+        });
+
+        let bubble = document.getElementsByClassName('sliderBubble')[0];
+        if (bubble) {
+            hiddenSliderBubble = bubble;
+
+            let customBubble = document.createElement('div');
+            customBubble.classList.add('sliderBubble', 'hide');
+
+            let customThumbContainer = document.createElement('div');
+            customThumbContainer.classList.add('chapterThumbContainer');
+
+            customThumbImg = document.createElement('img');
+            customThumbImg.classList.add('chapterThumb');
+            customThumbImg.src = 'data:,';
+            // Fix for custom styles that set radius on EVERYTHING causing weird holes when both img and text container are rounded
+            if (STYLE_TRICKPLAY_CONTAINER) customThumbImg.setAttribute('style', 'border-radius: unset !important;')
+            customThumbContainer.appendChild(customThumbImg);
+
+            let customChapterTextContainer = document.createElement('div');
+            customChapterTextContainer.classList.add('chapterThumbTextContainer');
+            // Fix for custom styles that set radius on EVERYTHING causing weird holes when both img and text container are rounded
+            if (STYLE_TRICKPLAY_CONTAINER) customChapterTextContainer.setAttribute('style', 'border-radius: unset !important;')
+
+            customChapterText = document.createElement('h2');
+            customChapterText.classList.add('chapterThumbText');
+            customChapterText.textContent = '--:--';
+            customChapterTextContainer.appendChild(customChapterText);
+
+            customThumbContainer.appendChild(customChapterTextContainer);
+            customBubble.appendChild(customThumbContainer);
+            customSliderBubble = hiddenSliderBubble.parentElement.appendChild(customBubble);
+
+            sliderObserver.observe(hiddenSliderBubble, sliderConfig);
+        }
+
+        // Main execution will first by triggered by the load video view method, but later (e.g. in the case of TV series)
+        // will be triggered by the playback request interception
+        if (!hasFailed && !trickplayData && mediaSourceId && mediaRuntimeTicks && embyAuthValue
+            && osdPositionSlider && hiddenSliderBubble && customSliderBubble) mainScriptExecution();
+    }
+}
+
+function unloadVideoView() {
+    debug('!!!!!!! Unloading video view !!!!!!!');
+
+    // Clear old values
+    clearTimeout(mainScriptExecution);
+
+    mediaSourceId = null;
+    mediaRuntimeTicks = null;
+
+    embyAuthValue = '';
+
+    hasFailed = false;
+    trickplayManifest = null;
+    trickplayData = null;
+    currentTrickplayFrame = null;
+
+    hiddenSliderBubble = null;
+    customSliderBubble = null;
+    customThumbImg = null;
+    customChapterText = null;
+
+    osdPositionSlider = null;
+    osdOriginalBubbleHtml = null;
+    osdGetBubbleHtml = null;
+    osdGetBubbleHtmlLock = false;
+    // Clear old values
+}
+
+/*
+ * Update mediaSourceId, runtime, and emby auth data
+ */
+
+// Override fetch method used by jellyfin-web internal API calls
+const { fetch: originalFetch } = window;
+
+window.fetch = async (...args) => {
+    let [resource, config] = args;
+
+    let url = new URL(resource);
+    let urlParts = url.pathname.split('/');
+    let isPlaybackInfo = urlParts.pop() == 'PlaybackInfo';
+
+    const response = await originalFetch(resource, config);
+
+    if (isPlaybackInfo) {
+        mediaSourceId = new URLSearchParams(url.search).get('MediaSourceId');
+        mediaSourceId = mediaSourceId ?? urlParts.pop();
+
+        debug(`Found media source ID: ${mediaSourceId}`);
+
+        let auth = config.headers['X-Emby-Authorization'];
+        embyAuthValue = auth ?? '';
+        debug(`Using Emby auth value: ${embyAuthValue}`);
+
+        response.clone().json().then((data) => {
+            for (const source of data.MediaSources) {
+                if (source.Id == mediaSourceId) {
+                    mediaRuntimeTicks = source.RunTimeTicks;
+                    debug(`Found media runtime of ${mediaRuntimeTicks} ticks`);
+
+                    debug(`Attempting to change trickplay data to source ${mediaSourceId}`);
+                    changeCurrentMedia();
+
+                    break;
+                } else {
+                    debug(`Runtime -- found media source ID ${source.Id} but main source is ${mediaSourceId}`);
+                }
+            }
+        });
+    }
+
+    return response;
+};
+
+function changeCurrentMedia() {
+    // Reset trickplay-related variables
+    hasFailed = false;
+    trickplayManifest = null;
+    trickplayData = null;
+    currentTrickplayFrame = null;
+
+    // Set bubble html back to default
+    if (osdOriginalBubbleHtml) osdGetBubbleHtml = osdOriginalBubbleHtml;
+    osdGetBubbleHtmlLock = false;
+
+    // Main execution will first by triggered by the load video view method, but later (e.g. in the case of TV series)
+    // will be triggered by the playback request interception
+    if (!hasFailed && !trickplayData && mediaSourceId && mediaRuntimeTicks && embyAuthValue
+        && osdPositionSlider && hiddenSliderBubble && customSliderBubble) mainScriptExecution();
+}
 
 /*
  * Indexed UInt8Array
@@ -340,6 +375,12 @@ function getTrickplayFrameUrl(playerTimestamp, data) {
 
 function manifestLoad() {
     if (this.status == 200) {
+        if (!this.response) {
+            error(`Received 200 status from manifest endpoint but a null response. (RESPONSE URL: ${this.responseURL})`);
+            hasFailed = true;
+            return;
+        }
+
         trickplayManifest = this.response;
         setTimeout(mainScriptExecution, 0); // Hacky way of avoiding using fetch/await by returning then calling function again
     } else if (this.status == 503) {
@@ -353,6 +394,12 @@ function manifestLoad() {
 
 function bifLoad() {
     if (this.status == 200) {
+        if (!this.response) {
+            error(`Received 200 status from BIF endpoint but a null response. (RESPONSE URL: ${this.responseURL})`);
+            hasFailed = true;
+            return;
+        }
+
         trickplayData = trickplayDecode(this.response);
         setTimeout(mainScriptExecution, 0); // Hacky way of avoiding using fetch/await by returning then calling function again
     } else if (this.status == 503) {
