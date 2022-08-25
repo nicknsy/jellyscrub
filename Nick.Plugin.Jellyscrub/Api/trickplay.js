@@ -373,6 +373,12 @@ function getTrickplayFrameUrl(playerTimestamp, data) {
 
 function manifestLoad() {
     if (this.status == 200) {
+        if (!this.response) {
+            error(`Received 200 status from manifest endpoint but a null response. (RESPONSE URL: ${this.responseURL})`);
+            hasFailed = true;
+            return;
+        }
+
         trickplayManifest = this.response;
         setTimeout(mainScriptExecution, 0); // Hacky way of avoiding using fetch/await by returning then calling function again
     } else if (this.status == 503) {
@@ -386,6 +392,12 @@ function manifestLoad() {
 
 function bifLoad() {
     if (this.status == 200) {
+        if (!this.response) {
+            error(`Received 200 status from BIF endpoint but a null response. (RESPONSE URL: ${this.responseURL})`);
+            hasFailed = true;
+            return;
+        }
+
         trickplayData = trickplayDecode(this.response);
         setTimeout(mainScriptExecution, 0); // Hacky way of avoiding using fetch/await by returning then calling function again
     } else if (this.status == 503) {
