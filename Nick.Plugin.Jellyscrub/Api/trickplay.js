@@ -1,6 +1,8 @@
+let basePath = document.currentScript?.getAttribute('src')?.replace('Trickplay/ClientScript', '') ?? '/';
+
 const JELLYSCRUB_GUID = 'a84a949d-4b73-4099-aacb-8341b4da17ba';
-const MANIFEST_ENDPOINT = '/Trickplay/{itemId}/GetManifest';
-const BIF_ENDPOINT = '/Trickplay/{itemId}/{width}/GetBIF';
+const MANIFEST_ENDPOINT = basePath + 'Trickplay/{itemId}/GetManifest';
+const BIF_ENDPOINT = basePath + 'Trickplay/{itemId}/{width}/GetBIF';
 const RETRY_INTERVAL = 60_000;  // ms (1 minute)
 
 let mediaSourceId = null;

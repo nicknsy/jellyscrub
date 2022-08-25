@@ -1,5 +1,7 @@
+using System.Text.RegularExpressions;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
+using MediaBrowser.Controller.Configuration;
 using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Serialization;
 using Microsoft.Extensions.Logging;
@@ -24,13 +26,11 @@ public class JellyscrubPlugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// <summary>
     /// Initializes a new instance of the <see cref="JellyscrubPlugin"/> class.
     /// </summary>
-    /// <param name="applicationPaths">Instance of the <see cref="IApplicationPaths"/> interface.</param>
-    /// <param name="xmlSerializer">Instance of the <see cref="IXmlSerializer"/> interface.</param>
-    /// <param name="logger">Instance of the <see cref="ILogger"/> interface.</param>
     public JellyscrubPlugin(
         IApplicationPaths applicationPaths,
         IXmlSerializer xmlSerializer,
-        ILogger<JellyscrubPlugin> logger)
+        ILogger<JellyscrubPlugin> logger,
+        IServerConfigurationManager configurationManager)
         : base(applicationPaths, xmlSerializer)
     {
         Instance = this;
@@ -43,14 +43,39 @@ public class JellyscrubPlugin : BasePlugin<PluginConfiguration>, IHasWebPages
                 if (File.Exists(indexFile))
                 {
                     string indexContents = File.ReadAllText(indexFile);
-                    if (!indexContents.Contains("/Trickplay/ClientScript"))
+                    string basePath = "";
+
+                    // Get base path from network config
+                    try
+                    {
+                        var networkConfig = configurationManager.GetConfiguration("network");
+                        var configType = networkConfig.GetType();
+                        var basePathField = configType.GetProperty("BaseUrl");
+                        var confBasePath = basePathField?.GetValue(networkConfig)?.ToString()?.Trim('/');
+
+                        if (!string.IsNullOrEmpty(confBasePath)) basePath = "/" + confBasePath.ToString();
+                    }
+                    catch (Exception e)
+                    {
+                        logger.LogError("Unable to get base path from config, using '/': {0}", e);
+                    }
+
+                    // Don't run if script already exists
+                    string scriptReplace = "<script plugin=\"Jellyscrub\".*?></script>";
+                    string scriptElement = string.Format("<script plugin=\"Jellyscrub\" version=\"1.0.0.0\" src=\"{0}/Trickplay/ClientScript\"></script>", basePath);
+
+                    if (!indexContents.Contains(scriptElement))
                     {
                         logger.LogInformation("Attempting to inject trickplay script code in {0}", indexFile);
 
+                        // Replace old Jellyscrub scrips
+                        indexContents = Regex.Replace(indexContents, scriptReplace, "");
+
+                        // Insert script last in body
                         int bodyClosing = indexContents.LastIndexOf("</body>");
                         if (bodyClosing != -1)
                         {
-                            indexContents = indexContents.Insert(bodyClosing, "<script plugin=\"Jellyscrub\" version=\"1.0.0.0\" src=\"/Trickplay/ClientScript\"></script>");
+                            indexContents = indexContents.Insert(bodyClosing, scriptElement);
 
                             try
                             {
