@@ -118,6 +118,7 @@ function loadVideoView() {
         debug(`Found OSD slider: ${osdPositionSlider}`);
 
         osdOriginalBubbleHtml = osdPositionSlider.getBubbleHtml;
+        osdGetBubbleHtml = osdOriginalBubbleHtml;
 
         Object.defineProperty(osdPositionSlider, 'getBubbleHtml', {
             get() { return osdGetBubbleHtml },
