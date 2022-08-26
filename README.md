@@ -9,14 +9,13 @@ The trickplay data for a 1:30hr movie with 320x180 thumbnails only takes about 6
 
 <b>Abilities</b>
 * No buffering, even over proxies
-* <a href="https://github.com/nicknsy/jellyscrub/issues/22#issuecomment-1206847719">Works with desktop client manually</a>
+* Works with web, android, ios client out of the box -- and <a href="https://github.com/nicknsy/jellyscrub/issues/22#issuecomment-1206847719">with desktop client manually</a>
 * Customize interval between new images
 * Generate trickplay files at multiple target resolutions
 * Generate on library scan, as a scheduled task, or whenever they are requested by the client
 * Option to save locally to media folder
 
 <b>Limitations</b>
-* Only works with web version of Jellyfin (see above for desktop support)
 * No options to limit libraries/media that have trickplay files generated
 
 ## Comparison ##
@@ -28,6 +27,10 @@ Jellyfin Default [<b>SSL, Cloudflare Proxy</b>] (Minimum of 5m Interval):
 Jellyscrub [<b>SSL, Cloudflare Proxy</b>] (Default 10s Interval, 320px width):
 <br/>
 <img src="https://github.com/nicknsy/jellyscrub/raw/main/logo/jellyscrub-cloudflare.gif" width="500">
+
+Jellyscrub on iOS [<b>Single Screenshot, Functions Same as Above</b>]:
+<br/>
+<img src="https://github.com/nicknsy/jellyscrub/raw/main/logo/jellyscrub-ios.jpg" width="500">
 
 ## Installation ##
 <b>NOTE: The client script will fail to inject automatically into the jellyfin-web server if there is a difference in permission between the owner of the web files (root, or www-data, etc.) and the executor of the main jellyfin-server. This often happens because...</b>
