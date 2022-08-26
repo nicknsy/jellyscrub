@@ -96,6 +96,7 @@
                     <div class="inputContainer">
                         <input is="emby-input" type="number" id="processThreads" pattern="[0-9]*" required="" label="FFmpeg Threads">
                         <div class="fieldDescription">The number of threads to pass to the "-threads" argument of ffmpeg.</div>
+                        <div class="fieldDescription">Applies to both input and output of ffmpeg, so the total threads used will be <strong>this * 2</strong>.</div>
                         <div class="fieldDescription"><strong>-1:</strong> The option "-1" will use the same amount of threads as configured in Jellyfin, usually "0".</div>
                         <div class="fieldDescription"><strong>0:</strong> The option "0" is the default for ffmpeg, utilizing as many threads/cores as possible.</div>
                     </div>
