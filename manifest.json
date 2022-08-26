@@ -9,6 +9,14 @@
         "imageUrl": "https://raw.githubusercontent.com/nicknsy/jellyscrub/main/logo/logo.png",
         "versions": [
             {
+                "version": "1.0.0.6",
+                "changelog": "- add non-blocking option for generations triggered by library scans\n- fix threads option\n- bug fixes",
+                "targetAbi": "10.8.0.0",
+                "sourceUrl": "https://github.com/nicknsy/jellyscrub/releases/download/1.0.0.6/Jellyscrub-v1.0.0.6.zip",
+                "checksum": "dd7bd697ae4cd0dc8209cc6a470fcba3",
+                "timestamp": "2022-08-26T20:37:00Z"
+            },
+            {
                 "version": "1.0.0.5",
                 "changelog": "- fix TV shows not having trickplay after first episode\n- handle Jellyfin base path configuration",
                 "targetAbi": "10.8.0.0",
