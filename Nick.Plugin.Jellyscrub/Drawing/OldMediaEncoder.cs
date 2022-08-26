@@ -87,7 +87,7 @@ public class OldMediaEncoder
         Directory.CreateDirectory(targetDirectory);
         var outputPath = Path.Combine(targetDirectory, filenamePrefix + "%08d.jpg");
 
-        var args = string.Format(CultureInfo.InvariantCulture, "-i {0} -threads {3} -v quiet {2} -f image2 \"{1}\"", inputArgument, outputPath, vf, _threads);
+        var args = string.Format(CultureInfo.InvariantCulture, "-threads {3} -i {0} -threads {4} -v quiet {2} -f image2 \"{1}\"", inputArgument, outputPath, vf, _threads, _threads);
 
         if (!string.IsNullOrWhiteSpace(container))
         {
@@ -175,14 +175,6 @@ public class OldMediaEncoder
     private void StartProcess(ProcessWrapper process)
     {
         process.Process.Start();
-        try
-        {
-            process.Process.PriorityClass = _config.ProcessPriority;
-        }
-        catch (Exception e)
-        {
-            _logger.LogError("Unable to set process priority: {0}", e.Message);
-        }
 
         lock (_runningProcessesLock)
         {

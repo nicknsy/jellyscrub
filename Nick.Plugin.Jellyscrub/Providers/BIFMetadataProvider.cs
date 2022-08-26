@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Nick.Plugin.Jellyscrub.Drawing;
 using MediaBrowser.Controller.MediaEncoding;
 using MediaBrowser.Controller.Configuration;
+using Nick.Plugin.Jellyscrub.Configuration;
 
 namespace Nick.Plugin.Jellyscrub.Providers;
 
@@ -146,15 +147,27 @@ public class BIFMetadataProvider : ICustomMetadataProvider<Episode>,
 
     private async Task<ItemUpdateType> FetchInternal(Video item, MetadataRefreshOptions options, CancellationToken cancellationToken)
     {
+        var config = JellyscrubPlugin.Instance!.Configuration;
+
         if (!EnableForItem(item, _fileSystem))
         {
             return ItemUpdateType.None;
         }
 
-        if (JellyscrubPlugin.Instance!.Configuration.ExtractionDuringLibraryScan)
+        if (config.ExtractionDuringLibraryScan)
         {
-            await new VideoProcessor(_loggerFactory, _loggerFactory.CreateLogger<VideoProcessor>(), _mediaEncoder, _configurationManager, _fileSystem, _appPaths, _libraryMonitor)
-                .Run(item, cancellationToken).ConfigureAwait(false);
+            var videoProcessor = new VideoProcessor(_loggerFactory, _loggerFactory.CreateLogger<VideoProcessor>(), _mediaEncoder, _configurationManager, _fileSystem, _appPaths, _libraryMonitor);
+
+            switch (config.ScanBehavior)
+            {
+                case MetadataScanBehavior.Blocking:
+                    await videoProcessor.Run(item, cancellationToken).ConfigureAwait(false);
+                    break;
+                default:
+                case MetadataScanBehavior.NonBlocking:
+                    videoProcessor.Run(item, cancellationToken);
+                    break;
+            }
         }
 
         // The core doesn't need to trigger any save operations over this
