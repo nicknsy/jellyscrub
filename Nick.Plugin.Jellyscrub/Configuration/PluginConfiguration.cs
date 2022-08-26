@@ -62,6 +62,14 @@ public class PluginConfiguration : BasePluginConfiguration
     public ProcessPriorityClass ProcessPriority { get; set; } = ProcessPriorityClass.Normal;
 
     /// <summary>
+    /// The behavior for the metadata provider used on library scan/update.
+    /// Blocking - starts generations, only returns once complete
+    /// NonBlocking - starts generation, returns immediately
+    /// default = NonBlocking
+    /// </summary>
+    public MetadataScanBehavior ScanBehavior { get; set; } = MetadataScanBehavior.NonBlocking;
+
+    /// <summary>
     /// Set the number of threads to be used by ffmpeg.
     /// -1 = use default from jellyfin
     /// 0 = default used by ffmpeg

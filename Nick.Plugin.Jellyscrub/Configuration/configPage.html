@@ -34,6 +34,15 @@
                         </label>
                         <div class="fieldDescription checkboxFieldDescription">This will make trickplay files available sooner but will result in longer library scans. Trickplay files are also created during a scheduled task.</div>
                         <div class="fieldDescription checkboxFieldDescription">To configure the scheduled task, see <a is="emby-linkbutton" class="button-link" href="scheduledtasks.html">scheduled tasks</a>.</div>
+
+                        <div class="inputContainer">
+                            <select is="emby-select" id="scanBehavior" name="Scan Behavior" label="Scan Behavior">
+                                <option id="optNonBlocking" value="NonBlocking">Non Blocking - queues generation, then returns</option>
+                                <option id="optBlocking" value="Blocking">Blocking - queues generation, blocks scan until complete</option>
+                            </select>
+                            <div class="fieldDescription">The default behavior is non blocking, which will add media to the library before trickplay generation is done.</div>
+                            <div class="fieldDescription">Blocking will ensure trickplay files are generated before media is added to the library, but will make scans significantly longer.</div>
+                        </div>
                     </div>
 
                     <div class="checkboxContainer checkboxContainer-withDescription">
@@ -137,6 +146,7 @@
 
                         page.querySelector('#chkOnDemand').checked = config.OnDemandGeneration;
                         page.querySelector('#chkEnableDuringScan').checked = config.ExtractionDuringLibraryScan;
+                        page.querySelector('#scanBehavior').value = config.ScanBehavior;
                         page.querySelector('#chkSaveBifLocal').checked = config.LocalMediaFolderSaving;
                         page.querySelector('#chkInjectScript').checked = config.InjectClientScript;
                         // page.querySelector('#chkStyleTrickplayContainer').checked = config.StyleTrickplayContainer;
@@ -159,6 +169,7 @@
 
                         config.OnDemandGeneration = form.querySelector('#chkOnDemand').checked;
                         config.ExtractionDuringLibraryScan = form.querySelector('#chkEnableDuringScan').checked;
+                        config.ScanBehavior = form.querySelector('#scanBehavior').value;
                         config.LocalMediaFolderSaving = form.querySelector('#chkSaveBifLocal').checked;
                         config.InjectClientScript = form.querySelector('#chkInjectScript').checked;
                         // config.StyleTrickplayContainer = page.querySelector('#chkStyleTrickplayContainer').checked;
