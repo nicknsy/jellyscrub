@@ -27,6 +27,14 @@ public class PluginConfiguration : BasePluginConfiguration
     public bool ExtractionDuringLibraryScan { get; set; } = true;
 
     /// <summary>
+    /// The behavior for the metadata provider used on library scan/update.
+    /// Blocking - starts generations, only returns once complete
+    /// NonBlocking - starts generation, returns immediately
+    /// default = NonBlocking
+    /// </summary>
+    public MetadataScanBehavior ScanBehavior { get; set; } = MetadataScanBehavior.NonBlocking;
+
+    /// <summary>
     /// Whether to save BIFs in the same media folder as their corresponding video.
     /// default = false
     /// </summary>
@@ -55,19 +63,6 @@ public class PluginConfiguration : BasePluginConfiguration
     /// default = { 320 }
     /// </summary>
     public HashSet<int> WidthResolutions { get; set; } = new HashSet<int> { 320 };
-
-    /// <summary>
-    /// The process priority of the ffmpeg .bif generation process.
-    /// </summary>
-    public ProcessPriorityClass ProcessPriority { get; set; } = ProcessPriorityClass.Normal;
-
-    /// <summary>
-    /// The behavior for the metadata provider used on library scan/update.
-    /// Blocking - starts generations, only returns once complete
-    /// NonBlocking - starts generation, returns immediately
-    /// default = NonBlocking
-    /// </summary>
-    public MetadataScanBehavior ScanBehavior { get; set; } = MetadataScanBehavior.NonBlocking;
 
     /// <summary>
     /// Set the number of threads to be used by ffmpeg.

@@ -80,20 +80,6 @@
                     </div>
 
                     <div class="inputContainer">
-                        <select is="emby-select" id="processPriority" name="Process Priority" label="Process Priority">
-                            <!--<option id="optPriorityRealtime" value="Realtime">Realtime</option>-->
-                            <option id="optPriorityHigh" value="High">High</option>
-                            <option id="optPriorityAboveNormal" value="AboveNormal">Above Normal</option>
-                            <option id="optPriorityNormal" value="Normal">Normal</option>
-                            <option id="optPriorityBelowNormal" value="BelowNormal">Below Normal</option>
-                            <option id="optPriorityIdle" value="Idle">Idle</option>
-                        </select>
-                        <div class="fieldDescription">Setting this lower or higher will determine how the CPU prioritizes the ffmpeg .bif process in relation to other processes.</div>
-                        <div class="fieldDescription">If you notice slowdown while generating bifs but don't want to fully stop their generation, try lowering this and the thread count.</div>
-                        <!--<div class="fieldDescription"><strong>Note:</strong> Setting this to Realtime might freeze the PC during bif generation!</div>-->
-                    </div>
-
-                    <div class="inputContainer">
                         <input is="emby-input" type="number" id="processThreads" pattern="[0-9]*" required="" label="FFmpeg Threads">
                         <div class="fieldDescription">The number of threads to pass to the "-threads" argument of ffmpeg.</div>
                         <div class="fieldDescription">Applies to both input and output of ffmpeg, so the total threads used will be <strong>this * 2</strong>.</div>
@@ -153,7 +139,6 @@
                         // page.querySelector('#chkStyleTrickplayContainer').checked = config.StyleTrickplayContainer;
                         page.querySelector('#intervalInput').value = config.Interval;
                         page.querySelector('#resolutionInput').value = fromIntArray(config.WidthResolutions);
-                        page.querySelector('#processPriority').value = config.ProcessPriority;
                         page.querySelector('#processThreads').value = config.ProcessThreads;
 
                         Dashboard.hideLoadingMsg();
@@ -176,7 +161,6 @@
                         // config.StyleTrickplayContainer = page.querySelector('#chkStyleTrickplayContainer').checked;
                         config.Interval = Math.max(0, form.querySelector('#intervalInput').value);
                         config.WidthResolutions = toIntArray(form.querySelector('#resolutionInput').value);
-                        config.ProcessPriority = form.querySelector('#processPriority').value;
                         config.ProcessThreads = form.querySelector('#processThreads').value;
 
                         ApiClient.updatePluginConfiguration(pluginId, config).then(Dashboard.processPluginConfigurationUpdateResult);
