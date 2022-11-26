@@ -63,7 +63,7 @@ if (STYLE_TRICKPLAY_CONTAINER) {
     jellyscrubStyle.id = 'jellscrubStyle';
     jellyscrubStyle.textContent += '.chapterThumbContainer {width: 15vw; overflow: hidden;}';
     jellyscrubStyle.textContent += '.chapterThumb {width: 100%; display: block; height: unset; min-height: unset; min-width: unset;}';
-    jellyscrubStyle.textContent += '.chapterThumbTextContainer {position: relative; background: rgb(38, 38, 38);}';
+    jellyscrubStyle.textContent += '.chapterThumbTextContainer {position: relative; background: rgb(38, 38, 38); text-align: center;}';
     jellyscrubStyle.textContent += '.chapterThumbText {margin: 0; opacity: unset; padding: unset;}';
     document.body.appendChild(jellyscrubStyle);
 }
