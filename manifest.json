@@ -9,6 +9,14 @@
         "imageUrl": "https://raw.githubusercontent.com/nicknsy/jellyscrub/main/logo/logo.png",
         "versions": [
             {
+                "version": "1.0.0.7",
+                "changelog": "- include a .ignore file in the trickplay folder\n- center scrubbing timestamp\n- add back process priority setting",
+                "targetAbi": "10.8.0.0",
+                "sourceUrl": "https://github.com/nicknsy/jellyscrub/releases/download/1.0.0.7/Jellyscrub-v1.0.0.7.zip",
+                "checksum": "3deb14e4d1f2a811994c5dcd14843371",
+                "timestamp": "2022-11-26T12:25:00Z"
+            },
+            {
                 "version": "1.0.0.6",
                 "changelog": "- add non-blocking option for generations triggered by library scans\n- fix threads option\n- bug fixes",
                 "targetAbi": "10.8.0.0",
