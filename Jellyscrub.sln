@@ -8,9 +8,9 @@ EndProject
 Project("{911E67C6-3D85-4FCE-B560-20A9C3E3FF48}") = "jellyfin", "..\..\..\Desktop\jellyfin_10.8.1\jellyfin_10.8.1\jellyfin.exe", "{3C3B31F4-F1D8-4C10-A142-066D2033783E}"
 	ProjectSection(DebuggerProjectSystem) = preProject
 		PortSupplier = 00000000-0000-0000-0000-000000000000
-		Executable = C:\Users\Nick\Desktop\jellyfin_10.8.1\jellyfin_10.8.1\jellyfin.exe
+		Executable = C:\Users\Nick\Desktop\jellyfin_10.8.7\jellyfin.exe
 		RemoteMachine = DESKTOP-IV35NHD
-		StartingDirectory = C:\Users\Nick\Desktop\jellyfin_10.8.1\jellyfin_10.8.1
+		StartingDirectory = C:\Users\Nick\Desktop\jellyfin_10.8.7
 		Environment = Default
 		LaunchingEngine = 00000000-0000-0000-0000-000000000000
 		UseLegacyDebugEngines = No

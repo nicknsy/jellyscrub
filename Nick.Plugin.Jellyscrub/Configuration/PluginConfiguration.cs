@@ -35,6 +35,12 @@ public class PluginConfiguration : BasePluginConfiguration
     public MetadataScanBehavior ScanBehavior { get; set; } = MetadataScanBehavior.NonBlocking;
 
     /// <summary>
+    /// The process priority of the ffmpeg .bif generation process.
+    /// default = BelowNormal
+    /// </summary>
+    public ProcessPriorityClass ProcessPriority { get; set; } = ProcessPriorityClass.BelowNormal;
+
+    /// <summary>
     /// Whether to save BIFs in the same media folder as their corresponding video.
     /// default = false
     /// </summary>
