@@ -56,15 +56,15 @@
                     </div>
 
                     <!--
-                    <div class="checkboxContainer checkboxContainer-withDescription">
-                        <label>
-                            <input is="emby-checkbox" type="checkbox" id="chkStyleTrickplayContainer" />
-                            <span>Style Trickplay Container</span>
-                        </label>
-                        <div class="fieldDescription checkboxFieldDescription">Injects a style element into the page that makes the trickplay preview look better.</div>
-                        <div class="fieldDescription"><strong>Note:</strong> This will not overwrite custom CSS as set in General settings.</div>
-                    </div>
-                    -->
+    <div class="checkboxContainer checkboxContainer-withDescription">
+        <label>
+            <input is="emby-checkbox" type="checkbox" id="chkStyleTrickplayContainer" />
+            <span>Style Trickplay Container</span>
+        </label>
+        <div class="fieldDescription checkboxFieldDescription">Injects a style element into the page that makes the trickplay preview look better.</div>
+        <div class="fieldDescription"><strong>Note:</strong> This will not overwrite custom CSS as set in General settings.</div>
+    </div>
+    -->
 
                     <div class="inputContainer">
                         <input is="emby-input" type="number" id="intervalInput" pattern="[0-9]*" min="0" required label="Image Interval">
@@ -77,6 +77,20 @@
                         <div class="fieldDescription">Comma separated list of the width (px) that trickplay images will be generated at.</div>
                         <div class="fieldDescription">All images <strong>try</strong> to generate proportionally to the source, so a width of 320 on a 16:9 video ends up <strong>around</strong> 320x180.</div>
                         <div class="fieldDescription"><strong>Note:</strong> Do not include spaces after commas.</div>
+                    </div>
+
+                    <div class="inputContainer">
+                        <select is="emby-select" id="processPriority" name="Process Priority" label="Process Priority">
+                            <!--<option id="optPriorityRealtime" value="Realtime">Realtime</option>-->
+                            <option id="optPriorityHigh" value="High">High</option>
+                            <option id="optPriorityAboveNormal" value="AboveNormal">Above Normal</option>
+                            <option id="optPriorityNormal" value="Normal">Normal</option>
+                            <option id="optPriorityBelowNormal" value="BelowNormal">Below Normal</option>
+                            <option id="optPriorityIdle" value="Idle">Idle</option>
+                        </select>
+                        <div class="fieldDescription">Setting this lower or higher will determine how the CPU prioritizes the ffmpeg .bif generation process in relation to other processes.</div>
+                        <div class="fieldDescription">If you notice slowdown while generating BIFs but don't want to fully stop their generation, try lowering this as well as the thread count.</div>
+                        <!--<div class="fieldDescription"><strong>Note:</strong> Setting this to Realtime might freeze the PC during bif generation!</div>-->
                     </div>
 
                     <div class="inputContainer">
@@ -139,6 +153,7 @@
                         // page.querySelector('#chkStyleTrickplayContainer').checked = config.StyleTrickplayContainer;
                         page.querySelector('#intervalInput').value = config.Interval;
                         page.querySelector('#resolutionInput').value = fromIntArray(config.WidthResolutions);
+                        page.querySelector('#processPriority').value = config.ProcessPriority;
                         page.querySelector('#processThreads').value = config.ProcessThreads;
 
                         Dashboard.hideLoadingMsg();
@@ -161,6 +176,7 @@
                         // config.StyleTrickplayContainer = page.querySelector('#chkStyleTrickplayContainer').checked;
                         config.Interval = Math.max(0, form.querySelector('#intervalInput').value);
                         config.WidthResolutions = toIntArray(form.querySelector('#resolutionInput').value);
+                        config.ProcessPriority = form.querySelector('#processPriority').value;
                         config.ProcessThreads = form.querySelector('#processThreads').value;
 
                         ApiClient.updatePluginConfiguration(pluginId, config).then(Dashboard.processPluginConfigurationUpdateResult);

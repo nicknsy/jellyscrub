@@ -175,6 +175,15 @@ public class OldMediaEncoder
     private void StartProcess(ProcessWrapper process)
     {
         process.Process.Start();
+        try
+        {
+            _logger.LogInformation("Setting generation process priority to {0}", _config.ProcessPriority);
+            process.Process.PriorityClass = _config.ProcessPriority;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("Unable to set process priority: {0} (will not prevent BIF generation!)", e.Message);
+        }
 
         lock (_runningProcessesLock)
         {
