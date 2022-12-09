@@ -29,6 +29,7 @@ public class OldMediaEncoder
 
     private string _ffmpegPath;
     private int _threads;
+    private int _qscaleValue;
     private readonly PluginConfiguration _config;
 
     public OldMediaEncoder(
@@ -44,6 +45,7 @@ public class OldMediaEncoder
 
         _config = JellyscrubPlugin.Instance!.Configuration;
         var configThreads = _config.ProcessThreads;
+        var configQscaleValue = _config.QscaleValue;
 
         var encodingConfig = _configurationManager.GetEncodingOptions();
         _ffmpegPath = _mediaEncoder.EncoderPath;
@@ -55,6 +57,7 @@ public class OldMediaEncoder
         }
 
         _threads = configThreads == -1 ? EncodingHelper.GetNumberOfThreads(null, encodingConfig, null) : configThreads;
+        _qscaleValue = configQscaleValue
     }
 
     public async Task ExtractVideoImagesOnInterval(
@@ -87,7 +90,7 @@ public class OldMediaEncoder
         Directory.CreateDirectory(targetDirectory);
         var outputPath = Path.Combine(targetDirectory, filenamePrefix + "%08d.jpg");
 
-        var args = string.Format(CultureInfo.InvariantCulture, "-threads {3} -i {0} -threads {4} -v quiet {2} -f image2 \"{1}\"", inputArgument, outputPath, vf, _threads, _threads);
+        var args = string.Format(CultureInfo.InvariantCulture, "-threads {3} -i {0} -threads {4} -v quiet {2} -qscale:v {5} -f image2 \"{1}\"", inputArgument, outputPath, vf, _threads, _threads, _qscaleValue);
 
         if (!string.IsNullOrWhiteSpace(container))
         {

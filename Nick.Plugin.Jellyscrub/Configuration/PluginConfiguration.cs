@@ -71,6 +71,12 @@ public class PluginConfiguration : BasePluginConfiguration
     public HashSet<int> WidthResolutions { get; set; } = new HashSet<int> { 320 };
 
     /// <summary>
+    /// FFmpeg qscale value.
+    /// The lower the value, the better the quality
+    /// </summary>
+    public int QscaleValue { get; set; } = 3;
+
+    /// <summary>
     /// Set the number of threads to be used by ffmpeg.
     /// -1 = use default from jellyfin
     /// 0 = default used by ffmpeg

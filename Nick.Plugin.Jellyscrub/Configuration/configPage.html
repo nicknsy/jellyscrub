@@ -80,6 +80,13 @@
                     </div>
 
                     <div class="inputContainer">
+                        <input is="emby-input" type="number" id="qscaleValue" pattern="[2-6]" min="2" max="6" label="FFmpeg Qscale">
+                        <div class="fieldDescription">Value to pass to the "-qscale:v" argument of ffmpeg from <strong>2-6</strong>.</div>
+                        <div class="fieldDescription">A lower value results in higher quality and will take up more space.</div>
+                        <div class="fieldDescription">If you want the bif files to take up less space, try increasing this value.</div>
+                    </div>
+
+                    <div class="inputContainer">
                         <select is="emby-select" id="processPriority" name="Process Priority" label="Process Priority">
                             <!--<option id="optPriorityRealtime" value="Realtime">Realtime</option>-->
                             <option id="optPriorityHigh" value="High">High</option>
@@ -153,6 +160,7 @@
                         // page.querySelector('#chkStyleTrickplayContainer').checked = config.StyleTrickplayContainer;
                         page.querySelector('#intervalInput').value = config.Interval;
                         page.querySelector('#resolutionInput').value = fromIntArray(config.WidthResolutions);
+                        page.querySelector('#qscaleValue').value = config.QscaleValue;
                         page.querySelector('#processPriority').value = config.ProcessPriority;
                         page.querySelector('#processThreads').value = config.ProcessThreads;
 
@@ -176,6 +184,7 @@
                         // config.StyleTrickplayContainer = page.querySelector('#chkStyleTrickplayContainer').checked;
                         config.Interval = Math.max(0, form.querySelector('#intervalInput').value);
                         config.WidthResolutions = toIntArray(form.querySelector('#resolutionInput').value);
+                        config.QscaleValue= form.querySelector('#qscaleValue').value;
                         config.ProcessPriority = form.querySelector('#processPriority').value;
                         config.ProcessThreads = form.querySelector('#processThreads').value;
 
