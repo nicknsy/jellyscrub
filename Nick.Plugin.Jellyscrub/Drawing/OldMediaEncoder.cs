@@ -57,7 +57,7 @@ public class OldMediaEncoder
         }
 
         _threads = configThreads == -1 ? EncodingHelper.GetNumberOfThreads(null, encodingConfig, null) : configThreads;
-        _qscaleValue = configQscaleValue
+        _qscaleValue = configQscaleValue;
     }
 
     public async Task ExtractVideoImagesOnInterval(
@@ -90,7 +90,14 @@ public class OldMediaEncoder
         Directory.CreateDirectory(targetDirectory);
         var outputPath = Path.Combine(targetDirectory, filenamePrefix + "%08d.jpg");
 
-        var args = string.Format(CultureInfo.InvariantCulture, "-threads {3} -i {0} -threads {4} -v quiet {2} -qscale:v {5} -f image2 \"{1}\"", inputArgument, outputPath, vf, _threads, _threads, _qscaleValue);
+        var args = string.Format(CultureInfo.InvariantCulture, "-threads {2} -i {0} -threads {2} -v quiet {1} -f image2", inputArgument, vf, _threads);
+
+        if (_qscaleValue != 0)
+        {
+            args = args + " " + string.Format(CultureInfo.InvariantCulture, "-qscale:v {0}", _qscaleValue);
+        }
+
+        args = args + " " + string.Format(CultureInfo.InvariantCulture, "\"{0}\"", outputPath);
 
         if (!string.IsNullOrWhiteSpace(container))
         {

@@ -74,7 +74,7 @@ public class PluginConfiguration : BasePluginConfiguration
     /// FFmpeg qscale value.
     /// The lower the value, the better the quality
     /// </summary>
-    public int QscaleValue { get; set; } = 3;
+    public int QscaleValue { get; set; } = 0;
 
     /// <summary>
     /// Set the number of threads to be used by ffmpeg.

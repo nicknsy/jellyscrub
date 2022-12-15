@@ -80,10 +80,18 @@
                     </div>
 
                     <div class="inputContainer">
-                        <input is="emby-input" type="number" id="qscaleValue" pattern="[2-6]" min="2" max="6" label="FFmpeg Qscale">
-                        <div class="fieldDescription">Value to pass to the "-qscale:v" argument of ffmpeg from <strong>2-6</strong>.</div>
-                        <div class="fieldDescription">A lower value results in higher quality and will take up more space.</div>
-                        <div class="fieldDescription">If you want the bif files to take up less space, try increasing this value.</div>
+                        <select is="emby-select" id="qscaleValue" name="Thumbnail Quality" label="Thumbnail Quality">
+                            <option id="opt0" value=0>Disabled</option>
+                            <option id="opt2" value=2>2</option>
+                            <option id="opt3" value=3>3</option>
+                            <option id="opt4" value=4>4</option>
+                            <option id="opt5" value=5>5</option>
+                            <option id="opt6" value=6>6</option>
+                        </select>
+                        <div class="fieldDescription">This setting controls the thumbnail quality by passing a value <strong>between 2 and 6</strong> to the "-qscale" argument of ffmpeg.</div>
+                        <div class="fieldDescription">By default this setting will not be used which roughly equals a "-qscale" value of 2.</div>
+                        <div class="fieldDescription">A higher value means lower quality and a lower value means higher quality.</div>
+                        <div class="fieldDescription">If you want the .bif files to take up less space, try setting a value of 3 or higher.</div>
                     </div>
 
                     <div class="inputContainer">
