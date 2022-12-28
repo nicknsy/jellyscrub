@@ -1,4 +1,11 @@
-let basePath = document.currentScript?.getAttribute('src')?.replace('Trickplay/ClientScript', '') ?? '/';
+let basePath = '/';
+
+if (document.currentScript) {
+    const src = document.currentScript.getAttribute('src');
+    if (src) {
+        basePath = src.replace('Trickplay/ClientScript', '');
+    }
+}
 
 const JELLYSCRUB_GUID = 'a84a949d-4b73-4099-aacb-8341b4da17ba';
 const MANIFEST_ENDPOINT = basePath + 'Trickplay/{itemId}/GetManifest';
@@ -214,12 +221,12 @@ window.fetch = async (...args) => {
 
     if (isPlaybackInfo) {
         mediaSourceId = new URLSearchParams(url.search).get('MediaSourceId');
-        mediaSourceId = mediaSourceId ?? urlParts.pop();
+        mediaSourceId = mediaSourceId ? mediaSourceId : urlParts.pop();
 
         debug(`Found media source ID: ${mediaSourceId}`);
 
         let auth = config.headers['X-Emby-Authorization'];
-        embyAuthValue = auth ?? '';
+        embyAuthValue = auth ? auth : '';
         debug(`Using Emby auth value: ${embyAuthValue}`);
 
         response.clone().json().then((data) => {
