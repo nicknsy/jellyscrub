@@ -26,6 +26,7 @@ public class BIFGenerationTask : IScheduledTask
     private readonly ILocalizationManager _localization;
     private readonly IMediaEncoder _mediaEncoder;
     private readonly IServerConfigurationManager _configurationManager;
+    private readonly EncodingHelper _encodingHelper;
 
     public BIFGenerationTask(
         ILibraryManager libraryManager,
@@ -36,7 +37,8 @@ public class BIFGenerationTask : IScheduledTask
         ILibraryMonitor libraryMonitor,
         ILocalizationManager localization,
         IMediaEncoder mediaEncoder,
-        IServerConfigurationManager configurationManager)
+        IServerConfigurationManager configurationManager,
+        EncodingHelper encodingHelper)
     {
         _libraryManager = libraryManager;
         _logger = logger;
@@ -47,6 +49,7 @@ public class BIFGenerationTask : IScheduledTask
         _localization = localization;
         _mediaEncoder = mediaEncoder;
         _configurationManager = configurationManager;
+        _encodingHelper= encodingHelper;
     }
 
     /// <inheritdoc />
@@ -98,7 +101,7 @@ public class BIFGenerationTask : IScheduledTask
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                await new VideoProcessor(_loggerFactory, _loggerFactory.CreateLogger<VideoProcessor>(), _mediaEncoder, _configurationManager, _fileSystem, _appPaths, _libraryMonitor)
+                await new VideoProcessor(_loggerFactory, _loggerFactory.CreateLogger<VideoProcessor>(), _mediaEncoder, _configurationManager, _fileSystem, _appPaths, _libraryMonitor, _encodingHelper)
                     .Run(item, cancellationToken).ConfigureAwait(false);
             }
             catch (OperationCanceledException)

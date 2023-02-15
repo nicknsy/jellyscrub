@@ -22,6 +22,7 @@ public class OldMediaEncoder
     private readonly IMediaEncoder _mediaEncoder;
     private readonly IFileSystem _fileSystem;
     private readonly IServerConfigurationManager _configurationManager;
+    private readonly EncodingHelper _encodingHelper;
 
     private readonly SemaphoreSlim _thumbnailResourcePool = new(1, 1);
     private readonly object _runningProcessesLock = new();
@@ -35,12 +36,14 @@ public class OldMediaEncoder
 	    ILogger<OldMediaEncoder> logger,
 	    IMediaEncoder mediaEncoder,
 	    IServerConfigurationManager configurationManager,
-	    IFileSystem fileSystem)
+	    IFileSystem fileSystem,
+        EncodingHelper encodingHelper)
     {
         _logger = logger;
         _mediaEncoder = mediaEncoder;
         _fileSystem = fileSystem;
         _configurationManager = configurationManager;
+        _encodingHelper = encodingHelper;
 
         _config = JellyscrubPlugin.Instance!.Configuration;
         var configThreads = _config.ProcessThreads;

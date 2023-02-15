@@ -28,14 +28,15 @@ public class VideoProcessor
         IServerConfigurationManager configurationManager,
         IFileSystem fileSystem,
         IApplicationPaths appPaths,
-        ILibraryMonitor libraryMonitor)
+        ILibraryMonitor libraryMonitor,
+        EncodingHelper encodingHelper)
     {
         _logger = logger;
         _fileSystem = fileSystem;
         _appPaths = appPaths;
         _libraryMonitor = libraryMonitor;
         _config = JellyscrubPlugin.Instance!.Configuration;
-        _oldEncoder = new OldMediaEncoder(loggerFactory.CreateLogger<OldMediaEncoder>(), mediaEncoder, configurationManager, fileSystem);
+        _oldEncoder = new OldMediaEncoder(loggerFactory.CreateLogger<OldMediaEncoder>(), mediaEncoder, configurationManager, fileSystem, encodingHelper);
     }
 
     /*
