@@ -235,7 +235,7 @@ public class VideoProcessor
 
                 // Create .ignore file so trickplay folder is not picked up as a season when TV folder structure is improper.
                 var ignorePath = Path.Combine(Directory.GetParent(path).FullName, ".ignore");
-                if (!File.Exists(ignorePath)) File.Create(ignorePath);
+                if (!File.Exists(ignorePath)) await File.Create(ignorePath).DisposeAsync();
 
                 _logger.LogInformation("Finished creation of trickplay file {0}", path);
             }
