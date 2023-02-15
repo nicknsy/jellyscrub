@@ -10,7 +10,6 @@ using System.Globalization;
 using MediaBrowser.Controller.Configuration;
 using MediaBrowser.Model.IO;
 using Nick.Plugin.Jellyscrub.Configuration;
-using Microsoft.Extensions.Options;
 using MediaBrowser.Model.Configuration;
 
 namespace Nick.Plugin.Jellyscrub.Drawing;
@@ -34,6 +33,7 @@ public class OldMediaEncoder
     private string _ffmpegPath;
     private int _threads;
     private bool _doHwAcceleration;
+    private bool _doHwEncode;
 
     public OldMediaEncoder(
 	    ILogger<OldMediaEncoder> logger,
@@ -61,7 +61,10 @@ public class OldMediaEncoder
         }
 
         _threads = configThreads == -1 ? EncodingHelper.GetNumberOfThreads(null, encodingConfig, null) : configThreads;
-        _doHwAcceleration = _config.DoHwAcceleration;
+
+        var hwAcceleration = _config.HwAcceleration;
+        _doHwAcceleration = (hwAcceleration != HwAccelerationOptions.None);
+        _doHwEncode = (hwAcceleration == HwAccelerationOptions.Full);
     }
 
     public async Task ExtractVideoImagesOnInterval(
@@ -204,13 +207,16 @@ public class OldMediaEncoder
 
     public string GetOutputCodec(string hwaccelType)
     {
-        switch (hwaccelType.ToLower())
+        if (_doHwAcceleration && _doHwEncode)
         {
-            case "vaapi":
-                return "mjpeg_vaapi";
-            case "qsv":
-                return "mjpeg_qsv";
-        }  
+            switch (hwaccelType.ToLower())
+            {
+                case "vaapi":
+                    return "mjpeg_vaapi";
+                case "qsv":
+                    return "mjpeg_qsv";
+            }
+        }
 
         return "mjpeg";
     }
