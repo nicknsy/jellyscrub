@@ -78,6 +78,10 @@ public class VideoProcessor
                     await CreateManifest(item, width).ConfigureAwait(false);
                 }
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while creating BIF file");
+            }
             finally
             {
                 BifWriterSemaphore.Release();
@@ -218,6 +222,8 @@ public class VideoProcessor
                 .Where(img => string.Equals(img.Extension, ".jpg", StringComparison.Ordinal))
                 .OrderBy(i => i.FullName)
                 .ToList();
+
+            if (images.Count == 0) throw new InvalidOperationException("Cannot make BIF file from 0 images.");
 
             var bifTempPath = Path.Combine(tempDirectory, Guid.NewGuid().ToString("N"));
 
