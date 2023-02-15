@@ -9,7 +9,7 @@ The trickplay data for a 1:30hr movie with 320x180 thumbnails only takes about 6
 
 <b>Abilities</b>
 * No buffering, even over proxies
-* Works with web, android, ios client out of the box -- and <a href="https://github.com/nicknsy/jellyscrub/issues/22#issuecomment-1206847719">with desktop client manually</a>
+* Works with web, desktop, Android phone, iOS client -- see last installation instruction to get working on desktop
 * Customize interval between new images
 * Generate trickplay files at multiple target resolutions
 * Generate on library scan, as a scheduled task, or whenever they are requested by the client
@@ -47,4 +47,4 @@ Jellyscrub on iOS [<b>Single Screenshot, Functions Same as Above</b>]:
 5. Clear your site cookies / local storage to get rid of the cached index file and receive a new one from the server.
 6. Change any configuration options, like whether to save in media folders over internal metadata folders.
 7. Run a scan (could take much longer depending on library size) or start watching a movie and the scrubbing preview should update in a few minutes.
-8. OPTIONAL: <a href="https://github.com/nicknsy/jellyscrub/issues/22#issuecomment-1206847719">See how to get it working on desktop client.</a>
+8. OPTIONAL: In the JMP desktop client (version >= 1.8.1), click on your profile image, go to "Client Settings", and tick "Jellyscrub" under plugin support. Restart for changes to take effect.
