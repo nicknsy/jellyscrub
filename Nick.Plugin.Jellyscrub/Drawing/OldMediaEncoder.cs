@@ -180,6 +180,7 @@ public class OldMediaEncoder
 
                 if (!ranToCompletion)
                 {
+                    _logger.LogInformation("Killing ffmpeg process due to inactivity.");
                     StopProcess(processWrapper, 1000);
                 }
             }
@@ -242,7 +243,7 @@ public class OldMediaEncoder
                 return;
             }
 
-            _logger.LogInformation("Killing ffmpeg process");
+            _logger.LogInformation("Killing process \"{0}\"", process.Process.ProcessName);
 
             process.Process.Kill();
         }
@@ -253,7 +254,7 @@ public class OldMediaEncoder
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error killing process");
+            _logger.LogError(ex, "Error killing process \"{0}\"", process.Process.ProcessName);
         }
     }
 
