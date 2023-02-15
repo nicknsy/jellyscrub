@@ -9,6 +9,14 @@
         "imageUrl": "https://raw.githubusercontent.com/nicknsy/jellyscrub/main/logo/logo.png",
         "versions": [
             {
+                "version": "1.0.0.9",
+                "changelog": "- add -an -sn to ffmpeg command to stop audio/subtitle transcoding",
+                "targetAbi": "10.8.0.0",
+                "sourceUrl": "https://github.com/nicknsy/jellyscrub/releases/download/1.0.0.9/Jellyscrub-v1.0.0.9.zip",
+                "checksum": "80b4038a54fd0d8c47f27a8c7b7edd67",
+                "timestamp": "2023-02-15T11:27:00Z"
+            },
+            {
                 "version": "1.0.0.8",
                 "changelog": "- HW acceleration (decode, filters, encode)\n- DV tonemapping\n- other small bug fixes",
                 "targetAbi": "10.8.0.0",
