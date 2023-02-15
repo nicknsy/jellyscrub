@@ -121,7 +121,7 @@ public class OldMediaEncoder
         // Final command arguments
         var args = string.Format(
             CultureInfo.InvariantCulture,
-            "-loglevel error {0} {1} -threads {2} -c:v {3} -f {4} \"{5}\"",
+            "-loglevel error {0} -an -sn {1} -threads {2} -c:v {3} -f {4} \"{5}\"",
             inputArgs,
             filterParams,
             _threads,
