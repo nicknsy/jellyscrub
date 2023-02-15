@@ -14,6 +14,14 @@
 
                     <div class="checkboxContainer checkboxContainer-withDescription">
                         <label>
+                            <input is="emby-checkbox" type="checkbox" id="chkDoHwAcceleration" />
+                            <span>HW Acceleration</span>
+                        </label>
+                        <div class="fieldDescription checkboxFieldDescription">Uses the same options as set in "Playback." Counts towards NVENC stream limit.</div>
+                    </div>
+
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label>
                             <input is="emby-checkbox" type="checkbox" id="chkOnDemand" />
                             <span>Generate trickplay files on demand when a client requests one</span>
                         </label>
@@ -56,15 +64,15 @@
                     </div>
 
                     <!--
-                    <div class="checkboxContainer checkboxContainer-withDescription">
-                        <label>
-                            <input is="emby-checkbox" type="checkbox" id="chkStyleTrickplayContainer" />
-                            <span>Style Trickplay Container</span>
-                        </label>
-                        <div class="fieldDescription checkboxFieldDescription">Injects a style element into the page that makes the trickplay preview look better.</div>
-                        <div class="fieldDescription"><strong>Note:</strong> This will not overwrite custom CSS as set in General settings.</div>
-                    </div>
-                    -->
+    <div class="checkboxContainer checkboxContainer-withDescription">
+        <label>
+            <input is="emby-checkbox" type="checkbox" id="chkStyleTrickplayContainer" />
+            <span>Style Trickplay Container</span>
+        </label>
+        <div class="fieldDescription checkboxFieldDescription">Injects a style element into the page that makes the trickplay preview look better.</div>
+        <div class="fieldDescription"><strong>Note:</strong> This will not overwrite custom CSS as set in General settings.</div>
+    </div>
+    -->
 
                     <div class="inputContainer">
                         <input is="emby-input" type="number" id="intervalInput" pattern="[0-9]*" min="0" required label="Image Interval">
@@ -145,6 +153,7 @@
 
                     ApiClient.getPluginConfiguration(pluginId).then(function (config) {
 
+                        page.querySelector('#chkDoHwAcceleration').checked = config.DoHwAcceleration;
                         page.querySelector('#chkOnDemand').checked = config.OnDemandGeneration;
                         page.querySelector('#chkEnableDuringScan').checked = config.ExtractionDuringLibraryScan;
                         page.querySelector('#scanBehavior').value = config.ScanBehavior;
@@ -167,7 +176,7 @@
                     var form = this;
 
                     ApiClient.getPluginConfiguration(pluginId).then(function (config) {
-
+                        config.DoHwAcceleration = form.querySelector('#chkDoHwAcceleration').checked;
                         config.OnDemandGeneration = form.querySelector('#chkOnDemand').checked;
                         config.ExtractionDuringLibraryScan = form.querySelector('#chkEnableDuringScan').checked;
                         config.ScanBehavior = form.querySelector('#scanBehavior').value;

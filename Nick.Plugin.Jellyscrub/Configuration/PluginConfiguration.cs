@@ -14,6 +14,13 @@ public class PluginConfiguration : BasePluginConfiguration
     public PluginConfiguration() {}
 
     /// <summary>
+    /// Whether or not to also use HW acceleration options set in Jellyfin
+    /// for BIF generation.
+    /// default = true
+    /// </summary>
+    public bool DoHwAcceleration { get; set; } = true;
+
+    /// <summary>
     /// Determines whether or not trickplays are generated on demand
     /// if client requests are none are available.
     /// default = false
