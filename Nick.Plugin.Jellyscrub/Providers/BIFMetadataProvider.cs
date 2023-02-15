@@ -33,6 +33,7 @@ public class BIFMetadataProvider : ICustomMetadataProvider<Episode>,
     private readonly ILibraryMonitor _libraryMonitor;
     private readonly IMediaEncoder _mediaEncoder;
     private readonly IServerConfigurationManager _configurationManager;
+    private readonly EncodingHelper _encodingHelper;
 
     public BIFMetadataProvider(
         ILogger<BIFMetadataProvider> logger,
@@ -41,7 +42,8 @@ public class BIFMetadataProvider : ICustomMetadataProvider<Episode>,
         IApplicationPaths appPaths,
         ILibraryMonitor libraryMonitor,
         IMediaEncoder mediaEncoder,
-        IServerConfigurationManager configurationManager)
+        IServerConfigurationManager configurationManager,
+        EncodingHelper encodingHelper)
     {
         _logger = logger;
         _loggerFactory = loggerFactory;
@@ -50,6 +52,7 @@ public class BIFMetadataProvider : ICustomMetadataProvider<Episode>,
         _libraryMonitor = libraryMonitor;
         _mediaEncoder = mediaEncoder;
         _configurationManager = configurationManager;
+        _encodingHelper = encodingHelper;
     }
 
     /// <inheritdoc />
@@ -156,7 +159,7 @@ public class BIFMetadataProvider : ICustomMetadataProvider<Episode>,
 
         if (config.ExtractionDuringLibraryScan)
         {
-            var videoProcessor = new VideoProcessor(_loggerFactory, _loggerFactory.CreateLogger<VideoProcessor>(), _mediaEncoder, _configurationManager, _fileSystem, _appPaths, _libraryMonitor);
+            var videoProcessor = new VideoProcessor(_loggerFactory, _loggerFactory.CreateLogger<VideoProcessor>(), _mediaEncoder, _configurationManager, _fileSystem, _appPaths, _libraryMonitor, _encodingHelper);
 
             switch (config.ScanBehavior)
             {

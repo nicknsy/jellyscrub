@@ -10,6 +10,7 @@ using System.Globalization;
 using MediaBrowser.Controller.Configuration;
 using MediaBrowser.Model.IO;
 using Nick.Plugin.Jellyscrub.Configuration;
+using MediaBrowser.Model.Configuration;
 
 namespace Nick.Plugin.Jellyscrub.Drawing;
 
@@ -22,25 +23,30 @@ public class OldMediaEncoder
     private readonly IMediaEncoder _mediaEncoder;
     private readonly IFileSystem _fileSystem;
     private readonly IServerConfigurationManager _configurationManager;
+    private readonly EncodingHelper _encodingHelper;
 
     private readonly SemaphoreSlim _thumbnailResourcePool = new(1, 1);
     private readonly object _runningProcessesLock = new();
     private readonly List<ProcessWrapper> _runningProcesses = new();
 
+    private readonly PluginConfiguration _config;
     private string _ffmpegPath;
     private int _threads;
-    private readonly PluginConfiguration _config;
+    private bool _doHwAcceleration;
+    private bool _doHwEncode;
 
     public OldMediaEncoder(
 	    ILogger<OldMediaEncoder> logger,
 	    IMediaEncoder mediaEncoder,
 	    IServerConfigurationManager configurationManager,
-	    IFileSystem fileSystem)
+	    IFileSystem fileSystem,
+        EncodingHelper encodingHelper)
     {
         _logger = logger;
         _mediaEncoder = mediaEncoder;
         _fileSystem = fileSystem;
         _configurationManager = configurationManager;
+        _encodingHelper = encodingHelper;
 
         _config = JellyscrubPlugin.Instance!.Configuration;
         var configThreads = _config.ProcessThreads;
@@ -55,6 +61,10 @@ public class OldMediaEncoder
         }
 
         _threads = configThreads == -1 ? EncodingHelper.GetNumberOfThreads(null, encodingConfig, null) : configThreads;
+
+        var hwAcceleration = _config.HwAcceleration;
+        _doHwAcceleration = (hwAcceleration != HwAccelerationOptions.None);
+        _doHwEncode = (hwAcceleration == HwAccelerationOptions.Full);
     }
 
     public async Task ExtractVideoImagesOnInterval(
@@ -69,35 +79,57 @@ public class OldMediaEncoder
             int maxWidth,
             CancellationToken cancellationToken)
     {
-        var inputArgument = _mediaEncoder.GetInputArgument(inputFile, mediaSource);
+        var options = _doHwAcceleration ? _configurationManager.GetEncodingOptions() : new EncodingOptions();
 
-        var vf = "-filter:v fps=1/" + interval.TotalSeconds.ToString(CultureInfo.InvariantCulture);
-        var maxWidthParam = maxWidth.ToString(CultureInfo.InvariantCulture);
-
-        vf += string.Format(CultureInfo.InvariantCulture, ",scale=min(iw\\,{0}):trunc(ow/dar/2)*2", maxWidthParam);
-
-        // HDR Software Tonemapping
-        if ((string.Equals(videoStream?.ColorTransfer, "smpte2084", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(videoStream?.ColorTransfer, "arib-std-b67", StringComparison.OrdinalIgnoreCase))
-            && _mediaEncoder.SupportsFilter("zscale"))
+        // A new EncodingOptions instance must be used as to not disable HW acceleration for all of Jellyfin.
+        // Additionally, we must set a few fields without defaults to prevent null pointer exceptions.
+        if (!_doHwAcceleration)
         {
-            vf += ",zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0:peak=100,zscale=t=bt709:m=bt709,format=yuv420p";
+            options.EnableHardwareEncoding = false;
+            options.HardwareAccelerationType = string.Empty;
+            options.EnableTonemapping = false;
         }
 
+        var hwAccelType = options.HardwareAccelerationType;
+
+        var baseRequest = new BaseEncodingJobOptions { MaxWidth = maxWidth };
+        var jobState = new EncodingJobInfo(TranscodingJobType.Progressive)
+        {
+            IsVideoRequest = true,  // must be true for InputVideoHwaccelArgs to return non-empty value
+            MediaSource = mediaSource,
+            VideoStream = videoStream,
+            BaseRequest = baseRequest,  // GetVideoProcessingFilterParam errors if null
+            MediaPath = inputFile,
+            OutputVideoCodec = GetOutputCodec(hwAccelType)
+        };
+
+        // Get input and filter arguments
+        var inputArgs = _encodingHelper.GetInputArgument(jobState, options, null).Trim();
+        if (string.IsNullOrWhiteSpace(inputArgs)) throw new InvalidOperationException("EncodingHelper returned empty input arguments.");
+
+        if (!_doHwAcceleration) inputArgs = "-threads " + _threads + " " + inputArgs; // HW accel args set a different input thread count, only set if disabled
+
+        var filterParams = _encodingHelper.GetVideoProcessingFilterParam(jobState, options, jobState.OutputVideoCodec).Trim();
+        if (string.IsNullOrWhiteSpace(filterParams) || filterParams.IndexOf("\"") == -1) throw new InvalidOperationException("EncodingHelper returned empty or invalid filter parameters.");
+
+        filterParams = filterParams.Insert(filterParams.IndexOf("\"") + 1, "fps=1/" + interval.TotalSeconds.ToString(CultureInfo.InvariantCulture) + ","); // set framerate
+
+        // Output arguments
         Directory.CreateDirectory(targetDirectory);
         var outputPath = Path.Combine(targetDirectory, filenamePrefix + "%08d.jpg");
 
-        var args = string.Format(CultureInfo.InvariantCulture, "-threads {3} -i {0} -threads {4} -v quiet {2} -f image2 \"{1}\"", inputArgument, outputPath, vf, _threads, _threads);
+        // Final command arguments
+        var args = string.Format(
+            CultureInfo.InvariantCulture,
+            "-loglevel error {0} {1} -threads {2} -c:v {3} -f {4} \"{5}\"",
+            inputArgs,
+            filterParams,
+            _threads,
+            jobState.OutputVideoCodec,
+            "image2",
+            outputPath);
 
-        if (!string.IsNullOrWhiteSpace(container))
-        {
-            var inputFormat = EncodingHelper.GetInputFormat(container);
-            if (!string.IsNullOrWhiteSpace(inputFormat))
-            {
-                args = "-f " + inputFormat + " " + args;
-            }
-        }
-
+        // Start ffmpeg process
         var processStartInfo = new ProcessStartInfo
         {
             CreateNoWindow = true,
@@ -151,6 +183,7 @@ public class OldMediaEncoder
 
                 if (!ranToCompletion)
                 {
+                    _logger.LogInformation("Killing ffmpeg process due to inactivity.");
                     StopProcess(processWrapper, 1000);
                 }
             }
@@ -163,13 +196,29 @@ public class OldMediaEncoder
 
             if (exitCode == -1)
             {
-                var msg = string.Format(CultureInfo.InvariantCulture, "ffmpeg image extraction failed for {0}", inputArgument);
+                var msg = string.Format(CultureInfo.InvariantCulture, "ffmpeg image extraction failed for {0}", inputFile);
 
                 _logger.LogError(msg);
 
                 throw new FfmpegException(msg);
             }
         }
+    }
+
+    public string GetOutputCodec(string hwaccelType)
+    {
+        if (_doHwAcceleration && _doHwEncode)
+        {
+            switch (hwaccelType.ToLower())
+            {
+                case "vaapi":
+                    return "mjpeg_vaapi";
+                case "qsv":
+                    return "mjpeg_qsv";
+            }
+        }
+
+        return "mjpeg";
     }
 
     private void StartProcess(ProcessWrapper process)
@@ -200,7 +249,7 @@ public class OldMediaEncoder
                 return;
             }
 
-            _logger.LogInformation("Killing ffmpeg process");
+            _logger.LogInformation("Killing process \"{0}\"", process.Process.ProcessName);
 
             process.Process.Kill();
         }
@@ -211,7 +260,7 @@ public class OldMediaEncoder
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error killing process");
+            _logger.LogError(ex, "Error killing process \"{0}\"", process.Process.ProcessName);
         }
     }
 

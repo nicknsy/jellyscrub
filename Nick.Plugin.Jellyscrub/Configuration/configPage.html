@@ -12,6 +12,16 @@
                 <form class="jellyscrubConfigurationForm">
                     <br />
 
+                    <div class="inputContainer">
+                        <select is="emby-select" id="hwAcceleration" name="HW Acceleration" label="HW Acceleration">
+                            <option id="optAccelerationNone" value="None">None</option>
+                            <option id="optAccelerationNoEncode" value="NoEncode">No Encode - decode, filters</option>
+                            <option id="optAccelerationFull" value="Full">Full - decode, filters, encode</option>
+                        </select>
+                        <div class="fieldDescription">Uses the same options as set in "Playback" to HW accelerate BIF generation. Counts towards NVENC stream limit.</div>
+                        <div class="fieldDescription">"Full" will default to SW encode on NVENC. On older VAAPI and QSV devices without mjpeg encode support, set to "No Encode".</div>
+                    </div>
+
                     <div class="checkboxContainer checkboxContainer-withDescription">
                         <label>
                             <input is="emby-checkbox" type="checkbox" id="chkOnDemand" />
@@ -56,15 +66,15 @@
                     </div>
 
                     <!--
-                    <div class="checkboxContainer checkboxContainer-withDescription">
-                        <label>
-                            <input is="emby-checkbox" type="checkbox" id="chkStyleTrickplayContainer" />
-                            <span>Style Trickplay Container</span>
-                        </label>
-                        <div class="fieldDescription checkboxFieldDescription">Injects a style element into the page that makes the trickplay preview look better.</div>
-                        <div class="fieldDescription"><strong>Note:</strong> This will not overwrite custom CSS as set in General settings.</div>
-                    </div>
-                    -->
+    <div class="checkboxContainer checkboxContainer-withDescription">
+        <label>
+            <input is="emby-checkbox" type="checkbox" id="chkStyleTrickplayContainer" />
+            <span>Style Trickplay Container</span>
+        </label>
+        <div class="fieldDescription checkboxFieldDescription">Injects a style element into the page that makes the trickplay preview look better.</div>
+        <div class="fieldDescription"><strong>Note:</strong> This will not overwrite custom CSS as set in General settings.</div>
+    </div>
+    -->
 
                     <div class="inputContainer">
                         <input is="emby-input" type="number" id="intervalInput" pattern="[0-9]*" min="0" required label="Image Interval">
@@ -145,6 +155,7 @@
 
                     ApiClient.getPluginConfiguration(pluginId).then(function (config) {
 
+                        page.querySelector('#hwAcceleration').value = config.HwAcceleration;
                         page.querySelector('#chkOnDemand').checked = config.OnDemandGeneration;
                         page.querySelector('#chkEnableDuringScan').checked = config.ExtractionDuringLibraryScan;
                         page.querySelector('#scanBehavior').value = config.ScanBehavior;
@@ -167,7 +178,7 @@
                     var form = this;
 
                     ApiClient.getPluginConfiguration(pluginId).then(function (config) {
-
+                        config.HwAcceleration = form.querySelector('#hwAcceleration').value;
                         config.OnDemandGeneration = form.querySelector('#chkOnDemand').checked;
                         config.ExtractionDuringLibraryScan = form.querySelector('#chkEnableDuringScan').checked;
                         config.ScanBehavior = form.querySelector('#scanBehavior').value;

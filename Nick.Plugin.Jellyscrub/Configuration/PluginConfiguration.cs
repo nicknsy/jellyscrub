@@ -14,6 +14,14 @@ public class PluginConfiguration : BasePluginConfiguration
     public PluginConfiguration() {}
 
     /// <summary>
+    /// Whether or not to use HW acceleration options set in Jellyfin
+    /// for BIF generation. Set to NoEncode on older VAAPI or QSV devices that
+    /// can't HW encode MJPEG.
+    /// default = None
+    /// </summary>
+    public HwAccelerationOptions HwAcceleration { get; set; } = HwAccelerationOptions.None;
+
+    /// <summary>
     /// Determines whether or not trickplays are generated on demand
     /// if client requests are none are available.
     /// default = false

@@ -28,14 +28,15 @@ public class VideoProcessor
         IServerConfigurationManager configurationManager,
         IFileSystem fileSystem,
         IApplicationPaths appPaths,
-        ILibraryMonitor libraryMonitor)
+        ILibraryMonitor libraryMonitor,
+        EncodingHelper encodingHelper)
     {
         _logger = logger;
         _fileSystem = fileSystem;
         _appPaths = appPaths;
         _libraryMonitor = libraryMonitor;
         _config = JellyscrubPlugin.Instance!.Configuration;
-        _oldEncoder = new OldMediaEncoder(loggerFactory.CreateLogger<OldMediaEncoder>(), mediaEncoder, configurationManager, fileSystem);
+        _oldEncoder = new OldMediaEncoder(loggerFactory.CreateLogger<OldMediaEncoder>(), mediaEncoder, configurationManager, fileSystem, encodingHelper);
     }
 
     /*
@@ -76,6 +77,10 @@ public class VideoProcessor
                     await CreateBif(item, width, interval, mediaSource, cancellationToken).ConfigureAwait(false);
                     await CreateManifest(item, width).ConfigureAwait(false);
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while creating BIF file");
             }
             finally
             {
@@ -218,6 +223,8 @@ public class VideoProcessor
                 .OrderBy(i => i.FullName)
                 .ToList();
 
+            if (images.Count == 0) throw new InvalidOperationException("Cannot make BIF file from 0 images.");
+
             var bifTempPath = Path.Combine(tempDirectory, Guid.NewGuid().ToString("N"));
 
             using (var fs = new FileStream(bifTempPath, FileMode.Create, FileAccess.Write, FileShare.Read))
@@ -234,7 +241,7 @@ public class VideoProcessor
 
                 // Create .ignore file so trickplay folder is not picked up as a season when TV folder structure is improper.
                 var ignorePath = Path.Combine(Directory.GetParent(path).FullName, ".ignore");
-                if (!File.Exists(ignorePath)) File.Create(ignorePath);
+                if (!File.Exists(ignorePath)) await File.Create(ignorePath).DisposeAsync();
 
                 _logger.LogInformation("Finished creation of trickplay file {0}", path);
             }
