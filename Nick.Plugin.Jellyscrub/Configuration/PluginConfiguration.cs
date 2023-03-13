@@ -76,7 +76,7 @@ public class PluginConfiguration : BasePluginConfiguration
     /// List of target width resolutions, in px, to generates BIFs for.
     /// default = { 320 }
     /// </summary>
-    public HashSet<int> WidthResolutions { get; set; } = new HashSet<int> { 320 };
+    public int[] WidthResolutions { get; set; } = new[] { 320 };
 
     /// <summary>
     /// Set the number of threads to be used by ffmpeg.
