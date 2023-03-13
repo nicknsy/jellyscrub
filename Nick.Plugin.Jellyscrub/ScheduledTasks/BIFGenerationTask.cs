@@ -83,7 +83,8 @@ public class BIFGenerationTask : IScheduledTask
         var items = _libraryManager.GetItemList(new InternalItemsQuery
         {
             MediaTypes = new[] { MediaType.Video },
-            IsVirtualItem = false
+            IsVirtualItem = false,
+            Recursive = true
 
         }).OfType<Video>().ToList();
 
