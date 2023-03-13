@@ -131,7 +131,7 @@ public class VideoProcessor
         // Create Manifest object with new resolution
         Manifest newManifest = new Manifest() {
             Version = JellyscrubPlugin.Instance!.Version.ToString(),
-            WidthResolutions = new HashSet<int> { width }
+            WidthResolutions = new[] { width }
         };
 
         // If a Manifest object already exists, combine resolutions
@@ -143,7 +143,7 @@ public class VideoProcessor
 
             if (oldManifest != null && oldManifest.WidthResolutions != null)
             {
-                newManifest.WidthResolutions = newManifest.WidthResolutions.Union(oldManifest.WidthResolutions).ToHashSet();
+                newManifest.WidthResolutions = newManifest.WidthResolutions.Concat(oldManifest.WidthResolutions).ToArray();
             }
         }
 
