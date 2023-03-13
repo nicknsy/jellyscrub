@@ -92,11 +92,6 @@ public class BIFGenerationTask : IScheduledTask
 
         foreach (var item in items)
         {
-            if (!Providers.BIFMetadataProvider.EnableForItem(item, _fileSystem))
-            {
-                continue;
-            }
-
             try
             {
                 cancellationToken.ThrowIfCancellationRequested();

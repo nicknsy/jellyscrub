@@ -97,65 +97,9 @@ public class BIFMetadataProvider : ICustomMetadataProvider<Episode>,
         return FetchInternal(item, options, cancellationToken);
     }
 
-    public static long MinRunTimeTicks = TimeSpan.FromSeconds(30).Ticks;
-
-    public static bool EnableForItem(Video item, IFileSystem fileSystem)
-    {
-        var videoType = item.VideoType;
-
-        if (videoType == VideoType.Iso)
-        {
-            return false;
-        }
-
-        if (videoType == VideoType.BluRay)
-        {
-            return false;
-        }
-
-        if (videoType == VideoType.Dvd)
-        {
-            return false;
-        }
-
-        if (item.IsShortcut)
-        {
-            return false;
-        }
-
-        if (!item.IsCompleteMedia)
-        {
-            return false;
-        }
-
-        if (!item.RunTimeTicks.HasValue || item.RunTimeTicks.Value < MinRunTimeTicks)
-        {
-            return false;
-        }
-
-        if (item.IsFileProtocol)
-        {
-            if (!fileSystem.FileExists(item.Path))
-            {
-                return false;
-            }
-        }
-        else
-        {
-            return false;
-        }
-
-        return true;
-    }
-
     private async Task<ItemUpdateType> FetchInternal(Video item, MetadataRefreshOptions options, CancellationToken cancellationToken)
     {
         var config = JellyscrubPlugin.Instance!.Configuration;
-
-        if (!EnableForItem(item, _fileSystem))
-        {
-            return ItemUpdateType.None;
-        }
 
         if (config.ExtractionDuringLibraryScan)
         {

@@ -1,5 +1,6 @@
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Controller.Entities;
+using MediaBrowser.Model.Entities;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.Dto;
 using System.Globalization;
@@ -44,6 +45,8 @@ public class VideoProcessor
      */
     public async Task Run(BaseItem item, CancellationToken cancellationToken)
     {
+        if (!EnableForItem(item, _fileSystem, _config.Interval)) return;
+
         var mediaSources = ((IHasMediaSources)item).GetMediaSources(false)
             .ToList();
 
@@ -87,6 +90,48 @@ public class VideoProcessor
                 BifWriterSemaphore.Release();
             }
         }
+    }
+
+    public static bool EnableForItem(BaseItem item, IFileSystem fileSystem, int interval)
+    {
+        if (item is not Video) return false;
+
+        var video = (Video)item;
+        var videoType = video.VideoType;
+
+        if (videoType == VideoType.Iso || videoType == VideoType.BluRay || videoType == VideoType.Dvd)
+        {
+            return false;
+        }
+
+        if (video.IsShortcut)
+        {
+            return false;
+        }
+
+        if (!video.IsCompleteMedia)
+        {
+            return false;
+        }
+
+        if (!video.RunTimeTicks.HasValue || video.RunTimeTicks.Value < TimeSpan.FromMilliseconds(interval).Ticks)
+        {
+            return false;
+        }
+
+        if (video.IsFileProtocol)
+        {
+            if (!fileSystem.FileExists(item.Path))
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return false;
+        }
+
+        return true;
     }
 
     /*
