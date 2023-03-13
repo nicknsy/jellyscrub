@@ -126,7 +126,7 @@ public class OldMediaEncoder
             filterParams,
             _threads,
             jobState.OutputVideoCodec,
-            "fuckyou",
+            "image2",
             outputPath);
 
         // Start ffmpeg process
