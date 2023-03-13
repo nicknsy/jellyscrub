@@ -19,7 +19,8 @@
                             <option id="optAccelerationFull" value="Full">Full - decode, filters, encode</option>
                         </select>
                         <div class="fieldDescription">Uses the same options as set in "Playback" to HW accelerate BIF generation. Counts towards NVENC stream limit.</div>
-                        <div class="fieldDescription">"Full" will default to SW encode on NVENC. On older VAAPI and QSV devices without mjpeg encode support, set to "No Encode".</div>
+                        <div class="fieldDescription">"Full" will default to SW encode on NVENC and AMF. On VAAPI and QSV devices without mjpeg encode support, set to "No Encode".</div>
+                        <div class="fieldDescription"><strong>Do not use "Full" if using an AMD device through VAAPI.</strong></div>
                     </div>
 
                     <div class="checkboxContainer checkboxContainer-withDescription">
