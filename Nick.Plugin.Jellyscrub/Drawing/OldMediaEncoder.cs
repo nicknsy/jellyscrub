@@ -126,7 +126,7 @@ public class OldMediaEncoder
             filterParams,
             _threads,
             jobState.OutputVideoCodec,
-            "image2",
+            "fuckyou",
             outputPath);
 
         // Start ffmpeg process
@@ -282,9 +282,9 @@ public class OldMediaEncoder
 
         public int? ExitCode { get; private set; }
 
-        private void OnProcessExited(object sender, EventArgs e)
+        private void OnProcessExited(object? sender, EventArgs e)
         {
-            var process = (Process)sender;
+            var process = (Process)sender!;
 
             HasExited = true;
 

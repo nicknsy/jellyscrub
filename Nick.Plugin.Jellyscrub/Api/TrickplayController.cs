@@ -77,7 +77,7 @@ public class TrickplayController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [Produces("application/javascript")]
-    public async Task<ActionResult> GetClientScript()
+    public ActionResult GetClientScript()
     {
         var scriptStream = _assembly.GetManifestResourceStream(_trickplayScriptPath);
 
@@ -102,7 +102,7 @@ public class TrickplayController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [Produces(MediaTypeNames.Application.Json)]
-    public async Task<ActionResult> GetManifest([FromRoute, Required] Guid itemId)
+    public ActionResult GetManifest([FromRoute, Required] Guid itemId)
     {
         var item = _libraryManager.GetItemById(itemId);
 
@@ -115,8 +115,8 @@ public class TrickplayController : ControllerBase
             }
             else if (_config.OnDemandGeneration)
             {
-                new VideoProcessor(_loggerFactory, _loggerFactory.CreateLogger<VideoProcessor>(), _mediaEncoder, _configurationManager, _fileSystem, _appPaths, _libraryMonitor, _encodingHelper)
-                    .Run(item, CancellationToken.None);
+                _ = new VideoProcessor(_loggerFactory, _loggerFactory.CreateLogger<VideoProcessor>(), _mediaEncoder, _configurationManager, _fileSystem, _appPaths, _libraryMonitor, _encodingHelper)
+                    .Run(item, CancellationToken.None).ConfigureAwait(false);
                 return StatusCode(503);
             }
         }
@@ -140,7 +140,7 @@ public class TrickplayController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
     [Produces(MediaTypeNames.Application.Octet)]
-    public async Task<ActionResult> GetBIF([FromRoute, Required] Guid itemId, [FromRoute, Required] int width)
+    public ActionResult GetBIF([FromRoute, Required] Guid itemId, [FromRoute, Required] int width)
     {
         var item = _libraryManager.GetItemById(itemId);
 
@@ -153,8 +153,8 @@ public class TrickplayController : ControllerBase
             }
             else if (_config.OnDemandGeneration && _config.WidthResolutions.Contains(width))
             {
-                new VideoProcessor(_loggerFactory, _loggerFactory.CreateLogger<VideoProcessor>(), _mediaEncoder, _configurationManager, _fileSystem, _appPaths, _libraryMonitor, _encodingHelper)
-                    .Run(item, CancellationToken.None);
+                _ = new VideoProcessor(_loggerFactory, _loggerFactory.CreateLogger<VideoProcessor>(), _mediaEncoder, _configurationManager, _fileSystem, _appPaths, _libraryMonitor, _encodingHelper)
+                    .Run(item, CancellationToken.None).ConfigureAwait(false);
                 return StatusCode(503);
             }
         }

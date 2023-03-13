@@ -168,7 +168,7 @@ public class BIFMetadataProvider : ICustomMetadataProvider<Episode>,
                     break;
                 default:
                 case MetadataScanBehavior.NonBlocking:
-                    videoProcessor.Run(item, cancellationToken);
+                    _ = videoProcessor.Run(item, cancellationToken).ConfigureAwait(false);
                     break;
             }
         }
