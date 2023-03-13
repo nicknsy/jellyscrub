@@ -72,8 +72,7 @@ public class BIFGenerationTask : IScheduledTask
                 new TaskTriggerInfo
                 {
                     Type = TaskTriggerInfo.TriggerDaily,
-                    TimeOfDayTicks = TimeSpan.FromHours(3).Ticks,
-                    MaxRuntimeTicks = TimeSpan.FromHours(5).Ticks
+                    TimeOfDayTicks = TimeSpan.FromHours(3).Ticks
                 }
             };
     }
