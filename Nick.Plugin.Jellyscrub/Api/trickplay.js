@@ -10,7 +10,7 @@ if (document.currentScript) {
 const JELLYSCRUB_GUID = 'a84a949d-4b73-4099-aacb-8341b4da17ba';
 const MANIFEST_ENDPOINT = basePath + 'Trickplay/{itemId}/GetManifest';
 const BIF_ENDPOINT = basePath + 'Trickplay/{itemId}/{width}/GetBIF';
-const RETRY_INTERVAL = 60_000;  // ms (1 minute)
+const RETRY_INTERVAL = 60000;  // ms (1 minute)
 
 let mediaSourceId = null;
 let mediaRuntimeTicks = null;   // NOT ms -- Microsoft DateTime.Ticks. Must be divided by 10,000.
@@ -309,7 +309,7 @@ const BIF_MAGIC_NUMBERS = [0x89, 0x42, 0x49, 0x46, 0x0D, 0x0A, 0x1A, 0x0A];
 const SUPPORTED_BIF_VERSION = 0;
 
 function trickplayDecode(buffer) {
-    info(`BIF file size: ${(buffer.byteLength / 1_048_576).toFixed(2)}MB`);
+    info(`BIF file size: ${(buffer.byteLength / 1048576).toFixed(2)}MB`);
 
 
     let bifArray = new Indexed8Array(buffer);
@@ -484,7 +484,7 @@ function getBubbleHtmlTrickplay(sliderValue) {
     //showOsd();
 
     let currentTicks = mediaRuntimeTicks * (sliderValue / 100);
-    let currentTimeMs = currentTicks / 10_000
+    let currentTimeMs = currentTicks / 10000
     let imageSrc = getTrickplayFrameUrl(currentTimeMs, trickplayData);
 
     if (imageSrc) {
