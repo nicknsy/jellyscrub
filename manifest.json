@@ -9,6 +9,14 @@
         "imageUrl": "https://raw.githubusercontent.com/nicknsy/jellyscrub/main/logo/logo.png",
         "versions": [
             {
+                "version": "1.1.1.0",
+                "changelog": "- fix on webOS",
+                "targetAbi": "10.8.0.0",
+                "sourceUrl": "https://github.com/nicknsy/jellyscrub/releases/download/1.1.1.0/Jellyscrub-v1.1.1.0.zip",
+                "checksum": "46db94750bd208ccd8d43916156f98f8",
+                "timestamp": "2023-03-30T05:02:00Z"
+            },
+            {
                 "version": "1.1.0.0",
                 "changelog": "- minor bug fixes/improvements",
                 "targetAbi": "10.8.0.0",
