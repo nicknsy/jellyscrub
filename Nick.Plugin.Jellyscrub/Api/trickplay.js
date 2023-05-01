@@ -79,15 +79,19 @@ if (STYLE_TRICKPLAY_CONTAINER) {
  * Monitor current page to be used for trickplay load/unload
  */
 
-let videoPath = 'playback/video/index.html';
+const videoPaths = ['playback/video/index.html', '/video'];
 let previousRoutePath = null;
 
 document.addEventListener('viewshow', function () {
     let currentRoutePath = Emby.Page.currentRouteInfo.route.path;
 
-    if (currentRoutePath == videoPath) {
+    if (!currentRoutePath) {
+        currentRoutePath = Emby.Page.currentRouteInfo.path;
+    }
+
+    if (videoPaths.includes(currentRoutePath)) {
         loadVideoView();
-    } else if (previousRoutePath == videoPath) {
+    } else if (videoPaths.includes(previousRoutePath)) {
         unloadVideoView();
     }
 
@@ -352,7 +356,7 @@ function trickplayDecode(buffer) {
 
         bifImages[timestamp] = buffer.slice(offset, nextOffset);
     }
-    
+
     return {
         version: bifVersion,
         timestampMultiplier: timestampMultiplier,
