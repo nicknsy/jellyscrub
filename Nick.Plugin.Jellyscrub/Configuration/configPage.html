@@ -5,11 +5,96 @@
 </head>
 <body>
     <div data-role="page" class="page type-interior pluginConfigurationPage jellyscrubConfigurationPage" data-require="emby-input,emby-button,emby-select,emby-checkbox,emby-linkbutton">
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Victor+Mono:wght@100;400;600&display=swap');
 
+            .steps-container {
+                max-width: 54em;
+                overflow: auto;
+                display: flex;
+                flex-direction: column;
+                flex-wrap: nowrap;
+                gap: 40px;
+                box-sizing: border-box;
+                font-family: 'Victor Mono', monospace;
+            }
+
+            .steps-container * {
+                box-sizing: border-box;
+            }
+
+            .step-header {
+                margin: 10px 0px;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                padding: 4px;
+                display: inline-block;
+                text-align: center;
+                min-width: 40px;
+                border-radius: 5px;
+                font-size: 1.125rem;
+            }
+
+            .step-info {
+                width: 100%;
+                border: 1px solid #292929;
+                border-bottom: none;
+                background-color: #242323;
+                padding: 10px 20px;
+                border-radius: 5px 5px 0px 0px;
+                letter-spacing: .05rem;
+                display: inline-block;
+                opacity: 95%;
+            }
+
+            .step-body {
+                width: 100%;
+                border-radius: 0px 0px 5px 5px;
+                border: 1px solid #292929;
+                border-top: none;
+                background-color: #3e363632;
+                padding: 20px;
+                line-height: 1.5rem;
+            }
+        </style>
         <div data-role="content">
             <div class="content-primary">
 
-                <form class="jellyscrubConfigurationForm">
+                <div class="steps-container">
+                    <section>
+                        <h2 class="step-header">1</h2>
+                        <div>
+                            <div class="step-info">* Enable native trickplay functionality and set desired options.</div>
+                            <div class="step-body">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.</div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 class="step-header">2</h2>
+                        <div>
+                            <div class="step-info">* Convert your already generated .BIF files to native format.</div>
+                            <div class="step-body"></div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 class="step-header">3</h2>
+                        <div>                    
+                            <div class="step-info">* Verify expected videos have trickplay previews, then delete left over .BIF files.</div>
+                            <div class="step-body"></div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 class="step-header">4</h2>
+                        <div>
+                            <div class="step-info">* Uninstall Jellyscrub and remove the plugin repository.</div>
+                            <div class="step-body"></div>
+                        </div>
+                    </section>
+                </div>
+                
+
+                <form class="jellyscrubConfigurationForm" style="display: none;">
                     <br />
 
                     <div class="inputContainer">
@@ -65,17 +150,6 @@
                         <div class="fieldDescription checkboxFieldDescription">Without this, all this plugin does it generate .bif files.</div>
                         <div class="fieldDescription checkboxFieldDescription"><strong>Especially ideal for Docker/combo installs. Recommended to be kept on.</strong></div>
                     </div>
-
-                    <!--
-    <div class="checkboxContainer checkboxContainer-withDescription">
-        <label>
-            <input is="emby-checkbox" type="checkbox" id="chkStyleTrickplayContainer" />
-            <span>Style Trickplay Container</span>
-        </label>
-        <div class="fieldDescription checkboxFieldDescription">Injects a style element into the page that makes the trickplay preview look better.</div>
-        <div class="fieldDescription"><strong>Note:</strong> This will not overwrite custom CSS as set in General settings.</div>
-    </div>
-    -->
 
                     <div class="inputContainer">
                         <input is="emby-input" type="number" id="intervalInput" pattern="[0-9]*" min="0" required label="Image Interval">
