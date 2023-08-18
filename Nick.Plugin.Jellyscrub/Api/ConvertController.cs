@@ -3,6 +3,7 @@ using System.Net.Mime;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Nick.Plugin.Jellyscrub.Conversion;
 
 namespace Nick.Plugin.Jellyscrub.Api;
 
@@ -14,9 +15,25 @@ namespace Nick.Plugin.Jellyscrub.Api;
 [Authorize(Policy = "RequiresElevation")]
 public class ConvertController : ControllerBase
 {
+    private static readonly ConversionTask _conversionTask = new ConversionTask();
+
+    /// <summary>
+    /// Start a conversion task.
+    /// </summary>
+    /// <response code="200">Successfully started task.</response>
+    /// <returns>The status code.</returns>
+    [HttpPost("ConvertAll")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public ActionResult ConvertAll()
+    {
+        Task.Run(() => _conversionTask.ConvertAll());
+        return Ok();
+    }
+
     /// <summary>
     /// Get the log for a specified task.
     /// </summary>
+    /// <param name="type">Type of task to return log for.</param>
     /// <response code="200">Successfully returned log.</response>
     /// <response code="404">Task log not found.</response>
     /// <returns>The JSON log.</returns>
@@ -24,14 +41,14 @@ public class ConvertController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [Produces(MediaTypeNames.Application.Json)]
-    public ActionResult GetLog([FromRoute, Required] TaskType type)
+    public ActionResult GetLog([FromQuery, Required] TaskType type)
     {
         switch (type)
         {
             case TaskType.Convert:
-                return new JsonResult("");
+                return Content(_conversionTask.GetConvertLog());
             case TaskType.Delete:
-                return new JsonResult("");
+                return Content(_conversionTask.GetDeleteLog());
             default:
                 return NotFound();
         }

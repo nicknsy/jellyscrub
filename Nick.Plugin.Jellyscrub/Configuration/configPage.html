@@ -55,10 +55,52 @@
                 padding: 20px;
                 line-height: 1.5rem;
             }
+
+            .convert-button {
+                background-color: #00a4dcad;
+                display: inline-block;
+                padding: 10px;
+                border-radius: 5px;
+                border: 1px solid #00a4dc;
+                font-weight: bold;
+                cursor: pointer;
+            }
+
+            .convert-button:hover {
+                background-color: #00a4dcd1;
+            }
+
+            .delete-button {
+                background-color: #590000ad;
+                display: inline-block;
+                padding: 10px;
+                border-radius: 5px;
+                border: 1px solid #590000;
+                font-weight: bold;
+                cursor: pointer;
+            }
+
+            .delete-button:hover {
+                background-color: #590000d1;
+            }
+
+            .log-output {
+                height: 25vh;
+                overflow: auto;
+                border: 1px solid #292929;
+                border-radius: 5px 0px 0px 5px;
+                margin-bottom: 15px;
+                scroll-behavior: smooth;
+                padding: 5px;
+            }
+
+            .log-output > p {
+                font-size: small;
+                margin: 0 5px;
+            }
         </style>
         <div data-role="content">
             <div class="content-primary">
-
                 <div class="steps-container">
                     <section>
                         <h2 class="step-header">1</h2>
@@ -72,7 +114,26 @@
                         <h2 class="step-header">2</h2>
                         <div>
                             <div class="step-info">* Convert your already generated .BIF files to native format.</div>
-                            <div class="step-body"></div>
+                            <div class="step-body">
+                                <div class="log-output">
+                                    <p>Test message. This is a test message.</p>
+                                    <p>Test message. This is a test message.</p>
+                                    <p>Test message. This is a test message.</p>
+                                    <p>Test message. This is a test message.</p>
+                                    <p>Test message. This is a test message.</p>
+                                    <p>Test message. This is a test message.</p>
+                                    <p>Test message. This is a test message.</p>
+                                    <p>Test message. This is a test message.</p>
+                                    <p>Test message. This is a test message.</p>
+                                    <p>Test message. This is a test message.</p>
+                                    <p>Test message. This is a test message.</p>
+                                    <p>Test message. This is a test message.</p>
+                                    <p>Test message. This is a test message.</p>
+                                    <p>Test message. This is a test message.</p>
+                                    <p>Test message. This is a test message.</p>
+                                </div>
+                                <div class="convert-button">Start Conversion</div>
+                            </div>
                         </div>
                     </section>
 
@@ -80,7 +141,27 @@
                         <h2 class="step-header">3</h2>
                         <div>                    
                             <div class="step-info">* Verify expected videos have trickplay previews, then delete left over .BIF files.</div>
-                            <div class="step-body"></div>
+                            <div class="step-body">
+                                <div class="log-output">
+                                    <p>Test message. This is a test message.</p>
+                                    <p>Test message. This is a test message.</p>
+                                    <p>Test message. This is a test message.</p>
+                                    <p>Test message. This is a test message.</p>
+                                    <p>Test message. This is a test message.</p>
+                                    <p>Test message. This is a test message.</p>
+                                    <p>Test message. This is a test message.</p>
+                                    <p>Test message. This is a test message.</p>
+                                    <p>Test message. This is a test message.</p>
+                                    <p>Test message. This is a test message.</p>
+                                    <p>Test message. This is a test message.</p>
+                                    <p>Test message. This is a test message.</p>
+                                    <p>Test message. This is a test message.</p>
+                                    <p>Test message. This is a test message.</p>
+                                    <p>Test message. This is a test message.</p>
+                                </div>
+                                <!-- TODO: Some safeguards -->
+                                <div class="delete-button">Start Deletion</div>
+                            </div>
                         </div>
                     </section>
 
@@ -88,187 +169,40 @@
                         <h2 class="step-header">4</h2>
                         <div>
                             <div class="step-info">* Uninstall Jellyscrub and remove the plugin repository.</div>
-                            <div class="step-body"></div>
+                            <div class="step-body">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.</div>
                         </div>
                     </section>
                 </div>
-                
-
-                <form class="jellyscrubConfigurationForm" style="display: none;">
-                    <br />
-
-                    <div class="inputContainer">
-                        <select is="emby-select" id="hwAcceleration" name="HW Acceleration" label="HW Acceleration">
-                            <option id="optAccelerationNone" value="None">None</option>
-                            <option id="optAccelerationNoEncode" value="NoEncode">No Encode - decode, filters</option>
-                            <option id="optAccelerationFull" value="Full">Full - decode, filters, encode</option>
-                        </select>
-                        <div class="fieldDescription">Uses the same options as set in "Playback" to HW accelerate BIF generation. Counts towards NVENC stream limit.</div>
-                        <div class="fieldDescription">"Full" will default to SW encode on NVENC and AMF. On VAAPI and QSV devices without mjpeg encode support, set to "No Encode".</div>
-                        <div class="fieldDescription"><strong>Do not use "Full" if using an AMD device through VAAPI.</strong></div>
-                    </div>
-
-                    <div class="checkboxContainer checkboxContainer-withDescription">
-                        <label>
-                            <input is="emby-checkbox" type="checkbox" id="chkOnDemand" />
-                            <span>Generate trickplay files on demand when a client requests one</span>
-                        </label>
-                    </div>
-
-                    <div class="checkboxContainer checkboxContainer-withDescription">
-                        <label>
-                            <input is="emby-checkbox" type="checkbox" id="chkSaveBifLocal" />
-                            <span>Save trickplay files within media folders</span>
-                        </label>
-                        <div class="fieldDescription checkboxFieldDescription">This will enable easier storage management of the trickplay files. Trickplay files will be saved with a .bif extension.</div>
-                    </div>
-
-                    <div class="checkboxContainer checkboxContainer-withDescription">
-                        <label>
-                            <input is="emby-checkbox" type="checkbox" id="chkEnableDuringScan" />
-                            <span>Create trickplays when videos are discovered</span>
-                        </label>
-                        <div class="fieldDescription checkboxFieldDescription">This will make trickplay files available sooner but will result in longer library scans. Trickplay files are also created during a scheduled task.</div>
-                        <div class="fieldDescription checkboxFieldDescription">To configure the scheduled task, see <a is="emby-linkbutton" class="button-link" href="scheduledtasks.html">scheduled tasks</a>.</div>
-
-                        <div class="inputContainer">
-                            <select is="emby-select" id="scanBehavior" name="Scan Behavior" label="Scan Behavior">
-                                <option id="optNonBlocking" value="NonBlocking">Non Blocking - queues generation, then returns</option>
-                                <option id="optBlocking" value="Blocking">Blocking - queues generation, blocks scan until complete</option>
-                            </select>
-                            <div class="fieldDescription">The default behavior is non blocking, which will add media to the library before trickplay generation is done.</div>
-                            <div class="fieldDescription">Blocking will ensure trickplay files are generated before media is added to the library, but will make scans significantly longer.</div>
-                        </div>
-                    </div>
-
-                    <div class="checkboxContainer checkboxContainer-withDescription">
-                        <label>
-                            <input is="emby-checkbox" type="checkbox" id="chkInjectScript" />
-                            <span>Inject client script into jellyfin-web</span>
-                        </label>
-                        <div class="fieldDescription checkboxFieldDescription">If on, the plugin will attempt to inject the client-side script tag in jellyfin-web that allows for smooth previews.</div>
-                        <div class="fieldDescription checkboxFieldDescription">Without this, all this plugin does it generate .bif files.</div>
-                        <div class="fieldDescription checkboxFieldDescription"><strong>Especially ideal for Docker/combo installs. Recommended to be kept on.</strong></div>
-                    </div>
-
-                    <div class="inputContainer">
-                        <input is="emby-input" type="number" id="intervalInput" pattern="[0-9]*" min="0" required label="Image Interval">
-                        <div class="fieldDescription">Interval of time between each new trickplay image. A shorter interval and more images will take up more space.</div>
-                        <div class="fieldDescription"><strong>Note:</strong> This value cannot be below 0. A value of 0 defaults to a 1000ms interval.</div>
-                    </div>
-
-                    <div class="inputContainer">
-                        <input is="emby-input" id="resolutionInput" pattern="[0-9,]*" required label="Width Resolutions">
-                        <div class="fieldDescription">Comma separated list of the width (px) that trickplay images will be generated at.</div>
-                        <div class="fieldDescription">All images <strong>try</strong> to generate proportionally to the source, so a width of 320 on a 16:9 video ends up <strong>around</strong> 320x180.</div>
-                        <div class="fieldDescription"><strong>Note:</strong> Do not include spaces after commas.</div>
-                    </div>
-
-                    <div class="inputContainer">
-                        <select is="emby-select" id="processPriority" name="Process Priority" label="Process Priority">
-                            <!--<option id="optPriorityRealtime" value="Realtime">Realtime</option>-->
-                            <option id="optPriorityHigh" value="High">High</option>
-                            <option id="optPriorityAboveNormal" value="AboveNormal">Above Normal</option>
-                            <option id="optPriorityNormal" value="Normal">Normal</option>
-                            <option id="optPriorityBelowNormal" value="BelowNormal">Below Normal</option>
-                            <option id="optPriorityIdle" value="Idle">Idle</option>
-                        </select>
-                        <div class="fieldDescription">Setting this lower or higher will determine how the CPU prioritizes the ffmpeg .bif generation process in relation to other processes.</div>
-                        <div class="fieldDescription">If you notice slowdown while generating BIFs but don't want to fully stop their generation, try lowering this as well as the thread count.</div>
-                        <!--<div class="fieldDescription"><strong>Note:</strong> Setting this to Realtime might freeze the PC during bif generation!</div>-->
-                    </div>
-
-                    <div class="inputContainer">
-                        <input is="emby-input" type="number" id="processThreads" pattern="[0-9]*" required="" label="FFmpeg Threads">
-                        <div class="fieldDescription">The number of threads to pass to the "-threads" argument of ffmpeg.</div>
-                        <div class="fieldDescription">Applies to both input and output of ffmpeg, so the total threads used will be <strong>this * 2</strong>.</div>
-                        <div class="fieldDescription"><strong>-1:</strong> The option "-1" will use the same amount of threads as configured in Jellyfin, usually "0".</div>
-                        <div class="fieldDescription"><strong>0:</strong> The option "0" is the default for ffmpeg, utilizing as many threads/cores as possible.</div>
-                    </div>
-
-                    <br />
-                    <div>
-                        <button is="emby-button" type="submit" class="raised button-submit block emby-button"><span>Save</span></button>
-                    </div>
-                </form>
             </div>
         </div>
 
         <script type="text/javascript">
-            function fromIntArray(intArray) {
-                let text = '';
-
-                for (let i = 0; i < intArray.length; i++) {
-                    text += intArray[i];
-                    if (i != intArray.length - 1) text += ',';
-                }
-
-                return text;
-            }
-
-            function toIntArray(csv) {
-                let intArray = [];
-                let strArray = csv.split(',');
-
-                for (let i = 0; i < strArray.length; i++) {
-                    intArray.push(parseInt(strArray[i].trim()));
-                }
-
-                return intArray;
-            }
-
-
             (function () {
 
                 var pluginId = "a84a949d-4b73-4099-aacb-8341b4da17ba";
 
                 $('.jellyscrubConfigurationPage').on('pageshow', function (event) {
 
-                    var page = this;
+                    // var page = this;
 
-                    Dashboard.showLoadingMsg();
+                    // Dashboard.showLoadingMsg();
 
-                    ApiClient.getPluginConfiguration(pluginId).then(function (config) {
+                    // ApiClient.getPluginConfiguration(pluginId).then(function (config) {
 
-                        page.querySelector('#hwAcceleration').value = config.HwAcceleration;
-                        page.querySelector('#chkOnDemand').checked = config.OnDemandGeneration;
-                        page.querySelector('#chkEnableDuringScan').checked = config.ExtractionDuringLibraryScan;
-                        page.querySelector('#scanBehavior').value = config.ScanBehavior;
-                        page.querySelector('#chkSaveBifLocal').checked = config.LocalMediaFolderSaving;
-                        page.querySelector('#chkInjectScript').checked = config.InjectClientScript;
-                        // page.querySelector('#chkStyleTrickplayContainer').checked = config.StyleTrickplayContainer;
-                        page.querySelector('#intervalInput').value = config.Interval;
-                        page.querySelector('#resolutionInput').value = fromIntArray(config.WidthResolutions);
-                        page.querySelector('#processPriority').value = config.ProcessPriority;
-                        page.querySelector('#processThreads').value = config.ProcessThreads;
+                    //     page.querySelector('#hwAcceleration').value = config.HwAcceleration;
+                    //     page.querySelector('#chkOnDemand').checked = config.OnDemandGeneration;
+                    //     page.querySelector('#chkEnableDuringScan').checked = config.ExtractionDuringLibraryScan;
+                    //     page.querySelector('#scanBehavior').value = config.ScanBehavior;
+                    //     page.querySelector('#chkSaveBifLocal').checked = config.LocalMediaFolderSaving;
+                    //     page.querySelector('#chkInjectScript').checked = config.InjectClientScript;
+                    //     // page.querySelector('#chkStyleTrickplayContainer').checked = config.StyleTrickplayContainer;
+                    //     page.querySelector('#intervalInput').value = config.Interval;
+                    //     page.querySelector('#resolutionInput').value = fromIntArray(config.WidthResolutions);
+                    //     page.querySelector('#processPriority').value = config.ProcessPriority;
+                    //     page.querySelector('#processThreads').value = config.ProcessThreads;
 
-                        Dashboard.hideLoadingMsg();
-                    });
-                });
-
-                $('.jellyscrubConfigurationForm').off('submit.plugin').on('submit.plugin', function (e) {
-
-                    Dashboard.showLoadingMsg();
-
-                    var form = this;
-
-                    ApiClient.getPluginConfiguration(pluginId).then(function (config) {
-                        config.HwAcceleration = form.querySelector('#hwAcceleration').value;
-                        config.OnDemandGeneration = form.querySelector('#chkOnDemand').checked;
-                        config.ExtractionDuringLibraryScan = form.querySelector('#chkEnableDuringScan').checked;
-                        config.ScanBehavior = form.querySelector('#scanBehavior').value;
-                        config.LocalMediaFolderSaving = form.querySelector('#chkSaveBifLocal').checked;
-                        config.InjectClientScript = form.querySelector('#chkInjectScript').checked;
-                        // config.StyleTrickplayContainer = page.querySelector('#chkStyleTrickplayContainer').checked;
-                        config.Interval = Math.max(0, form.querySelector('#intervalInput').value);
-                        config.WidthResolutions = toIntArray(form.querySelector('#resolutionInput').value);
-                        config.ProcessPriority = form.querySelector('#processPriority').value;
-                        config.ProcessThreads = form.querySelector('#processThreads').value;
-
-                        ApiClient.updatePluginConfiguration(pluginId, config).then(Dashboard.processPluginConfigurationUpdateResult);
-                    });
-
-                    return false;
+                    //     Dashboard.hideLoadingMsg();
+                    // });
                 });
 
             })();
