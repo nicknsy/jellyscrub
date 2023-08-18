@@ -17,9 +17,9 @@ public class ConversionTask
         if (!CheckAndSetBusy(_convertLogger)) return;
 
         _convertLogger.ClearSynchronized();
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 200; i++)
         {
-            Thread.Sleep(5000);
+            Thread.Sleep(500);
             _convertLogger.LogSynchronized($"Convert message {i}", PrettyLittleLogger.LogColor.Blue);
         }
 
@@ -29,6 +29,13 @@ public class ConversionTask
     public void DeleteAll()
     {
         if (!CheckAndSetBusy(_deleteLogger)) return;
+
+        _deleteLogger.ClearSynchronized();
+        for (int i = 0; i < 200; i++)
+        {
+            Thread.Sleep(500);
+            _deleteLogger.LogSynchronized($"Delete message {i}", PrettyLittleLogger.LogColor.Green);
+        }
 
         _busy = false;
     }

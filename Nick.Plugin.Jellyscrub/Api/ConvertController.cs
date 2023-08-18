@@ -31,6 +31,19 @@ public class ConvertController : ControllerBase
     }
 
     /// <summary>
+    /// Start a deletion task.
+    /// </summary>
+    /// <response code="200">Successfully started task.</response>
+    /// <returns>The status code.</returns>
+    [HttpPost("DeleteAll")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public ActionResult DeleteAll()
+    {
+        Task.Run(() => _conversionTask.DeleteAll());
+        return Ok();
+    }
+
+    /// <summary>
     /// Get the log for a specified task.
     /// </summary>
     /// <param name="type">Type of task to return log for.</param>

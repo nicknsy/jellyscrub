@@ -115,21 +115,7 @@
                         <div>
                             <div class="step-info">* Convert your already generated .BIF files to native format.</div>
                             <div class="step-body">
-                                <div class="log-output">
-                                    <p>Test message. This is a test message.</p>
-                                    <p>Test message. This is a test message.</p>
-                                    <p>Test message. This is a test message.</p>
-                                    <p>Test message. This is a test message.</p>
-                                    <p>Test message. This is a test message.</p>
-                                    <p>Test message. This is a test message.</p>
-                                    <p>Test message. This is a test message.</p>
-                                    <p>Test message. This is a test message.</p>
-                                    <p>Test message. This is a test message.</p>
-                                    <p>Test message. This is a test message.</p>
-                                    <p>Test message. This is a test message.</p>
-                                    <p>Test message. This is a test message.</p>
-                                    <p>Test message. This is a test message.</p>
-                                    <p>Test message. This is a test message.</p>
+                                <div class="log-output" id="convert-log">
                                     <p>Test message. This is a test message.</p>
                                 </div>
                                 <div class="convert-button">Start Conversion</div>
@@ -142,24 +128,10 @@
                         <div>                    
                             <div class="step-info">* Verify expected videos have trickplay previews, then delete left over .BIF files.</div>
                             <div class="step-body">
-                                <div class="log-output">
-                                    <p>Test message. This is a test message.</p>
-                                    <p>Test message. This is a test message.</p>
-                                    <p>Test message. This is a test message.</p>
-                                    <p>Test message. This is a test message.</p>
-                                    <p>Test message. This is a test message.</p>
-                                    <p>Test message. This is a test message.</p>
-                                    <p>Test message. This is a test message.</p>
-                                    <p>Test message. This is a test message.</p>
-                                    <p>Test message. This is a test message.</p>
-                                    <p>Test message. This is a test message.</p>
-                                    <p>Test message. This is a test message.</p>
-                                    <p>Test message. This is a test message.</p>
-                                    <p>Test message. This is a test message.</p>
-                                    <p>Test message. This is a test message.</p>
+                                <div class="log-output" id="delete-log">
                                     <p>Test message. This is a test message.</p>
                                 </div>
-                                <!-- TODO: Some safeguards -->
+                                <!-- TODO: Some safeguards and force button -->
                                 <div class="delete-button">Start Deletion</div>
                             </div>
                         </div>
@@ -178,32 +150,79 @@
 
         <script type="text/javascript">
             (function () {
+                var startConvertRequest = {
+                    type: 'POST'
+                };
+                var startDeleteRequest = {
+                    type: 'POST'
+                };
+                var getConvertLogRequest = {};
+                var getDeleteLogRequest = {};
 
-                var pluginId = "a84a949d-4b73-4099-aacb-8341b4da17ba";
+                var convertTask = { id: undefined, old: undefined };
+                var deleteTask = { id: undefined, old: undefined };
 
+                /*
+                 *  Set up requests using ApiClient. Start requesting logs.
+                 */
                 $('.jellyscrubConfigurationPage').on('pageshow', function (event) {
+                    const base = 'Trickplay/Convert/';
 
-                    // var page = this;
+                    startConvertRequest.url = ApiClient.getUrl(base + 'ConvertAll');
+                    getConvertLogRequest.url = ApiClient.getUrl(base + 'Log?type=Convert');
 
-                    // Dashboard.showLoadingMsg();
+                    startDeleteRequest.url = ApiClient.getUrl(base + 'DeleteAll');
+                    getDeleteLogRequest.url = ApiClient.getUrl(base + 'Log?type=Delete');
 
-                    // ApiClient.getPluginConfiguration(pluginId).then(function (config) {
-
-                    //     page.querySelector('#hwAcceleration').value = config.HwAcceleration;
-                    //     page.querySelector('#chkOnDemand').checked = config.OnDemandGeneration;
-                    //     page.querySelector('#chkEnableDuringScan').checked = config.ExtractionDuringLibraryScan;
-                    //     page.querySelector('#scanBehavior').value = config.ScanBehavior;
-                    //     page.querySelector('#chkSaveBifLocal').checked = config.LocalMediaFolderSaving;
-                    //     page.querySelector('#chkInjectScript').checked = config.InjectClientScript;
-                    //     // page.querySelector('#chkStyleTrickplayContainer').checked = config.StyleTrickplayContainer;
-                    //     page.querySelector('#intervalInput').value = config.Interval;
-                    //     page.querySelector('#resolutionInput').value = fromIntArray(config.WidthResolutions);
-                    //     page.querySelector('#processPriority').value = config.ProcessPriority;
-                    //     page.querySelector('#processThreads').value = config.ProcessThreads;
-
-                    //     Dashboard.hideLoadingMsg();
-                    // });
+                    convertTask.id = setInterval(
+                        function() { updateLog(document.getElementById('convert-log'), convertTask, getConvertLogRequest) },
+                        1000);
+                    deleteTask.id = setInterval(
+                        function() { updateLog(document.getElementById('delete-log'), deleteTask, getDeleteLogRequest) },
+                        1000);
                 });
+
+                $('.convert-button').on('click', function (event) {
+                    ApiClient.fetch(startConvertRequest);
+                });
+
+                $('.delete-button').on('click', function (event) {
+                    // TODO: Add some safeguards
+                    ApiClient.fetch(startDeleteRequest);
+                });
+
+                function updateLog(element, task, request) {
+                    // Since Jellyfin is a SPA interval must be cleared manually (I think)
+                    // String interpolation doesn't work -- gone after compilation
+                    if (!document.contains(element) || element.getClientRects().length < 1) {
+                        console.log(element.id + ' no longer visible. Stopping log refresh.');
+                        task.old = undefined;
+                        clearInterval(task.id);
+                    }
+
+                    ApiClient.fetch(request).then((data) => {
+                        let messages = JSON.parse(data);
+                        let newHTML = '';
+
+                        if (data === task.old) return;
+
+                        messages.forEach((message) => {
+                            // Messages are html encoded server-side, color is safe
+                            newHTML += '<p style="color:' + message.Color + '">' + message.Text + '</p>';
+                        });
+
+                        if (newHTML) {
+                            element.innerHTML = newHTML;
+                            // Auto-scroll if they haven't intentionally scrolled up
+                            // Always auto-scroll on the first request because many messages could be present if user clicks off then back
+                            if (!task.old || element.scrollHeight - (element.scrollTop + element.getBoundingClientRect().height) < 200) {
+                                element.scroll(0, element.scrollHeight);
+                            }
+                        }
+
+                        task.old = data;
+                    });
+                }
 
             })();
 

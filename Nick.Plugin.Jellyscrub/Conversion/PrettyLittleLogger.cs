@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Text.Json;
+using System.Web;
 
 namespace Nick.Plugin.Jellyscrub.Conversion;
 
@@ -12,7 +13,7 @@ public class PrettyLittleLogger
         ICollection col = _messages;
         lock (col.SyncRoot)
         {
-            _messages.Add(new LogMessage { Text = text, Color = _colorToHTML[color] });
+            _messages.Add(new LogMessage { Text = HttpUtility.HtmlEncode(text), Color = _colorToHTML[color] });
         }
     }
 
