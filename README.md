@@ -48,3 +48,35 @@ Jellyscrub on iOS [<b>Single Screenshot, Functions Same as Above</b>]:
 6. Change any configuration options, like whether to save in media folders over internal metadata folders.
 7. Run a scan (could take much longer depending on library size) or start watching a movie and the scrubbing preview should update in a few minutes.
 8. OPTIONAL: In the JMP desktop client (version >= 1.8.1), click on your profile image, go to "Client Settings", and tick "Jellyscrub" under plugin support. Restart for changes to take effect.
+
+<b>NOTE: If you're using the [LinuxServer.io Jellyfin Docker Image](https://docs.linuxserver.io/images/docker-jellyfin/) and a custom UID/GID, you can leverage their [custom script framework](https://docs.linuxserver.io/general/container-customization/) to inject your own user script which injects the Client Script into index.html upon initialization of the container.</b>
+
+1. Create a folder containing a bash script which injects the Client Script into index.html.
+
+    Example `custom_scripts/jellyscrub_injection.sh` script:
+```bash
+#!/bin/bash
+
+if grep -q "Jellyscrub" /usr/share/jellyfin/web/index.html; then
+    echo "Content already exists. No changes needed."
+else
+    sed -i 's|</body|<script plugin="Jellyscrub" version="1.0.0.0" src="/Trickplay/ClientScript"></script></body|' /usr/share/jellyfin/web/index.html && echo "Content inserted successfully."
+fi
+```
+2. Modify your Docker configuration to include a volume mount to a directory containing the script.
+
+    Example `docker-compose.yml`:
+```docker
+version: "3.7"
+services:
+
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    environment:
+        PUID: "99"
+        PGID: "100"
+    volumes:
+      - ./custom_scripts:/custom-cont-init.d:ro # custom startup script for Jellyscrub plugin client script injection
+    restart: always
+```
