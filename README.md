@@ -36,6 +36,22 @@ Jellyscrub on iOS [<b>Single Screenshot, Functions Same as Above</b>]:
 <b>NOTE: The client script will fail to inject automatically into the jellyfin-web server if there is a difference in permission between the owner of the web files (root, or www-data, etc.) and the executor of the main jellyfin-server. This often happens because...</b>
 * <b>Docker -</b> the container is being run as a non-root user while having been built as a root user, causing the web files to be owned by root. To solve this, you can remove any lines like `User: 1000:1000`, `GUID:`, `PID:`, etc. from the jellyfin docker compose file.
 * <b>Install from distro repositories -</b> the jellyfin-server will execute as `jellyfin` user while the web files will be owned by `root`, `www-data`, etc. This can <i>likely</i> be fixed by adding the `jellyfin` (or whichecher user your main jellyfin server runs at) to the same group the jellyfin-web folders are owned by. You should only do this if they are owned by a group other than root, and will have to lookup how to manage permissions on your specific distro.
+* <b>Jellyfin behind NGINX reverse proxy -</b> An alternative to the two solutions above is injecting the code into the webclient by using NGINX's [ngx_http_sub_module](https://nginx.org/en/docs/http/ngx_http_sub_module.html) module. This works when using Nginx as reverse proxy in front of Jellyfin (regardless of install method) and does not require any file/owner/permissions changes at all as NGINX simply injects the code dynamically on request.
+
+Example:
+```
+location = /web/ {
+    ...
+    # inject Jellyscrub script into the webclient
+    proxy_set_header Accept-Encoding "";
+    sub_filter
+    '</body>'
+    '<script plugin="Jellyscrub" version="1.0.0.0" src="/Trickplay/ClientScript"></script>
+    </body>';
+    sub_filter_once on;
+    ...
+}
+```
 * <b>Alternatively, the script can manually be added to the index.html as described below.</b>
 
 <b>NOTE: If you manually injected the script tag, you will have to manually inject it on every jellyfin-web update, as the index.html file will get overwritten. However, for normal Jellyscrub updates the script tag will not need to be changed as the plugin will return the latest script from /ClientScript</b>
