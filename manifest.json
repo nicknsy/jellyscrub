@@ -1,108 +1,20 @@
 [
     {
-        "guid": "a84a949d-4b73-4099-aacb-8341b4da17ba",
-        "name": "Jellyscrub",
+        "guid": "1145F307-A7B2-48FB-B514-7A838DD5F95F",
+        "name": "Jellyscrub Fork Richy",
         "overview": "Create BIF files for media to be used for trickplay scrubbing previews.",
         "description": "Smooth mouse-over video scrubbing previews.",
-        "owner": "Nick",
+        "owner": "Richy",
         "category": "General",
-        "imageUrl": "https://raw.githubusercontent.com/nicknsy/jellyscrub/main/logo/logo.png",
+        "imageUrl": "https://raw.githubusercontent.com/richy1989/jellyscrub/main/logo/logo.png",
         "versions": [
             {
-                "version": "1.1.1.0",
-                "changelog": "- fix on webOS",
+                "version": "1.1.1.1",
+                "changelog": "- added parallel processes",
                 "targetAbi": "10.8.0.0",
-                "sourceUrl": "https://github.com/nicknsy/jellyscrub/releases/download/1.1.1.0/Jellyscrub-v1.1.1.0.zip",
-                "checksum": "46db94750bd208ccd8d43916156f98f8",
-                "timestamp": "2023-03-30T05:02:00Z"
-            },
-            {
-                "version": "1.1.0.0",
-                "changelog": "- minor bug fixes/improvements",
-                "targetAbi": "10.8.0.0",
-                "sourceUrl": "https://github.com/nicknsy/jellyscrub/releases/download/1.1.0.0/Jellyscrub-v1.1.0.0.zip",
-                "checksum": "86ac6bd95ec8c52898e1b0d660bda6b1",
-                "timestamp": "2023-03-13T07:44:00Z"
-            },
-            {
-                "version": "1.0.0.9",
-                "changelog": "- add -an -sn to ffmpeg command to stop audio/subtitle transcoding",
-                "targetAbi": "10.8.0.0",
-                "sourceUrl": "https://github.com/nicknsy/jellyscrub/releases/download/1.0.0.9/Jellyscrub-v1.0.0.9.zip",
-                "checksum": "80b4038a54fd0d8c47f27a8c7b7edd67",
-                "timestamp": "2023-02-15T11:27:00Z"
-            },
-            {
-                "version": "1.0.0.8",
-                "changelog": "- HW acceleration (decode, filters, encode)\n- DV tonemapping\n- other small bug fixes",
-                "targetAbi": "10.8.0.0",
-                "sourceUrl": "https://github.com/nicknsy/jellyscrub/releases/download/1.0.0.8/Jellyscrub-v1.0.0.8.zip",
-                "checksum": "49edf864886a9fe3075fd09a15ceaa1c",
-                "timestamp": "2023-02-15T09:13:00Z"
-            },
-            {
-                "version": "1.0.0.7",
-                "changelog": "- include a .ignore file in the trickplay folder\n- center scrubbing timestamp\n- add back process priority setting",
-                "targetAbi": "10.8.0.0",
-                "sourceUrl": "https://github.com/nicknsy/jellyscrub/releases/download/1.0.0.7/Jellyscrub-v1.0.0.7.zip",
-                "checksum": "3deb14e4d1f2a811994c5dcd14843371",
-                "timestamp": "2022-11-26T12:25:00Z"
-            },
-            {
-                "version": "1.0.0.6",
-                "changelog": "- add non-blocking option for generations triggered by library scans\n- fix threads option\n- bug fixes",
-                "targetAbi": "10.8.0.0",
-                "sourceUrl": "https://github.com/nicknsy/jellyscrub/releases/download/1.0.0.6/Jellyscrub-v1.0.0.6.zip",
-                "checksum": "dd7bd697ae4cd0dc8209cc6a470fcba3",
-                "timestamp": "2022-08-26T20:37:00Z"
-            },
-            {
-                "version": "1.0.0.5",
-                "changelog": "- fix TV shows not having trickplay after first episode\n- handle Jellyfin base path configuration",
-                "targetAbi": "10.8.0.0",
-                "sourceUrl": "https://github.com/nicknsy/jellyscrub/releases/download/1.0.0.5/Jellyscrub-v1.0.0.5.zip",
-                "checksum": "fd00e3a08f876a9e9ff7e03ac578bb17",
-                "timestamp": "2022-08-25T14:40:00Z"
-            },
-            {
-                "version": "1.0.0.4",
-                "changelog": "- catch permission exception on setting process priority",
-                "targetAbi": "10.8.0.0",
-                "sourceUrl": "https://github.com/nicknsy/jellyscrub/releases/download/1.0.0.4/Jellyscrub-v1.0.0.4.zip",
-                "checksum": "c3680efb82635ad96203f670212d0364",
-                "timestamp": "2022-08-04T11:30:00Z"
-            },
-            {
-                "version": "1.0.0.3",
-                "changelog": "- maybe fixed hdr tonemapping\n- style trickplay images to look better\n- added option to set threads\n- added option to set process priority\n- other bug fixes",
-                "targetAbi": "10.8.0.0",
-                "sourceUrl": "https://github.com/nicknsy/jellyscrub/releases/download/1.0.0.3/Jellyscrub-v1.0.0.3.zip",
-                "checksum": "a18c7dab567ac2919e65f98589991db7",
-                "timestamp": "2022-08-04T02:11:00Z"
-            },
-            {
-                "version": "1.0.0.2",
-                "changelog": "- fix issue causing previews to disappear after clicking certain playback controls",
-                "targetAbi": "10.8.0.0",
-                "sourceUrl": "https://github.com/nicknsy/jellyscrub/releases/download/1.0.0.2/Jellyscrub-v1.0.0.2.zip",
-                "checksum": "4cd7f3625ecc029f208083a1c5929d94",
-                "timestamp": "2022-08-02T17:15:00Z"
-            },
-            {
-                "version": "1.0.0.1",
-                "changelog": "- fix media encoder not using configured interval\n- add more client-side null checks\n- allow .bif extension on GetBIF endpoint",
-                "targetAbi": "10.8.0.0",
-                "sourceUrl": "https://github.com/nicknsy/jellyscrub/releases/download/1.0.0.1/Jellyscrub-v1.0.0.1.zip",
-                "checksum": "d4d67d4d5cb659072afd98c5c8cdf5d9",
-                "timestamp": "2022-08-01T11:36:00Z"
-            },
-            {
-                "version": "1.0.0.0",
-                "changelog": "Initial release",
-                "targetAbi": "10.8.0.0",
-                "sourceUrl": "https://github.com/nicknsy/jellyscrub/releases/download/1.0.0.0/Jellyscrub-v1.0.0.0.zip",
-                "checksum": "72340430bdb7dab0a223d9d40c3c676f",
-                "timestamp": "2022-07-31T20:09:00Z"
+                "sourceUrl": "https://github.com/richy1989/jellyscrub/releases/download/1.1.1.1/Jellyscrub-v1.1.1.1.zip",
+                "checksum": "a30e204d7abb8b61c3e96501547972c8",
+                "timestamp": "2024-02-6T11:00:00Z"
             }
         ]
     }
