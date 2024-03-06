@@ -105,6 +105,13 @@
                     </div>
 
                     <div class="inputContainer">
+                        <input is="emby-input" type="number" id="parallelProcesses" pattern="[0-9]*" required="" label="Parallel Processes">
+                        <div class="fieldDescription">The number parallel processes started. This will generate trickplay images in parallel.</div>
+                        <div class="fieldDescription"><strong>NOTE: </strong>If using HW Encoding make sure the GPU driver allows the number of entered parallel processes.</div>
+
+                    </div>
+
+                    <div class="inputContainer">
                         <input is="emby-input" type="number" id="processThreads" pattern="[0-9]*" required="" label="FFmpeg Threads">
                         <div class="fieldDescription">The number of threads to pass to the "-threads" argument of ffmpeg.</div>
                         <div class="fieldDescription">Applies to both input and output of ffmpeg, so the total threads used will be <strong>this * 2</strong>.</div>
@@ -167,6 +174,7 @@
                         page.querySelector('#resolutionInput').value = fromIntArray(config.WidthResolutions);
                         page.querySelector('#processPriority').value = config.ProcessPriority;
                         page.querySelector('#processThreads').value = config.ProcessThreads;
+                        page.querySelector('#parallelProcesses').value = config.ParallelProcesses;
 
                         Dashboard.hideLoadingMsg();
                     });
@@ -190,6 +198,7 @@
                         config.WidthResolutions = toIntArray(form.querySelector('#resolutionInput').value);
                         config.ProcessPriority = form.querySelector('#processPriority').value;
                         config.ProcessThreads = form.querySelector('#processThreads').value;
+                        config.ParallelProcesses = form.querySelector('#parallelProcesses').value;
 
                         ApiClient.updatePluginConfiguration(pluginId, config).then(Dashboard.processPluginConfigurationUpdateResult);
                     });

@@ -22,6 +22,7 @@ public class VideoProcessor
     private readonly PluginConfiguration _config;
     private readonly OldMediaEncoder _oldEncoder;
 
+
     public VideoProcessor(
         ILoggerFactory loggerFactory,
         ILogger<VideoProcessor> logger,
@@ -43,12 +44,11 @@ public class VideoProcessor
     /*
      * Entry point to tell VideoProcessor to generate BIF from item
      */
-    public async Task Run(BaseItem item, CancellationToken cancellationToken)
+    public async Task Run(BaseItem item, bool runParallel, CancellationToken cancellationToken)
     {
         if (!EnableForItem(item, _fileSystem, _config.Interval)) return;
 
-        var mediaSources = ((IHasMediaSources)item).GetMediaSources(false)
-            .ToList();
+        var mediaSources = ((IHasMediaSources)item).GetMediaSources(false).ToList();
 
         foreach (var mediaSource in mediaSources)
         {
@@ -62,16 +62,19 @@ public class VideoProcessor
                 if (!item.Id.Equals(Guid.Parse(mediaSource.Id))) continue;
 
                 cancellationToken.ThrowIfCancellationRequested();
-                await Run(item, mediaSource, width, _config.Interval, cancellationToken).ConfigureAwait(false);
+                await Run(item, mediaSource, width, _config.Interval, runParallel, cancellationToken).ConfigureAwait(false);
             }
         }
     }
 
-    private async Task Run(BaseItem item, MediaSourceInfo mediaSource, int width, int interval, CancellationToken cancellationToken)
+    private static readonly SemaphoreSlim _bifWriterSemaphore = new SemaphoreSlim(1, 1);
+
+    private async Task Run(BaseItem item, MediaSourceInfo mediaSource, int width, int interval, bool runParallel, CancellationToken cancellationToken)
     {
         if (!HasBif(item, _fileSystem, width))
         {
-            await BifWriterSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+            if(!runParallel)
+                await _bifWriterSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
 
             try
             {
@@ -87,7 +90,8 @@ public class VideoProcessor
             }
             finally
             {
-                BifWriterSemaphore.Release();
+                if (!runParallel)
+                    _bifWriterSemaphore.Release();
             }
         }
     }
@@ -235,7 +239,6 @@ public class VideoProcessor
     /*
      * Bif Creation
      */
-    private static readonly SemaphoreSlim BifWriterSemaphore = new SemaphoreSlim(1, 1);
 
     private Task CreateBif(BaseItem item, int width, int interval, MediaSourceInfo mediaSource, CancellationToken cancellationToken)
     {
