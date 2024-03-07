@@ -108,11 +108,11 @@ public class BIFMetadataProvider : ICustomMetadataProvider<Episode>,
             switch (config.ScanBehavior)
             {
                 case MetadataScanBehavior.Blocking:
-                    await videoProcessor.Run(item, cancellationToken).ConfigureAwait(false);
+                    await videoProcessor.Run(item, false, cancellationToken).ConfigureAwait(false);
                     break;
                 default:
                 case MetadataScanBehavior.NonBlocking:
-                    _ = videoProcessor.Run(item, cancellationToken).ConfigureAwait(false);
+                    _ = videoProcessor.Run(item, false, cancellationToken).ConfigureAwait(false);
                     break;
             }
         }

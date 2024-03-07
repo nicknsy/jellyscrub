@@ -79,6 +79,11 @@ public class PluginConfiguration : BasePluginConfiguration
     public int[] WidthResolutions { get; set; } = new[] { 320 };
 
     /// <summary>
+    /// Gets or sets the number of parallel processes used to generate the images.
+    /// </summary>
+    public int ParallelProcesses { get; set; } = 1;
+
+    /// <summary>
     /// Set the number of threads to be used by ffmpeg.
     /// -1 = use default from jellyfin
     /// 0 = default used by ffmpeg
