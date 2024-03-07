@@ -36,10 +36,10 @@ public class OldMediaEncoder
     private bool _doHwEncode;
 
     public OldMediaEncoder(
-	    ILogger<OldMediaEncoder> logger,
-	    IMediaEncoder mediaEncoder,
-	    IServerConfigurationManager configurationManager,
-	    IFileSystem fileSystem,
+        ILogger<OldMediaEncoder> logger,
+        IMediaEncoder mediaEncoder,
+        IServerConfigurationManager configurationManager,
+        IFileSystem fileSystem,
         EncodingHelper encodingHelper)
     {
         _logger = logger;

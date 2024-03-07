@@ -66,7 +66,7 @@
                         <div class="fieldDescription checkboxFieldDescription"><strong>Especially ideal for Docker/combo installs. Recommended to be kept on.</strong></div>
                     </div>
 
-                    <!--
+    <!--
     <div class="checkboxContainer checkboxContainer-withDescription">
         <label>
             <input is="emby-checkbox" type="checkbox" id="chkStyleTrickplayContainer" />
@@ -102,6 +102,13 @@
                         <div class="fieldDescription">Setting this lower or higher will determine how the CPU prioritizes the ffmpeg .bif generation process in relation to other processes.</div>
                         <div class="fieldDescription">If you notice slowdown while generating BIFs but don't want to fully stop their generation, try lowering this as well as the thread count.</div>
                         <!--<div class="fieldDescription"><strong>Note:</strong> Setting this to Realtime might freeze the PC during bif generation!</div>-->
+                    </div>
+
+                    <div class="inputContainer">
+                        <input is="emby-input" type="number" id="parallelProcesses" pattern="[0-9]*" required="" label="Parallel Processes">
+                        <div class="fieldDescription">The number parallel processes started. This will generate trickplay images in parallel.</div>
+                        <div class="fieldDescription"><strong>NOTE: </strong>If using HW Encoding make sure the GPU driver allows the number of entered parallel processes.</div>
+
                     </div>
 
                     <div class="inputContainer">
@@ -167,6 +174,7 @@
                         page.querySelector('#resolutionInput').value = fromIntArray(config.WidthResolutions);
                         page.querySelector('#processPriority').value = config.ProcessPriority;
                         page.querySelector('#processThreads').value = config.ProcessThreads;
+                        page.querySelector('#parallelProcesses').value = config.ParallelProcesses;
 
                         Dashboard.hideLoadingMsg();
                     });
@@ -190,6 +198,7 @@
                         config.WidthResolutions = toIntArray(form.querySelector('#resolutionInput').value);
                         config.ProcessPriority = form.querySelector('#processPriority').value;
                         config.ProcessThreads = form.querySelector('#processThreads').value;
+                        config.ParallelProcesses = form.querySelector('#parallelProcesses').value;
 
                         ApiClient.updatePluginConfiguration(pluginId, config).then(Dashboard.processPluginConfigurationUpdateResult);
                     });

@@ -1,14 +1,14 @@
 using MediaBrowser.Common.Configuration;
+using MediaBrowser.Controller.Configuration;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
+using MediaBrowser.Controller.MediaEncoding;
+using MediaBrowser.Model.Entities;
+using MediaBrowser.Model.Globalization;
 using MediaBrowser.Model.IO;
 using MediaBrowser.Model.Tasks;
-using MediaBrowser.Model.Entities;
 using Microsoft.Extensions.Logging;
 using Nick.Plugin.Jellyscrub.Drawing;
-using MediaBrowser.Model.Globalization;
-using MediaBrowser.Controller.MediaEncoding;
-using MediaBrowser.Controller.Configuration;
 
 namespace Nick.Plugin.Jellyscrub.ScheduledTasks;
 
@@ -27,6 +27,10 @@ public class BIFGenerationTask : IScheduledTask
     private readonly IMediaEncoder _mediaEncoder;
     private readonly IServerConfigurationManager _configurationManager;
     private readonly EncodingHelper _encodingHelper;
+    private readonly ManualResetEvent _waitHandleParallelProcesses;
+    private readonly ManualResetEvent _waitHandleReportProgress;
+    private int _currentExecutionIndex;
+    private int _numComplete = 0;
 
     public BIFGenerationTask(
         ILibraryManager libraryManager,
@@ -49,7 +53,9 @@ public class BIFGenerationTask : IScheduledTask
         _localization = localization;
         _mediaEncoder = mediaEncoder;
         _configurationManager = configurationManager;
-        _encodingHelper= encodingHelper;
+        _encodingHelper = encodingHelper;
+        _waitHandleParallelProcesses = new ManualResetEvent(true);
+        _waitHandleReportProgress = new ManualResetEvent(true);
     }
 
     /// <inheritdoc />
@@ -88,32 +94,74 @@ public class BIFGenerationTask : IScheduledTask
 
         }).OfType<Video>().ToList();
 
-        var numComplete = 0;
+        var config = JellyscrubPlugin.Instance!.Configuration;
+        int parallelProcessesCount = config.ParallelProcesses > 0 ? config.ParallelProcesses : 1;
 
-        foreach (var item in items)
+        _currentExecutionIndex = -1;
+        _numComplete = 0;
+
+        var parallelProcessArray = new Task[parallelProcessesCount];
+
+        for (var i = 0; i < parallelProcessesCount; i++)
         {
-            try
+            parallelProcessArray[i] = Task.Run(async () =>
             {
-                cancellationToken.ThrowIfCancellationRequested();
+                int executionIndex = 0;
+                while (!cancellationToken.IsCancellationRequested && executionIndex < items.Count)
+                {
+                    _waitHandleParallelProcesses.WaitOne();
 
-                await new VideoProcessor(_loggerFactory, _loggerFactory.CreateLogger<VideoProcessor>(), _mediaEncoder, _configurationManager, _fileSystem, _appPaths, _libraryMonitor, _encodingHelper)
-                    .Run(item, cancellationToken).ConfigureAwait(false);
-            }
-            catch (OperationCanceledException)
-            {
-                break;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("Error creating trickplay files for {0}: {1}", item.Name, ex);
-            }
+                    _currentExecutionIndex++;
+                    executionIndex = _currentExecutionIndex;
 
-            numComplete++;
-            double percent = numComplete;
-            percent /= items.Count;
-            percent *= 100;
+                    _waitHandleParallelProcesses.Set();
 
-            progress.Report(percent);
+                    if (executionIndex < items.Count)
+                    {
+                        var item = items[executionIndex];
+
+                        try
+                        {
+                            cancellationToken.ThrowIfCancellationRequested();
+
+                            await new VideoProcessor(_loggerFactory, _loggerFactory.CreateLogger<VideoProcessor>(), _mediaEncoder, _configurationManager, _fileSystem, _appPaths, _libraryMonitor, _encodingHelper)
+                                .Run(item, true, cancellationToken).ConfigureAwait(false);
+
+                            ReportProgress(progress, items.Count);
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            break;
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError("Error creating trickplay files for {0}: {1}", item.Name, ex);
+                        }
+                    }
+                }
+            }, cancellationToken);
         }
+
+        foreach (var task in parallelProcessArray)
+        {
+            await task.WaitAsync(cancellationToken).ConfigureAwait(false);
+        }
+        _logger.LogInformation("Creating Trickplay Task Finished");
+    }
+
+    /// <summary>
+    /// Report the current progress of the task.  
+    /// </summary>
+    public void ReportProgress(IProgress<double> progress, int maxCount)
+    {
+        _waitHandleReportProgress.WaitOne();
+
+        _numComplete++;
+        double percent = _numComplete;
+        percent /= maxCount;
+        percent *= 100;
+        progress.Report(percent);
+
+        _waitHandleReportProgress.Set();
     }
 }
