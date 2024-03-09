@@ -8,6 +8,16 @@
         <style>
             @import url('https://fonts.googleapis.com/css2?family=Victor+Mono:wght@100;400;600&display=swap');
 
+            a {
+                text-decoration: none;
+                color: #00a4dc;
+                font-weight: bold;
+            }
+
+            a:hover {
+                text-decoration: dashed underline rgba(255, 255, 255, 0.8);
+            }
+
             .steps-container {
                 max-width: 54em;
                 overflow: auto;
@@ -106,7 +116,10 @@
                         <h2 class="step-header">1</h2>
                         <div>
                             <div class="step-info">* Enable native trickplay functionality and set desired options.</div>
-                            <div class="step-body">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.</div>
+                            <div class="step-body">
+                                Trickplay must be enabled per-library from the <a href="#/dashboard/libraries">Libraries</a> page.<br/><br/>
+                                Configure desired trickplay settings from the <a href="#/dashboard/playback/trickplay">Trickplay</a> page.<br/>
+                            </div>
                         </div>
                     </section>
 
@@ -115,9 +128,7 @@
                         <div>
                             <div class="step-info">* Convert your already generated .BIF files to native format.</div>
                             <div class="step-body">
-                                <div class="log-output" id="convert-log">
-                                    <p>Test message. This is a test message.</p>
-                                </div>
+                                <div class="log-output" id="convert-log"></div>
                                 <div class="convert-button">Start Conversion</div>
                             </div>
                         </div>
@@ -128,9 +139,7 @@
                         <div>                    
                             <div class="step-info">* Verify expected videos have trickplay previews, then delete left over .BIF files.</div>
                             <div class="step-body">
-                                <div class="log-output" id="delete-log">
-                                    <p>Test message. This is a test message.</p>
-                                </div>
+                                <div class="log-output" id="delete-log"></div>
                                 <!-- TODO: Some safeguards and force button -->
                                 <div class="delete-button">Start Deletion</div>
                             </div>
@@ -141,7 +150,10 @@
                         <h2 class="step-header">4</h2>
                         <div>
                             <div class="step-info">* Uninstall Jellyscrub and remove the plugin repository.</div>
-                            <div class="step-body">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.</div>
+                            <div class="step-body">
+                                Uninstall the plugin from the <a href="#/dashboard/plugins">My Plugins</a> page.<br/><br/>
+                                Remove the "jellyscrub" repository from the <a href="#/dashboard/plugins/repositories">Repositories</a> page.<br/>
+                            </div>
                         </div>
                     </section>
                 </div>
