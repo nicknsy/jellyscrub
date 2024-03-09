@@ -10,6 +10,7 @@ using Nick.Plugin.Jellyscrub.Configuration;
 using System.Text.Json;
 using MediaBrowser.Controller.MediaEncoding;
 using MediaBrowser.Controller.Configuration;
+using System.IO;
 
 namespace Nick.Plugin.Jellyscrub.Drawing;
 
@@ -166,6 +167,16 @@ public class VideoProcessor
     private static string GetInternalManifestPath(BaseItem item)
     {
         return Path.Combine(item.GetInternalMetadataPath(), "trickplay", "manifest.json");
+    }
+
+    public async static Task<Manifest?> GetManifest(BaseItem item, IFileSystem fileSystem)
+    {
+        var path = GetExistingManifestPath(item, fileSystem);
+
+        if (path is null) return null;
+
+        using FileStream openStream = File.OpenRead(path);
+        return await JsonSerializer.DeserializeAsync<Manifest>(openStream);
     }
 
     /*

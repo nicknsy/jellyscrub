@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Net.Mime;
+using MediaBrowser.Controller.Library;
+using MediaBrowser.Model.IO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -15,7 +17,12 @@ namespace Nick.Plugin.Jellyscrub.Api;
 [Authorize(Policy = "RequiresElevation")]
 public class ConvertController : ControllerBase
 {
-    private static readonly ConversionTask _conversionTask = new ConversionTask();
+    private static ConversionTask _conversionTask;
+
+    public ConvertController(ILibraryManager libraryManager, IFileSystem fileSystem)
+    {
+        if (_conversionTask is null) _conversionTask = new ConversionTask(libraryManager, fileSystem);
+    }
 
     /// <summary>
     /// Start a conversion task.
