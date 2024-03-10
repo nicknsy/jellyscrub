@@ -3,12 +3,12 @@ using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.IO;
 using MediaBrowser.Model.Tasks;
-using MediaBrowser.Model.Entities;
 using Microsoft.Extensions.Logging;
 using Nick.Plugin.Jellyscrub.Drawing;
 using MediaBrowser.Model.Globalization;
 using MediaBrowser.Controller.MediaEncoding;
 using MediaBrowser.Controller.Configuration;
+using Jellyfin.Data.Enums;
 
 namespace Nick.Plugin.Jellyscrub.ScheduledTasks;
 

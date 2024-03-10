@@ -176,7 +176,15 @@ public class VideoProcessor
         if (path is null) return null;
 
         using FileStream openStream = File.OpenRead(path);
-        return await JsonSerializer.DeserializeAsync<Manifest>(openStream);
+        try
+        {
+            return await JsonSerializer.DeserializeAsync<Manifest>(openStream);
+        }
+        catch (Exception ex)
+        {
+            // TODO: Logger?
+            return null;
+        }
     }
 
     /*

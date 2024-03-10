@@ -1,6 +1,6 @@
+using Jellyfin.Data.Enums;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
-using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.IO;
 using Nick.Plugin.Jellyscrub.Drawing;
 

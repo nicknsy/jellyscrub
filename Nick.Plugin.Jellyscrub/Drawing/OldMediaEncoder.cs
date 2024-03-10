@@ -166,7 +166,7 @@ public class OldMediaEncoder
 
                 while (isResponsive)
                 {
-                    if (await process.WaitForExitAsync(TimeSpan.FromSeconds(30)).ConfigureAwait(false))
+                    if (true /*await process.WaitForExitAsync(TimeSpan.FromSeconds(30)).ConfigureAwait(false)*/)
                     {
                         ranToCompletion = true;
                         break;
