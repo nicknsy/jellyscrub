@@ -1,10 +1,14 @@
 using System.ComponentModel.DataAnnotations;
 using System.Net.Mime;
+using MediaBrowser.Common.Configuration;
+using MediaBrowser.Controller.Configuration;
 using MediaBrowser.Controller.Library;
+using MediaBrowser.Controller.Trickplay;
 using MediaBrowser.Model.IO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Nick.Plugin.Jellyscrub.Conversion;
 
 namespace Nick.Plugin.Jellyscrub.Api;
@@ -19,9 +23,26 @@ public class ConvertController : ControllerBase
 {
     private static ConversionTask _conversionTask;
 
-    public ConvertController(ILibraryManager libraryManager, IFileSystem fileSystem)
+    public ConvertController(
+        ILoggerFactory loggerFactory,
+        ILibraryManager libraryManager,
+        IFileSystem fileSystem,
+        ITrickplayManager trickplayManager,
+        IApplicationPaths appPaths,
+        IServerConfigurationManager configManager
+        )
     {
-        if (_conversionTask is null) _conversionTask = new ConversionTask(libraryManager, fileSystem);
+        if (_conversionTask is null)
+        {
+            _conversionTask = new ConversionTask(
+                libraryManager,
+                fileSystem,
+                trickplayManager,
+                appPaths,
+                configManager,
+                loggerFactory.CreateLogger<ConversionTask>()
+                );
+        }
     }
 
     /// <summary>
@@ -33,7 +54,8 @@ public class ConvertController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public ActionResult ConvertAll()
     {
-        Task.Run(() => _conversionTask.ConvertAll());
+        // TODO: ForceReconvert
+        _ = _conversionTask.ConvertAll().ConfigureAwait(false);
         return Ok();
     }
 
@@ -46,7 +68,8 @@ public class ConvertController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public ActionResult DeleteAll()
     {
-        Task.Run(() => _conversionTask.DeleteAll());
+        // TODO: DeleteNonConverted, DeleteNonEmpty
+        _ = _conversionTask.DeleteAll().ConfigureAwait(false);
         return Ok();
     }
 

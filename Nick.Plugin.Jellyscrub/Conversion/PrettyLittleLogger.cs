@@ -45,13 +45,18 @@ public class PrettyLittleLogger
     {
         Red,
         Green,
-        Blue
+        Blue,
+
+        // Aliases
+        Info = Blue,
+        Sucess = Green,
+        Error = Red
     }
 
     private static readonly Dictionary<LogColor, string> _colorToHTML = new Dictionary<LogColor, string>
     {
-        { LogColor.Red, "red" },
-        { LogColor.Green, "green" },
-        { LogColor.Blue, "blue" }
+        { LogColor.Red, "#f58080" },
+        { LogColor.Green, "#5eb955" },
+        { LogColor.Blue, "#5abbdd" }
     };
 }

@@ -99,6 +99,8 @@ public class BIFMetadataProvider : ICustomMetadataProvider<Episode>,
 
     private async Task<ItemUpdateType> FetchInternal(Video item, MetadataRefreshOptions options, CancellationToken cancellationToken)
     {
+        return ItemUpdateType.None;
+
         var config = JellyscrubPlugin.Instance!.Configuration;
 
         if (config.ExtractionDuringLibraryScan)

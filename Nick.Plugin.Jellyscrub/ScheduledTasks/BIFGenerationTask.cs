@@ -80,6 +80,8 @@ public class BIFGenerationTask : IScheduledTask
     /// <inheritdoc />
     public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
     {
+        return;
+
         var items = _libraryManager.GetItemList(new InternalItemsQuery
         {
             MediaTypes = new[] { MediaType.Video },
