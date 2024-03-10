@@ -53,11 +53,14 @@ public class ConversionTask
      * Conversion
      * 
      */
-    public async Task ConvertAll()
+    public async Task ConvertAll(bool forceConvert)
     {
         if (!CheckAndSetBusy(_convertLogger)) return;
 
         _convertLogger.ClearSynchronized();
+
+        int attempted = 0;
+        int completed = 0;
         foreach (var convertInfo in await GetConvertInfo().ConfigureAwait(false))
         {
             try
@@ -68,13 +71,14 @@ public class ConversionTask
                 var width = convertInfo.Width;
                 var bifPath = convertInfo.Path;
 
-                if (Directory.Exists(tilesMetaDir) && (await _trickplayManager.GetTrickplayResolutions(itemId).ConfigureAwait(false)).ContainsKey(width))
+                if (!forceConvert && Directory.Exists(tilesMetaDir) && (await _trickplayManager.GetTrickplayResolutions(itemId).ConfigureAwait(false)).ContainsKey(width))
                 {
                     _convertLogger.LogSynchronized($"Found existing trickplay files for {bifPath}. Skipping...", PrettyLittleLogger.LogColor.Info);
                     continue;
                 }
 
                 // Extract images
+                attempted++;
                 _convertLogger.LogSynchronized($"Converting {bifPath}", PrettyLittleLogger.LogColor.Info);
 
                 var imgTempDir = Path.Combine(_appPaths.TempDirectory, Guid.NewGuid().ToString("N"));
@@ -99,6 +103,7 @@ public class ConversionTask
                 Directory.Delete(imgTempDir, true);
 
                 _convertLogger.LogSynchronized($"Finished converting {bifPath}", PrettyLittleLogger.LogColor.Sucess);
+                completed++;
             }
             catch (Exception ex)
             {
@@ -106,6 +111,9 @@ public class ConversionTask
                 _convertLogger.LogSynchronized($"Encountered error while converting {convertInfo.Path}, please check the console.", PrettyLittleLogger.LogColor.Error);
             }
         }
+
+        if (attempted > 0)
+            _convertLogger.LogSynchronized($"Successfully converted {completed}/{attempted} .BIF files!", PrettyLittleLogger.LogColor.Info);
 
         _busy = false;
     }

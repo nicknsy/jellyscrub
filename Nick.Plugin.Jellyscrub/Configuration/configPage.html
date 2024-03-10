@@ -74,6 +74,7 @@
                 border: 1px solid #00a4dc;
                 font-weight: bold;
                 cursor: pointer;
+                margin-right: 20px;
             }
 
             .convert-button:hover {
@@ -88,6 +89,7 @@
                 border: 1px solid #590000;
                 font-weight: bold;
                 cursor: pointer;
+                margin-right: 20px;
             }
 
             .delete-button:hover {
@@ -106,7 +108,61 @@
 
             .log-output > p {
                 font-size: small;
-                margin: 0 5px;
+                margin: 5px 5px;
+            }
+
+            .check-container {
+                position: relative;
+                cursor: pointer;
+                user-select: none;
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .options-panel {
+                display: flex;
+                gap: 20px;
+                align-items: center;
+            }
+
+            .convert-check {
+                display: inline-block;
+                width: 24px;
+                height: 24px;
+                border: 1px solid #292929;
+                border-radius: 5px;
+                border-color: #292929;
+            }
+
+            .convert-check::after {
+                content: "";
+                display: none;
+                position: absolute;
+                top: 4px;
+                left: 8px;
+                width: 5px;
+                height: 10px;
+                border: solid white;
+                border-width: 0 3px 3px 0;
+                transform: rotate(45deg);
+            }
+
+            .check-container input:checked ~ .convert-check:after {
+                display: block;
+            }
+
+            .check-container input {
+                display: none;
+            }
+
+            .check-container:hover .convert-check {
+                border-color: #00a4dc;
+            }
+
+            .check-container input:checked ~ .convert-check {
+                background-color: #00a4dcad;
+                border-color: #00a4dc;
             }
         </style>
         <div data-role="content">
@@ -129,7 +185,14 @@
                             <div class="step-info">* Convert your already generated .BIF files to native format.</div>
                             <div class="step-body">
                                 <div class="log-output" id="convert-log"></div>
-                                <div class="convert-button">Start Conversion</div>
+                                <div class="options-panel">
+                                    <div class="convert-button">Start Conversion</div>
+                                    <label class="check-container">
+                                        <input type="checkbox" id="forceConvert">
+                                        <span class="convert-check"></span>
+                                        Force re-conversion
+                                    </label>
+                                </div>
                             </div>
                         </div>
                     </section>
@@ -163,9 +226,11 @@
         <script type="text/javascript">
             (function () {
                 var startConvertRequest = {
+                    contentType: 'application/json',
                     type: 'POST'
                 };
                 var startDeleteRequest = {
+                    contentType: 'application/json',
                     type: 'POST'
                 };
                 var getConvertLogRequest = {};
@@ -195,7 +260,8 @@
                 });
 
                 $('.convert-button').on('click', function (event) {
-                    ApiClient.fetch(startConvertRequest);
+                    startConvertRequest.data = JSON.stringify({ ForceConvert: document.getElementById("forceConvert").checked });
+                    ApiClient.ajax(startConvertRequest);
                 });
 
                 $('.delete-button').on('click', function (event) {

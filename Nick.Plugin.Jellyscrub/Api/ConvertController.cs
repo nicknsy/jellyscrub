@@ -52,10 +52,9 @@ public class ConvertController : ControllerBase
     /// <returns>The status code.</returns>
     [HttpPost("ConvertAll")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public ActionResult ConvertAll()
+    public ActionResult ConvertAll([FromBody, Required] ConvertOptions convertOptions)
     {
-        // TODO: ForceReconvert
-        _ = _conversionTask.ConvertAll().ConfigureAwait(false);
+        _ = _conversionTask.ConvertAll(convertOptions.ForceConvert).ConfigureAwait(false);
         return Ok();
     }
 
