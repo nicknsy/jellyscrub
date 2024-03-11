@@ -73,7 +73,7 @@ public class ConversionTask
 
                 if (!forceConvert && Directory.Exists(tilesMetaDir) && (await _trickplayManager.GetTrickplayResolutions(itemId).ConfigureAwait(false)).ContainsKey(width))
                 {
-                    _convertLogger.LogSynchronized($"Found existing trickplay files for {bifPath}. Skipping...", PrettyLittleLogger.LogColor.Info);
+                    _convertLogger.LogSynchronized($"Found existing trickplay files for {bifPath}, use force re-convert if necessary. Skipping...", PrettyLittleLogger.LogColor.Info);
                     continue;
                 }
 
