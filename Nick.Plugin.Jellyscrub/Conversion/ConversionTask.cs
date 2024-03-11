@@ -6,6 +6,7 @@ using MediaBrowser.Controller.Configuration;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Trickplay;
+using MediaBrowser.Model.Configuration;
 using MediaBrowser.Model.IO;
 using Microsoft.Extensions.Logging;
 using Nick.Plugin.Jellyscrub.Api;
@@ -83,7 +84,7 @@ public class ConversionTask
 
                 var imgTempDir = Path.Combine(_appPaths.TempDirectory, Guid.NewGuid().ToString("N"));
                 Directory.CreateDirectory(imgTempDir);
-                var images = await ExtractImages(bifPath, imgTempDir);
+                var (interval, images) = await ExtractImages(bifPath, imgTempDir);
 
                 if (images.Count == 0)
                 {
@@ -92,8 +93,15 @@ public class ConversionTask
                 }
 
                 // Create tiles
+                var globalTOptions = _configManager.Configuration.TrickplayOptions;
+                var localTOptions = new TrickplayOptions();
+                localTOptions.Interval = interval;
+                localTOptions.TileWidth = globalTOptions.TileWidth;
+                localTOptions.TileHeight = globalTOptions.TileHeight;
+                localTOptions.JpegQuality = globalTOptions.JpegQuality;
+
                 Directory.CreateDirectory(tilesMetaDir);
-                TrickplayInfo trickplayInfo = _trickplayManager.CreateTiles(images, convertInfo.Width, _configManager.Configuration.TrickplayOptions, tilesMetaDir);
+                TrickplayInfo trickplayInfo = _trickplayManager.CreateTiles(images, convertInfo.Width, localTOptions, tilesMetaDir);
 
                 // Save trickplay info
                 trickplayInfo.ItemId = itemId;
@@ -118,13 +126,18 @@ public class ConversionTask
         _busy = false;
     }
 
-    private async Task<List<string>> ExtractImages(string bifPath, string outputDir)
+    private async Task<(int, List<string>)> ExtractImages(string bifPath, string outputDir)
     {
         List<string> images = new();
         List<UInt32> imageOffsets = new();
 
         using var bifStream = File.OpenRead(bifPath);
         using var bifReader = new BinaryReader(bifStream);
+
+        // Get interval
+        bifStream.Seek(16, SeekOrigin.Begin);
+        UInt32 interval = bifReader.ReadUInt32();
+        interval = interval == 0 ? 1000 : interval;
 
         // Skip to index section
         bifStream.Seek(64, SeekOrigin.Begin);
@@ -158,7 +171,7 @@ public class ConversionTask
             images.Add(imgPath);
         }
 
-        return images;
+        return ((int)interval, images);
     }
 
     /*
