@@ -35,6 +35,12 @@ public class JellyscrubPlugin : BasePlugin<PluginConfiguration>, IHasWebPages
     {
         Instance = this;
 
+        logger.LogWarning("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        logger.LogWarning("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        logger.LogWarning("PLEASE VISIT THE JELLYSCRUB PLUGIN CONFIG PAGE TO CONVERT TRICKPLAY FILES");
+        logger.LogWarning("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        logger.LogWarning("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
         if (Configuration.InjectClientScript)
         {
             if (!string.IsNullOrWhiteSpace(applicationPaths.WebPath))
