@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Text;
 using Jellyfin.Data.Entities;
 using Jellyfin.Data.Enums;
 using MediaBrowser.Common.Configuration;
@@ -9,6 +8,7 @@ using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Trickplay;
 using MediaBrowser.Model.IO;
 using Microsoft.Extensions.Logging;
+using Nick.Plugin.Jellyscrub.Api;
 using Nick.Plugin.Jellyscrub.Drawing;
 
 namespace Nick.Plugin.Jellyscrub.Conversion;
@@ -53,7 +53,7 @@ public class ConversionTask
      * Conversion
      * 
      */
-    public async Task ConvertAll(bool forceConvert)
+    public async Task ConvertAll(ConvertOptions options)
     {
         if (!CheckAndSetBusy(_convertLogger)) return;
 
@@ -71,9 +71,9 @@ public class ConversionTask
                 var width = convertInfo.Width;
                 var bifPath = convertInfo.Path;
 
-                if (!forceConvert && Directory.Exists(tilesMetaDir) && (await _trickplayManager.GetTrickplayResolutions(itemId).ConfigureAwait(false)).ContainsKey(width))
+                if (!options.ForceConvert && Directory.Exists(tilesMetaDir) && (await _trickplayManager.GetTrickplayResolutions(itemId).ConfigureAwait(false)).ContainsKey(width))
                 {
-                    _convertLogger.LogSynchronized($"Found existing trickplay files for {bifPath}, use force re-convert if necessary. Skipping...", PrettyLittleLogger.LogColor.Info);
+                    _convertLogger.LogSynchronized($"Found existing trickplay files for {bifPath}, use force re-convert if necessary.", PrettyLittleLogger.LogColor.Info);
                     continue;
                 }
 
@@ -166,15 +166,111 @@ public class ConversionTask
      * Deletion
      * 
      */
-    public async Task DeleteAll()
+    private static readonly string[] allowedExtensions = { ".json", ".ignore" };
+    public async Task DeleteAll(Api.DeleteOptions options)
     {
         if (!CheckAndSetBusy(_deleteLogger)) return;
 
         _deleteLogger.ClearSynchronized();
-        foreach (var convertInfo in await GetConvertInfo().ConfigureAwait(false))
+
+        int attempted = 0;
+        int completed = 0;
+        foreach (var convertInfo in await GetConvertInfo(true).ConfigureAwait(false))
         {
-            _convertLogger.LogSynchronized($"Deleting {convertInfo.Path}", PrettyLittleLogger.LogColor.Info);
+            try
+            {
+                // Don't delete if matching native trickplay not found
+                var tilesMetaDir = GetTrickplayDirectory(convertInfo.Item, convertInfo.Width);
+                var itemId = convertInfo.Item.Id;
+                var width = convertInfo.Width;
+                var bifPath = convertInfo.Path;
+
+                attempted++;    // Skipping still counts as an attempt for deletion, since having left over files is an "error"
+                if (!options.ForceDelete && !(Directory.Exists(tilesMetaDir) && (await _trickplayManager.GetTrickplayResolutions(itemId).ConfigureAwait(false)).ContainsKey(width)))
+                {
+                    _deleteLogger.LogSynchronized($"Couldn't find native trickplay data for {bifPath}, use force delete if necessary.", PrettyLittleLogger.LogColor.Error);
+                    continue;
+                }
+
+                // Delete .bif file
+                // Allow non-existant paths in case parent folder wasn't deleted and task is re-run
+                if (File.Exists(bifPath))
+                {
+                    if (!options.ForceDelete && !Path.GetExtension(bifPath).ToLower().Equals(".bif"))
+                        throw new InvalidOperationException($"Path to bif file has incorrect file extension {bifPath}");
+                    File.Delete(bifPath);
+                    _deleteLogger.LogSynchronized($"Deleted {bifPath}", PrettyLittleLogger.LogColor.Sucess);
+                    _logger.LogInformation("Deleted file {0}", bifPath);
+                    completed++;
+                }
+                else
+                {
+                    attempted--;
+                }
+
+
+                // Delete folder if only files left are in allowed list (or empty subdirectories)
+                var trickplayFolder = Directory.GetParent(bifPath);
+                if (trickplayFolder is null || (!options.ForceDelete && !trickplayFolder.Name.ToLower().Equals("trickplay")))
+                    throw new InvalidOperationException($"BIF parent folder is null or has invalid name {trickplayFolder?.FullName}");
+
+                if (options.DeleteNonEmpty)
+                {
+                    Directory.Delete(trickplayFolder.FullName, true);
+                }
+                else
+                {
+                    // There could technically be dangling .bif files that will never be deleted, so user should be alerted.
+                    //if (trickplayFolder.GetFiles("*.bif", SearchOption.AllDirectories).Length > 0)
+                    //    continue;
+
+                    bool canDelete = true;
+                    bool containsBifs = false;
+                    foreach (var file in trickplayFolder.GetFiles("*", SearchOption.AllDirectories))
+                    {
+                        var extension = Path.GetExtension(file.FullName).ToLower();
+                        if (!allowedExtensions.Contains(extension))
+                        {
+                            canDelete = false;
+
+                            if (extension.Equals(".bif"))
+                            {
+                                containsBifs = true;
+                                _deleteLogger.LogSynchronized($"-> {file.FullName}", PrettyLittleLogger.LogColor.Info);
+                            }
+                            else
+                            {
+                                _deleteLogger.LogSynchronized($"-> {file.FullName}", PrettyLittleLogger.LogColor.Error);
+                            }
+                        }
+                    }
+
+                    if (canDelete)
+                    {
+                        Directory.Delete(trickplayFolder.FullName, true);
+                    }
+                    else if (containsBifs)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        _deleteLogger.LogSynchronized($"Couldn't delete folder {trickplayFolder.FullName} as it is non-empty. Use delete non-empty folders if necessary.", PrettyLittleLogger.LogColor.Error);
+                        continue;
+                    }
+                }
+                _deleteLogger.LogSynchronized($"Deleted folder {trickplayFolder.FullName}", PrettyLittleLogger.LogColor.Sucess);
+                _logger.LogInformation("Deleted folder {0}", trickplayFolder.FullName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting BIF file {0}", convertInfo.Path);
+                _deleteLogger.LogSynchronized($"Encountered error while deleting {convertInfo.Path}, please check the console.", PrettyLittleLogger.LogColor.Error);
+            }
         }
+
+        if (attempted > 0)
+            _deleteLogger.LogSynchronized($"Successfully deleted {completed}/{attempted} .BIF files!", PrettyLittleLogger.LogColor.Info);
 
         _busy = false;
     }
@@ -184,7 +280,7 @@ public class ConversionTask
      * Util
      * 
      */
-    private async Task<List<ConvertInfo>> GetConvertInfo()
+    private async Task<List<ConvertInfo>> GetConvertInfo(bool allowNonExistant = false)
     {
         List<ConvertInfo> bifFiles = new();
 
@@ -207,7 +303,7 @@ public class ConversionTask
 
                 foreach (var width in manifest.WidthResolutions)
                 {
-                    var path = VideoProcessor.GetExistingBifPath(item, _fileSystem, width);
+                    var path = allowNonExistant ? VideoProcessor.GetNewBifPath(item, width) : VideoProcessor.GetExistingBifPath(item, _fileSystem, width);
                     if (path != null)
                     {
                         bifFiles.Add(new ConvertInfo { Item = item, Path = path, Width = width });

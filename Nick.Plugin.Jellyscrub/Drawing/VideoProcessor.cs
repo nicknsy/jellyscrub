@@ -224,7 +224,7 @@ public class VideoProcessor
         return fileSystem.FileExists(path) ? path : null;
     }
 
-    private static string GetNewBifPath(BaseItem item, int width)
+    public static string GetNewBifPath(BaseItem item, int width)
     {
         return JellyscrubPlugin.Instance!.Configuration.LocalMediaFolderSaving ? GetLocalBifPath(item, width) : GetInternalBifPath(item, width);
     }

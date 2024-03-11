@@ -54,7 +54,7 @@ public class ConvertController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public ActionResult ConvertAll([FromBody, Required] ConvertOptions convertOptions)
     {
-        _ = _conversionTask.ConvertAll(convertOptions.ForceConvert).ConfigureAwait(false);
+        _ = _conversionTask.ConvertAll(convertOptions).ConfigureAwait(false);
         return Ok();
     }
 
@@ -65,10 +65,10 @@ public class ConvertController : ControllerBase
     /// <returns>The status code.</returns>
     [HttpPost("DeleteAll")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public ActionResult DeleteAll()
+    public ActionResult DeleteAll([FromBody, Required] DeleteOptions deleteOptions)
     {
         // TODO: DeleteNonConverted, DeleteNonEmpty
-        _ = _conversionTask.DeleteAll().ConfigureAwait(false);
+        _ = _conversionTask.DeleteAll(deleteOptions).ConfigureAwait(false);
         return Ok();
     }
 
