@@ -9,6 +9,14 @@
         "imageUrl": "https://raw.githubusercontent.com/nicknsy/jellyscrub/main/logo/logo.png",
         "versions": [
             {
+                "version": "2.0.0.0",
+                "changelog": "- support 10.9.0\n- allow for conversion of BIF files to native format\n- disable all other functionality",
+                "targetAbi": "10.9.0.0",
+                "sourceUrl": "https://github.com/nicknsy/jellyscrub/releases/download/2.0.0.0/Jellyscrub-v2.0.0.0.zip",
+                "checksum": "dac456c5dac7f60fd7949afe7f1d0a13",
+                "timestamp": "2024-03-30T18:30:00Z"
+            },
+            {
                 "version": "1.1.1.0",
                 "changelog": "- fix on webOS",
                 "targetAbi": "10.8.0.0",
