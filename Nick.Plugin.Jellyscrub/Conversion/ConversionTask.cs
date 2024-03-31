@@ -317,12 +317,12 @@ public class ConversionTask
         {
             try
             {
-                Manifest? manifest = await VideoProcessor.GetManifest(item, _fileSystem);
+                Manifest? manifest = await VideoProcessor.GetManifest(item);
                 if (manifest?.WidthResolutions == null) continue;
 
                 foreach (var width in manifest.WidthResolutions)
                 {
-                    var path = allowNonExistant ? VideoProcessor.GetNewBifPath(item, width) : VideoProcessor.GetExistingBifPath(item, _fileSystem, width);
+                    var path = allowNonExistant ? VideoProcessor.GetNewBifPath(item, width) : VideoProcessor.GetExistingBifPath(item, width);
                     if (path != null)
                     {
                         bifFiles.Add(new ConvertInfo { Item = item, Path = path, Width = width });

@@ -1,6 +1,5 @@
 using MediaBrowser.Controller.Entities;
 using System.Globalization;
-using MediaBrowser.Model.IO;
 using System.Text.Json;
 
 namespace Nick.Plugin.Jellyscrub.Drawing;
@@ -10,9 +9,9 @@ public class VideoProcessor
     /*
      * Methods for getting storage paths of Manifest files
      */
-    public static bool HasManifest(BaseItem item, IFileSystem fileSystem)
+    public static bool HasManifest(BaseItem item)
     {
-        return !string.IsNullOrWhiteSpace(GetExistingManifestPath(item, fileSystem));
+        return !string.IsNullOrWhiteSpace(GetExistingManifestPath(item));
     }
 
     public static string GetNewManifestPath(BaseItem item)
@@ -20,16 +19,16 @@ public class VideoProcessor
         return JellyscrubPlugin.Instance!.Configuration.LocalMediaFolderSaving ? GetLocalManifestPath(item) : GetInternalManifestPath(item);
     }
 
-    public static string? GetExistingManifestPath(BaseItem item, IFileSystem fileSystem)
+    public static string? GetExistingManifestPath(BaseItem item)
     {
         var path = JellyscrubPlugin.Instance!.Configuration.LocalMediaFolderSaving ? GetLocalManifestPath(item) : GetInternalManifestPath(item);
 
-        return fileSystem.FileExists(path) ? path : null;
+        return File.Exists(path) ? path : null;
     }
 
-    public async static Task<Manifest?> GetManifest(BaseItem item, IFileSystem fileSystem)
+    public async static Task<Manifest?> GetManifest(BaseItem item)
     {
-        var path = GetExistingManifestPath(item, fileSystem);
+        var path = GetExistingManifestPath(item);
 
         if (path is null) return null;
 
@@ -54,16 +53,16 @@ public class VideoProcessor
     /*
      * Methods for getting storage paths of BIFs
      */
-    public static bool HasBif(BaseItem item, IFileSystem fileSystem, int width)
+    public static bool HasBif(BaseItem item, int width)
     {
-        return !string.IsNullOrWhiteSpace(GetExistingBifPath(item, fileSystem, width));
+        return !string.IsNullOrWhiteSpace(GetExistingBifPath(item, width));
     }
 
-    public static string? GetExistingBifPath(BaseItem item, IFileSystem fileSystem, int width)
+    public static string? GetExistingBifPath(BaseItem item, int width)
     {
         var path = JellyscrubPlugin.Instance!.Configuration.LocalMediaFolderSaving ? GetLocalBifPath(item, width) : GetInternalBifPath(item, width);
 
-        return fileSystem.FileExists(path) ? path : null;
+        return File.Exists(path) ? path : null;
     }
 
     public static string GetNewBifPath(BaseItem item, int width)
