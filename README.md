@@ -2,6 +2,11 @@ Jellyscrub
 ====================
 <img src="https://raw.githubusercontent.com/nicknsy/jellyscrub/main/logo/logo.png" width="500">
 
+## ⚠️ Warning for Jellyfin 10.9 ⚠️ ##
+Trickplay functionality has been upstreamed into Jellyfin 10.9.0, and as such, <b>Jellyscrub's trickplay functionality will not be maintained after 10.9.0 is officially released.</b> However, Jellyscrub has been updated to version 2.0.0 which only allows for the conversion of your already generated .bif files to Jellyfin's new native format.
+
+<b>All that is required to convert your old .bif files is to update the plugin to the latest version through Jellyfin, restart the server, and visit the plugin configuration page in the dashboard.</b>
+
 ## About ##
 Jellyscrub is a plugin that generates "trickplay" (Roku .bif) files that are then interpreted by the client and used for bufferless scrubbing image previews.
 
