@@ -62,10 +62,16 @@ public class ConversionTask
 
         int attempted = 0;
         int completed = 0;
-        foreach (var convertInfo in await GetConvertInfo().ConfigureAwait(false))
+        var convertInfos = await GetConvertInfo().ConfigureAwait(false);
+        foreach (var convertInfo in convertInfos)
         {
+            int total = convertInfos.Count;
+            int current = 0;
+
             try
             {
+                current++;
+
                 // Check that it doesn't already exist
                 var tilesMetaDir = GetTrickplayDirectory(convertInfo.Item, convertInfo.Width);
                 var itemId = convertInfo.Item.Id;
@@ -74,13 +80,13 @@ public class ConversionTask
 
                 if (!options.ForceConvert && Directory.Exists(tilesMetaDir) && (await _trickplayManager.GetTrickplayResolutions(itemId).ConfigureAwait(false)).ContainsKey(width))
                 {
-                    _convertLogger.LogSynchronized($"Found existing trickplay files for {bifPath}, use force re-convert if necessary.", PrettyLittleLogger.LogColor.Info);
+                    _convertLogger.LogSynchronized($"Found existing trickplay files for {bifPath}, use force re-convert if necessary. [{current}/{total}]", PrettyLittleLogger.LogColor.Info);
                     continue;
                 }
 
                 // Extract images
                 attempted++;
-                _convertLogger.LogSynchronized($"Converting {bifPath}", PrettyLittleLogger.LogColor.Info);
+                _convertLogger.LogSynchronized($"Converting {bifPath} [{current}/{total}]", PrettyLittleLogger.LogColor.Info);
 
                 var imgTempDir = Path.Combine(_appPaths.TempDirectory, Guid.NewGuid().ToString("N"));
                 Directory.CreateDirectory(imgTempDir);
@@ -121,7 +127,7 @@ public class ConversionTask
         }
 
         if (attempted > 0)
-            _convertLogger.LogSynchronized($"Successfully converted {completed}/{attempted} .BIF files!", PrettyLittleLogger.LogColor.Info);
+            _convertLogger.LogSynchronized($"Successfully converted {completed}/{attempted} attempted .BIF files!", PrettyLittleLogger.LogColor.Info);
 
         _busy = false;
     }
