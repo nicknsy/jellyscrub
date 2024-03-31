@@ -60,14 +60,14 @@ public class ConversionTask
 
         _convertLogger.ClearSynchronized();
 
+        var convertInfos = await GetConvertInfo().ConfigureAwait(false); 
+        int total = convertInfos.Count;
+        int current = 0;
         int attempted = 0;
         int completed = 0;
-        var convertInfos = await GetConvertInfo().ConfigureAwait(false);
+
         foreach (var convertInfo in convertInfos)
         {
-            int total = convertInfos.Count;
-            int current = 0;
-
             try
             {
                 current++;
