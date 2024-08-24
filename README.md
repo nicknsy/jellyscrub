@@ -2,6 +2,11 @@ Jellyscrub
 ====================
 <img src="https://raw.githubusercontent.com/nicknsy/jellyscrub/main/logo/logo.png" width="500">
 
+## ⚠️ Warning for Jellyfin 10.9 ⚠️ ##
+Trickplay functionality has been upstreamed into Jellyfin 10.9.0, and as such, <b>Jellyscrub's trickplay functionality will not be maintained after 10.9.0 is officially released.</b> However, Jellyscrub has been updated to version 2.0.0 which only allows for the conversion of your already generated .bif files to Jellyfin's new native format.
+
+<b>All that is required to convert your old .bif files is to update the plugin to the latest version through Jellyfin, restart the server, and visit the plugin configuration page in the dashboard.</b>
+
 ## About ##
 Jellyscrub is a plugin that generates "trickplay" (Roku .bif) files that are then interpreted by the client and used for bufferless scrubbing image previews.
 
@@ -35,7 +40,7 @@ Jellyscrub on iOS [<b>Single Screenshot, Functions Same as Above</b>]:
 ## Installation ##
 <b>NOTE: The client script will fail to inject automatically into the jellyfin-web server if there is a difference in permission between the owner of the web files (root, or www-data, etc.) and the executor of the main jellyfin-server. This often happens because...</b>
 * <b>Docker -</b> the container is being run as a non-root user while having been built as a root user, causing the web files to be owned by root. To solve this, you can remove any lines like `User: 1000:1000`, `GUID:`, `PID:`, etc. from the jellyfin docker compose file.
-* <b>Install from distro repositories -</b> the jellyfin-server will execute as `jellyfin` user while the web files will be owned by `root`, `www-data`, etc. This can <i>likely</i> be fixed by adding the `jellyfin` (or whichecher user your main jellyfin server runs at) to the same group the jellyfin-web folders are owned by. You should only do this if they are owned by a group other than root, and will have to lookup how to manage permissions on your specific distro.
+* <b>Install from distro repositories -</b> the jellyfin-server will execute as the `jellyfin` user while the web files will be owned by `root`, `www-data`, etc. This can <i>likely</i> be fixed by adding the `jellyfin` (or whichever user your main jellyfin server runs as) user to the same group the jellyfin-web folders are owned by. You should only do this if they are owned by a group other than root, and will have to lookup how to manage permissions on your specific distro.
 * <b>Alternatively, the script can manually be added to the index.html as described below.</b>
 
 <b>NOTE: If you manually injected the script tag, you will have to manually inject it on every jellyfin-web update, as the index.html file will get overwritten. However, for normal Jellyscrub updates the script tag will not need to be changed as the plugin will return the latest script from /ClientScript</b>
