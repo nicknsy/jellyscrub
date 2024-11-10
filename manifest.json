@@ -9,6 +9,14 @@
         "imageUrl": "https://raw.githubusercontent.com/nicknsy/jellyscrub/main/logo/logo.png",
         "versions": [
             {
+                "version": "2.1.0.0",
+                "changelog": "- support Jellyfin 10.10\n- allow plugin config to be edited on conversion page\n- other minor improvements",
+                "targetAbi": "10.10.0.0",
+                "sourceUrl": "https://github.com/nicknsy/jellyscrub/releases/download/2.1.0.0/Jellyscrub-v2.1.0.0.zip",
+                "checksum": "8e89428d30211d67d9d401de763213d7",
+                "timestamp": "2024-11-10T21:00:00Z"
+            },
+            {
                 "version": "2.0.0.0",
                 "changelog": "- support 10.9.0\n- allow for conversion of BIF files to native format\n- disable all other functionality",
                 "targetAbi": "10.9.0.0",
