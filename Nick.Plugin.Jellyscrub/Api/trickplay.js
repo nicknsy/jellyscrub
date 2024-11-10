@@ -1,5 +1,3 @@
-const alertPages = ['home.html'];
-
 const alertWrapperId = 'jellyscrub-alert-wrapper';
 const alertHTML = 
 `
@@ -18,21 +16,15 @@ const alertHTML =
 <div>
 `
 
+$(document.body).on('pageshow', '.homePage', function (event) {
+    injectAlert($(this).find('#homeTab')[0]);
+});
 
-setInterval(() => {
-   if (alertPages.some(x => window.location.href.includes(x)) 
-        && !document.getElementById(alertWrapperId)) {
-       injectAlert();     
-   }
-}, 250);
-
-function injectAlert() {
-    const homeTab = document.getElementById('homeTab');
-
-    if (!homeTab) return;
+function injectAlert(element) {
+    if (!element) return;
 
     const alertWrapper = document.createElement('div');
     alertWrapper.id = alertWrapperId;
     alertWrapper.innerHTML = alertHTML;
-    homeTab.insertBefore(alertWrapper, homeTab.firstChild);
+    element.insertBefore(alertWrapper, element.firstChild);
 }

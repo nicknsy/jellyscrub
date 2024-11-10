@@ -68,7 +68,7 @@ public class JellyscrubPlugin : BasePlugin<PluginConfiguration>, IHasWebPages
 
                     // Don't run if script already exists
                     string scriptReplace = "<script plugin=\"Jellyscrub\".*?></script>";
-                    string scriptElement = string.Format("<script plugin=\"Jellyscrub\" version=\"1.0.0.0\" src=\"{0}/Trickplay/ClientScript\"></script>", basePath);
+                    string scriptElement = string.Format("<script plugin=\"Jellyscrub\" version=\"2.0.0.0\" src=\"{0}/Trickplay/ClientScript\" defer></script>", basePath);
 
                     if (!indexContents.Contains(scriptElement))
                     {
