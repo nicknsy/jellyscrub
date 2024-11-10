@@ -127,7 +127,14 @@ public class ConversionTask
         }
 
         if (attempted > 0)
+        {
             _convertLogger.LogSynchronized($"Successfully converted {completed}/{attempted} attempted .BIF files!", PrettyLittleLogger.LogColor.Info);
+        }
+        else
+        {
+            _convertLogger.LogSynchronized("Conversion task completed without finding any .BIF files.", PrettyLittleLogger.LogColor.Info);
+        }
+            
 
         _busy = false;
     }
@@ -289,7 +296,14 @@ public class ConversionTask
         }
 
         if (attempted > 0)
+        {
             _deleteLogger.LogSynchronized($"Successfully deleted {completed}/{attempted} .BIF files!", PrettyLittleLogger.LogColor.Info);
+
+        }
+        else
+        {
+            _deleteLogger.LogSynchronized("Deletion task completed without finding any .BIF files.", PrettyLittleLogger.LogColor.Info);
+        }
 
         _busy = false;
     }
