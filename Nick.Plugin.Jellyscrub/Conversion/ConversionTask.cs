@@ -73,7 +73,13 @@ public class ConversionTask
                 current++;
 
                 // Check that it doesn't already exist
-                var tilesMetaDir = GetTrickplayDirectory(convertInfo.Item, convertInfo.Width);
+                var globalTOptions = _configManager.Configuration.TrickplayOptions;
+                var libraryOptions = _libraryManager.GetLibraryOptions(convertInfo.Item);
+                var tileWidth = globalTOptions.TileWidth;
+                var tileHeight = globalTOptions.TileHeight;
+                var saveWithMedia = libraryOptions is null ? false : libraryOptions.SaveTrickplayWithMedia;
+                var tilesMetaDir = _trickplayManager.GetTrickplayDirectory(convertInfo.Item, tileWidth, tileHeight, convertInfo.Width, saveWithMedia);
+
                 var itemId = convertInfo.Item.Id;
                 var width = convertInfo.Width;
                 var bifPath = convertInfo.Path;
@@ -99,11 +105,10 @@ public class ConversionTask
                 }
 
                 // Create tiles
-                var globalTOptions = _configManager.Configuration.TrickplayOptions;
                 var localTOptions = new TrickplayOptions();
                 localTOptions.Interval = interval;
-                localTOptions.TileWidth = globalTOptions.TileWidth;
-                localTOptions.TileHeight = globalTOptions.TileHeight;
+                localTOptions.TileWidth = tileWidth;
+                localTOptions.TileHeight = tileHeight;
                 localTOptions.JpegQuality = globalTOptions.JpegQuality;
 
                 Directory.CreateDirectory(tilesMetaDir);
@@ -132,7 +137,7 @@ public class ConversionTask
         }
         else
         {
-            _convertLogger.LogSynchronized("Conversion task completed without finding any .BIF files.", PrettyLittleLogger.LogColor.Info);
+            _convertLogger.LogSynchronized("Task completed without attempting to convert any .BIF files.", PrettyLittleLogger.LogColor.Info);
         }
             
 
@@ -206,7 +211,13 @@ public class ConversionTask
             try
             {
                 // Don't delete if matching native trickplay not found
-                var tilesMetaDir = GetTrickplayDirectory(convertInfo.Item, convertInfo.Width);
+                var globalTOptions = _configManager.Configuration.TrickplayOptions;
+                var libraryOptions = _libraryManager.GetLibraryOptions(convertInfo.Item);
+                var tileWidth = globalTOptions.TileWidth;
+                var tileHeight = globalTOptions.TileHeight;
+                var saveWithMedia = libraryOptions is null ? false : libraryOptions.SaveTrickplayWithMedia;
+
+                var tilesMetaDir = _trickplayManager.GetTrickplayDirectory(convertInfo.Item, tileWidth, tileHeight, convertInfo.Width, saveWithMedia);
                 var itemId = convertInfo.Item.Id;
                 var width = convertInfo.Width;
                 var bifPath = convertInfo.Path;
@@ -302,7 +313,7 @@ public class ConversionTask
         }
         else
         {
-            _deleteLogger.LogSynchronized("Deletion task completed without finding any .BIF files.", PrettyLittleLogger.LogColor.Info);
+            _deleteLogger.LogSynchronized("Task completed without attempting to delete any .BIF files.", PrettyLittleLogger.LogColor.Info);
         }
 
         _busy = false;
@@ -350,13 +361,6 @@ public class ConversionTask
         }
 
         return bifFiles;
-    }
-
-    private string GetTrickplayDirectory(BaseItem item, int? width = null)
-    {
-        var path = Path.Combine(item.GetInternalMetadataPath(), "trickplay");
-
-        return width.HasValue ? Path.Combine(path, width.Value.ToString(CultureInfo.InvariantCulture)) : path;
     }
 
     public string GetConvertLog()
