@@ -66,6 +66,22 @@
                 line-height: 1.5rem;
             }
 
+            .config-button {
+                background-color: #7bcd8cad;
+                display: inline-block;
+                padding: 10px;
+                border-radius: 5px;
+                border: 1px solid #7bcd8c;
+                font-weight: bold;
+                cursor: pointer;
+                margin-right: 20px;
+                font-family: 'Victor Mono', monospace;
+            }
+
+            .config-button:hover {
+                background-color: #7bcd8cd1;
+            }
+
             .convert-button {
                 background-color: #00a4dcad;
                 display: inline-block;
@@ -184,17 +200,26 @@
                 background-color: #590000ad;
                 border-color: #590000;
             }
+
+            .config-nav {
+                margin: 20px 0px;
+            }
         </style>
         <div data-role="content">
             <div class="content-primary">
+                <div class="config-nav">
+                    <div class="config-button">Show Config</div>
+                    <br/>
+                </div>
                 <div class="steps-container">
                     <section>
                         <h2 class="step-header">1</h2>
                         <div>
                             <div class="step-info">* Enable native trickplay functionality and set desired options.</div>
                             <div class="step-body">
-                                Trickplay must be enabled per-library from the <a href="#/dashboard/libraries">Libraries</a> page.<br/><br/>
-                                Configure desired trickplay settings from the <a href="#/dashboard/playback/trickplay">Trickplay</a> page.<br/>
+                                Trickplay must be enabled per-library from the <a href="#/dashboard/libraries">Libraries</a> page.<br /><br />
+                                Configure desired trickplay settings from the <a href="#/dashboard/playback/trickplay">Trickplay</a> page.<br />
+                                If no .BIF files are found during conversion, verify that the save location is correct in the plugin config.<br />
                             </div>
                         </div>
                     </section>
@@ -219,11 +244,10 @@
 
                     <section id="delete-panel">
                         <h2 class="step-header">3</h2>
-                        <div>                    
+                        <div>
                             <div class="step-info">* Verify expected videos have trickplay previews, then delete left over .BIF files.</div>
                             <div class="step-body">
                                 <div class="log-output" id="delete-log"></div>
-                                <!-- TODO: Some safeguards and force button -->
                                 <div class="options-panel">
                                     <div class="delete-button">Start Deletion</div>
                                     <label class="check-container">
@@ -246,97 +270,280 @@
                         <div>
                             <div class="step-info">* Uninstall Jellyscrub and remove the plugin repository.</div>
                             <div class="step-body">
-                                Uninstall the plugin from the <a href="#/dashboard/plugins">My Plugins</a> page.<br/><br/>
-                                Remove the "jellyscrub" repository from the <a href="#/dashboard/plugins/repositories">Repositories</a> page.<br/>
+                                Uninstall the plugin from the <a href="#/dashboard/plugins">My Plugins</a> page.<br /><br />
+                                Remove the "jellyscrub" repository from the <a href="#/dashboard/plugins/repositories">Repositories</a> page.<br />
                             </div>
                         </div>
                     </section>
                 </div>
+
+                <!-- Config Page -->
+                <div class="config-container" style="display: none">
+                    <form class="jellyscrubConfigurationForm">
+                        <br />
+
+                        <div class="inputContainer">
+                            <select is="emby-select" id="hwAcceleration" name="HW Acceleration" label="HW Acceleration">
+                                <option id="optAccelerationNone" value="None">None</option>
+                                <option id="optAccelerationNoEncode" value="NoEncode">No Encode - decode, filters</option>
+                                <option id="optAccelerationFull" value="Full">Full - decode, filters, encode</option>
+                            </select>
+                            <div class="fieldDescription">Uses the same options as set in "Playback" to HW accelerate BIF generation. Counts towards NVENC stream limit.</div>
+                            <div class="fieldDescription">"Full" will default to SW encode on NVENC and AMF. On VAAPI and QSV devices without mjpeg encode support, set to "No Encode".</div>
+                            <div class="fieldDescription"><strong>Do not use "Full" if using an AMD device through VAAPI.</strong></div>
+                        </div>
+
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label>
+                                <input is="emby-checkbox" type="checkbox" id="chkOnDemand" />
+                                <span>Generate trickplay files on demand when a client requests one</span>
+                            </label>
+                        </div>
+
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label>
+                                <input is="emby-checkbox" type="checkbox" id="chkSaveBifLocal" />
+                                <span>Save trickplay files within media folders</span>
+                            </label>
+                            <div class="fieldDescription checkboxFieldDescription">This will enable easier storage management of the trickplay files. Trickplay files will be saved with a .bif extension.</div>
+                        </div>
+
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label>
+                                <input is="emby-checkbox" type="checkbox" id="chkEnableDuringScan" />
+                                <span>Create trickplays when videos are discovered</span>
+                            </label>
+                            <div class="fieldDescription checkboxFieldDescription">This will make trickplay files available sooner but will result in longer library scans. Trickplay files are also created during a scheduled task.</div>
+                            <div class="fieldDescription checkboxFieldDescription">To configure the scheduled task, see <a is="emby-linkbutton" class="button-link" href="scheduledtasks.html">scheduled tasks</a>.</div>
+
+                            <div class="inputContainer">
+                                <select is="emby-select" id="scanBehavior" name="Scan Behavior" label="Scan Behavior">
+                                    <option id="optNonBlocking" value="NonBlocking">Non Blocking - queues generation, then returns</option>
+                                    <option id="optBlocking" value="Blocking">Blocking - queues generation, blocks scan until complete</option>
+                                </select>
+                                <div class="fieldDescription">The default behavior is non blocking, which will add media to the library before trickplay generation is done.</div>
+                                <div class="fieldDescription">Blocking will ensure trickplay files are generated before media is added to the library, but will make scans significantly longer.</div>
+                            </div>
+                        </div>
+
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label>
+                                <input is="emby-checkbox" type="checkbox" id="chkInjectScript" />
+                                <span>Inject client script into jellyfin-web</span>
+                            </label>
+                            <div class="fieldDescription checkboxFieldDescription">If on, the plugin will attempt to inject the client-side script tag in jellyfin-web that allows for smooth previews.</div>
+                            <div class="fieldDescription checkboxFieldDescription">Without this, all this plugin does it generate .bif files.</div>
+                            <div class="fieldDescription checkboxFieldDescription"><strong>Especially ideal for Docker/combo installs. Recommended to be kept on.</strong></div>
+                        </div>
+
+                        <div class="inputContainer">
+                            <input is="emby-input" type="number" id="intervalInput" pattern="[0-9]*" min="0" required label="Image Interval">
+                            <div class="fieldDescription">Interval of time between each new trickplay image. A shorter interval and more images will take up more space.</div>
+                            <div class="fieldDescription"><strong>Note:</strong> This value cannot be below 0. A value of 0 defaults to a 1000ms interval.</div>
+                        </div>
+
+                        <div class="inputContainer">
+                            <input is="emby-input" id="resolutionInput" pattern="[0-9,]*" required label="Width Resolutions">
+                            <div class="fieldDescription">Comma separated list of the width (px) that trickplay images will be generated at.</div>
+                            <div class="fieldDescription">All images <strong>try</strong> to generate proportionally to the source, so a width of 320 on a 16:9 video ends up <strong>around</strong> 320x180.</div>
+                            <div class="fieldDescription"><strong>Note:</strong> Do not include spaces after commas.</div>
+                        </div>
+
+                        <div class="inputContainer">
+                            <select is="emby-select" id="processPriority" name="Process Priority" label="Process Priority">
+                                <option id="optPriorityHigh" value="High">High</option>
+                                <option id="optPriorityAboveNormal" value="AboveNormal">Above Normal</option>
+                                <option id="optPriorityNormal" value="Normal">Normal</option>
+                                <option id="optPriorityBelowNormal" value="BelowNormal">Below Normal</option>
+                                <option id="optPriorityIdle" value="Idle">Idle</option>
+                            </select>
+                            <div class="fieldDescription">Setting this lower or higher will determine how the CPU prioritizes the ffmpeg .bif generation process in relation to other processes.</div>
+                            <div class="fieldDescription">If you notice slowdown while generating BIFs but don't want to fully stop their generation, try lowering this as well as the thread count.</div>
+                        </div>
+
+                        <div class="inputContainer">
+                            <input is="emby-input" type="number" id="processThreads" pattern="[0-9]*" required="" label="FFmpeg Threads">
+                            <div class="fieldDescription">The number of threads to pass to the "-threads" argument of ffmpeg.</div>
+                            <div class="fieldDescription">Applies to both input and output of ffmpeg, so the total threads used will be <strong>this * 2</strong>.</div>
+                            <div class="fieldDescription"><strong>-1:</strong> The option "-1" will use the same amount of threads as configured in Jellyfin, usually "0".</div>
+                            <div class="fieldDescription"><strong>0:</strong> The option "0" is the default for ffmpeg, utilizing as many threads/cores as possible.</div>
+                        </div>
+
+                        <br />
+                        <div>
+                            <button is="emby-button" type="submit" class="raised button-submit block emby-button"><span>Save</span></button>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
 
-        <script type="text/javascript">
-            (function () {
-                var startConvertRequest = {
-                    contentType: 'application/json',
-                    type: 'POST'
-                };
-                var startDeleteRequest = {
-                    contentType: 'application/json',
-                    type: 'POST'
-                };
-                var getConvertLogRequest = {};
-                var getDeleteLogRequest = {};
+            <script type="text/javascript">
+                function fromIntArray(intArray) {
+                    let text = '';
 
-                var convertTask = { id: undefined, old: undefined };
-                var deleteTask = { id: undefined, old: undefined };
-
-                /*
-                 *  Set up requests using ApiClient. Start requesting logs.
-                 */
-                $('.jellyscrubConfigurationPage').on('pageshow', function (event) {
-                    const base = 'Trickplay/Convert/';
-
-                    startConvertRequest.url = ApiClient.getUrl(base + 'ConvertAll');
-                    getConvertLogRequest.url = ApiClient.getUrl(base + 'Log?type=Convert');
-
-                    startDeleteRequest.url = ApiClient.getUrl(base + 'DeleteAll');
-                    getDeleteLogRequest.url = ApiClient.getUrl(base + 'Log?type=Delete');
-
-                    convertTask.id = setInterval(
-                        function() { updateLog(document.getElementById('convert-log'), convertTask, getConvertLogRequest) },
-                        1000);
-                    deleteTask.id = setInterval(
-                        function() { updateLog(document.getElementById('delete-log'), deleteTask, getDeleteLogRequest) },
-                        1000);
-                });
-
-                $('.convert-button').on('click', function (event) {
-                    startConvertRequest.data = JSON.stringify({ ForceConvert: document.getElementById("forceConvert").checked });
-                    ApiClient.ajax(startConvertRequest);
-                });
-
-                $('.delete-button').on('click', function (event) {
-                    startDeleteRequest.data = JSON.stringify({ ForceDelete: document.getElementById("forceDelete").checked, DeleteNonEmpty: document.getElementById("deleteNonEmpty").checked });
-                    ApiClient.ajax(startDeleteRequest);
-                });
-
-                function updateLog(element, task, request) {
-                    // Since Jellyfin is a SPA interval must be cleared manually (I think)
-                    // String interpolation doesn't work -- gone after compilation
-                    if (!document.contains(element) || element.getClientRects().length < 1) {
-                        console.log(element.id + ' no longer visible. Stopping log refresh.');
-                        task.old = undefined;
-                        clearInterval(task.id);
+                    for (let i = 0; i < intArray.length; i++) {
+                        text += intArray[i];
+                        if (i != intArray.length - 1) text += ',';
                     }
 
-                    ApiClient.fetch(request).then((data) => {
-                        let messages = JSON.parse(data);
-                        let newHTML = '';
-
-                        if (data === task.old) return;
-
-                        messages.forEach((message) => {
-                            // Messages are html encoded server-side, color is safe
-                            newHTML += '<p style="color:' + message.Color + '">' + message.Text + '</p>';
-                        });
-
-                        if (newHTML) {
-                            element.innerHTML = newHTML;
-                            // Auto-scroll if they haven't intentionally scrolled up
-                            // Always auto-scroll on the first request because many messages could be present if user clicks off then back
-                            if (!task.old || element.scrollHeight - (element.scrollTop + element.getBoundingClientRect().height) < 200) {
-                                element.scroll(0, element.scrollHeight);
-                            }
-                        }
-
-                        task.old = data;
-                    });
+                    return text;
                 }
 
-            })();
+                function toIntArray(csv) {
+                    let intArray = [];
+                    let strArray = csv.split(',');
 
-        </script>
-    </div>
+                    for (let i = 0; i < strArray.length; i++) {
+                        intArray.push(parseInt(strArray[i].trim()));
+                    }
+
+                    return intArray;
+                }
+
+                (function () {
+                    const pluginId = "a84a949d-4b73-4099-aacb-8341b4da17ba";
+
+                    /*
+                     * Conversion
+                     */
+                    var startConvertRequest = {
+                        contentType: 'application/json',
+                        type: 'POST'
+                    };
+                    var startDeleteRequest = {
+                        contentType: 'application/json',
+                        type: 'POST'
+                    };
+                    var getConvertLogRequest = {};
+                    var getDeleteLogRequest = {};
+
+                    var convertTask = { id: undefined, old: undefined };
+                    var deleteTask = { id: undefined, old: undefined };
+
+                    /*
+                     *  Set up requests using ApiClient. Start requesting logs.
+                     */
+                    $('.jellyscrubConfigurationPage').on('pageshow', function (event) {
+                        /*
+                         * Plugin Config
+                         */
+                        var page = this;
+
+                        Dashboard.showLoadingMsg();
+
+                        ApiClient.getPluginConfiguration(pluginId).then(function (config) {
+
+                            page.querySelector('#hwAcceleration').value = config.HwAcceleration;
+                            page.querySelector('#chkOnDemand').checked = config.OnDemandGeneration;
+                            page.querySelector('#chkEnableDuringScan').checked = config.ExtractionDuringLibraryScan;
+                            page.querySelector('#scanBehavior').value = config.ScanBehavior;
+                            page.querySelector('#chkSaveBifLocal').checked = config.LocalMediaFolderSaving;
+                            page.querySelector('#chkInjectScript').checked = config.InjectClientScript;
+                            // page.querySelector('#chkStyleTrickplayContainer').checked = config.StyleTrickplayContainer;
+                            page.querySelector('#intervalInput').value = config.Interval;
+                            page.querySelector('#resolutionInput').value = fromIntArray(config.WidthResolutions);
+                            page.querySelector('#processPriority').value = config.ProcessPriority;
+                            page.querySelector('#processThreads').value = config.ProcessThreads;
+
+                            Dashboard.hideLoadingMsg();
+                        });
+
+                        /*
+                         * Conversion
+                         */
+                        const base = 'Trickplay/Convert/';
+
+                        startConvertRequest.url = ApiClient.getUrl(base + 'ConvertAll');
+                        getConvertLogRequest.url = ApiClient.getUrl(base + 'Log?type=Convert');
+
+                        startDeleteRequest.url = ApiClient.getUrl(base + 'DeleteAll');
+                        getDeleteLogRequest.url = ApiClient.getUrl(base + 'Log?type=Delete');
+
+                        convertTask.id = setInterval(
+                            function () { updateLog(document.getElementById('convert-log'), convertTask, getConvertLogRequest) },
+                            1000);
+                        deleteTask.id = setInterval(
+                            function () { updateLog(document.getElementById('delete-log'), deleteTask, getDeleteLogRequest) },
+                            1000);
+                    });
+
+                    $('.config-button').on('click', function (event) {
+                        $('.steps-container').toggle();
+                        $('.config-container').toggle();
+
+                        $(this).text($('.config-container').is(':visible') ? 'Hide Config' : 'Show Config');
+                    });
+
+                    $('.convert-button').on('click', function (event) {
+                        startConvertRequest.data = JSON.stringify({ ForceConvert: document.getElementById("forceConvert").checked });
+                        ApiClient.ajax(startConvertRequest);
+                    });
+
+                    $('.delete-button').on('click', function (event) {
+                        startDeleteRequest.data = JSON.stringify({ ForceDelete: document.getElementById("forceDelete").checked, DeleteNonEmpty: document.getElementById("deleteNonEmpty").checked });
+                        ApiClient.ajax(startDeleteRequest);
+                    });
+
+                    function updateLog(element, task, request) {
+                        // Since Jellyfin is a SPA interval must be cleared manually (I think)
+                        // String interpolation doesn't work -- gone after compilation
+                        if (window.location.href.indexOf("Jellyscrub") == -1) {
+                            console.log('No longer on Jellyscrub configuration page. Stopping log update.');
+                            task.old = undefined;
+                            clearInterval(task.id);
+                        }
+
+                        ApiClient.fetch(request).then((data) => {
+                            let messages = JSON.parse(data);
+                            let newHTML = '';
+
+                            if (data === task.old) return;
+
+                            messages.forEach((message) => {
+                                // Messages are html encoded server-side, color is safe
+                                newHTML += '<p style="color:' + message.Color + '">' + message.Text + '</p>';
+                            });
+
+                            if (newHTML) {
+                                element.innerHTML = newHTML;
+                                // Auto-scroll if they haven't intentionally scrolled up
+                                // Always auto-scroll on the first request because many messages could be present if user clicks off then back
+                                if (!task.old || element.scrollHeight - (element.scrollTop + element.getBoundingClientRect().height) < 200) {
+                                    element.scroll(0, element.scrollHeight);
+                                }
+                            }
+
+                            task.old = data;
+                        });
+                    }
+
+                    $('.jellyscrubConfigurationForm').off('submit.plugin').on('submit.plugin', function (e) {
+
+                        Dashboard.showLoadingMsg();
+
+                        var form = this;
+
+                        ApiClient.getPluginConfiguration(pluginId).then(function (config) {
+                            config.HwAcceleration = form.querySelector('#hwAcceleration').value;
+                            config.OnDemandGeneration = form.querySelector('#chkOnDemand').checked;
+                            config.ExtractionDuringLibraryScan = form.querySelector('#chkEnableDuringScan').checked;
+                            config.ScanBehavior = form.querySelector('#scanBehavior').value;
+                            config.LocalMediaFolderSaving = form.querySelector('#chkSaveBifLocal').checked;
+                            config.InjectClientScript = form.querySelector('#chkInjectScript').checked;
+                            // config.StyleTrickplayContainer = page.querySelector('#chkStyleTrickplayContainer').checked;
+                            config.Interval = Math.max(0, form.querySelector('#intervalInput').value);
+                            config.WidthResolutions = toIntArray(form.querySelector('#resolutionInput').value);
+                            config.ProcessPriority = form.querySelector('#processPriority').value;
+                            config.ProcessThreads = form.querySelector('#processThreads').value;
+
+                            ApiClient.updatePluginConfiguration(pluginId, config).then(Dashboard.processPluginConfigurationUpdateResult);
+                        });
+
+                        return false;
+                    });
+                })();
+
+            </script>
+        </div>
 </body>
 </html>
